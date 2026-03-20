@@ -278,7 +278,16 @@ claude_tutorial/
 
 ## Licencia
 
-Material de formación interna. Basado en la documentación pública de Anthropic.
+[![CC BY-NC-SA 4.0](https://img.shields.io/badge/Licencia-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+
+Este curso está licenciado bajo [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+
+Puedes compartir y adaptar este material siempre que:
+- **Atribución** — Des crédito al autor original
+- **No Comercial** — No lo uses con fines comerciales
+- **Compartir Igual** — Las adaptaciones deben usar la misma licencia
+
+Basado en la documentación pública de [Anthropic](https://docs.anthropic.com). Consulta el fichero [LICENSE](../LICENSE) para el texto legal completo.
 
 ---
 

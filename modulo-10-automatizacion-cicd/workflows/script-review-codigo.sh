@@ -14,7 +14,7 @@
 #   ./script-review-codigo.sh --file archivo.py  # Revisa un archivo especifico
 #
 # Requisitos:
-#   - Claude Code instalado (npm install -g @anthropic-ai/claude-code)
+#   - Claude Code instalado (curl -fsSL https://claude.ai/install.sh | bash)
 #   - ANTHROPIC_API_KEY configurada como variable de entorno
 #   - Git inicializado en el directorio actual
 #   - jq instalado (para procesar JSON)
@@ -91,7 +91,7 @@ verificar_requisitos() {
     # Verificar Claude Code
     if ! command -v claude &>/dev/null; then
         log_error "Claude Code no esta instalado."
-        echo "  Instala con: npm install -g @anthropic-ai/claude-code"
+        echo "  Instala con: curl -fsSL https://claude.ai/install.sh | bash"
         exit 1
     fi
 

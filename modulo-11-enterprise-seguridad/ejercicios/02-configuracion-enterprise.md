@@ -370,9 +370,9 @@ Crea el archivo `ejercicio-enterprise/guia-onboarding-equipo.md` con:
 >
 > La guía de onboarding debe incluir:
 >
-> - **Prerrequisitos**: Node.js 18+, Git con email corporativo, acceso al repo, cuenta Anthropic, Docker Desktop
-> - **Paso 1 - Instalación**: `npm install -g @anthropic-ai/claude-code` y verificar con `claude --version`
-> - **Paso 2 - Autenticación**: `claude auth login`
+> - **Prerrequisitos**: Git con email corporativo, acceso al repo, cuenta Anthropic (Pro/Max/Teams/Enterprise), Docker Desktop
+> - **Paso 1 - Instalación**: `curl -fsSL https://claude.ai/install.sh | bash` y verificar con `claude --version`
+> - **Paso 2 - Autenticación**: ejecutar `claude` (primer uso guía el login en navegador)
 > - **Paso 3 - Configurar proyecto**: clonar, copiar `.env.example`, rellenar secretos desde 1Password, `make dev`
 > - **Paso 4 - Primera sesión**: arrancar en Plan mode (`/plan`), probar prompts exploratorios
 > - **Paso 5 - Ejercicios**: explorar un módulo, planificar un cambio, ejecutar tests

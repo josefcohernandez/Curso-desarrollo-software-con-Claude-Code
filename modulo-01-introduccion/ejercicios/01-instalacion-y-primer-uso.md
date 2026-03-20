@@ -6,49 +6,74 @@ Instalar Claude Code, verificar su funcionamiento y ejecutar tu primera sesion i
 
 ---
 
-## Parte 1: Instalacion (10 min)
+## Parte 1: Instalacion (5 min)
 
 ### Paso 1: Verificar prerequisitos
 
 ```bash
-node --version    # Debe ser 18+
-npm --version     # Debe ser 8+
-git --version     # Recomendado
+git --version     # Necesario en todas las plataformas
 ```
 
-Si no tienes Node.js:
+En Windows, asegurate de tener [Git for Windows](https://git-scm.com/downloads/win) instalado.
+
+> [!NOTE]
+> Node.js ya no es necesario. El instalador nativo de Claude Code es autocontenido.
+
+### Paso 2: Instalar Claude Code (instalador nativo)
+
+**macOS / Linux / WSL:**
+
 ```bash
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-source ~/.bashrc
-nvm install 22
+curl -fsSL https://claude.ai/install.sh | bash
 ```
 
-### Paso 2: Instalar Claude Code
+**Windows PowerShell:**
+
+```powershell
+irm https://claude.ai/install.ps1 | iex
+```
+
+**Windows CMD:**
+
+```batch
+curl -fsSL https://claude.ai/install.cmd -o install.cmd && install.cmd && del install.cmd
+```
+
+**Alternativa con Homebrew (macOS/Linux):**
 
 ```bash
-npm install -g @anthropic-ai/claude-code
+brew install --cask claude-code
+```
+
+### Paso 3: Verificar
+
+```bash
 claude --version
-```
-
-### Paso 3: Autenticarse
-
-```bash
-claude auth login
-```
-
-### Paso 4: Verificar
-
-```bash
 claude doctor
 ```
 
-**Checkpoint**: Deberias ver todos los checks en verde.
+**Checkpoint**: `claude --version` muestra la version instalada y `claude doctor` no reporta errores criticos.
 
 ---
 
-## Parte 2: Primer Uso - Modo One-Shot (10 min)
+## Parte 2: Autenticacion (5 min)
 
-Ejecuta estos comandos y observa las respuestas:
+```bash
+claude
+```
+
+En el primer uso, Claude Code abre automaticamente el navegador para que te autentiques con tu cuenta de Anthropic (Pro, Max, Teams o Enterprise). Sigue las instrucciones en pantalla.
+
+Una vez autenticado, veras el prompt interactivo de Claude Code.
+
+> [!IMPORTANT]
+> El plan gratuito de Claude.ai no incluye acceso a Claude Code. Necesitas una suscripcion de pago o una cuenta Console.
+
+---
+
+## Parte 3: Primer Uso - Modo One-Shot (10 min)
+
+Sal de la sesion interactiva (`/exit`) y ejecuta estos comandos:
 
 ```bash
 # Pregunta simple
@@ -68,7 +93,7 @@ claude -p "Explica que hace este archivo" < algun-archivo.py
 
 ---
 
-## Parte 3: Primera Sesion Interactiva (15 min)
+## Parte 4: Primera Sesion Interactiva (15 min)
 
 ```bash
 # Crear proyecto de prueba
@@ -92,7 +117,7 @@ Dentro de la sesion interactiva, prueba:
 
 ---
 
-## Parte 4: Explorar Slash Commands (10 min)
+## Parte 5: Explorar Slash Commands (10 min)
 
 En una sesion interactiva, prueba estos comandos:
 
@@ -111,8 +136,8 @@ En una sesion interactiva, prueba estos comandos:
 
 ## Criterios de Completitud
 
-- [ ] Claude Code instalado y version verificada
-- [ ] Autenticacion configurada
+- [ ] Claude Code instalado con el instalador nativo y version verificada
+- [ ] Autenticacion configurada (primer login en navegador completado)
 - [ ] `claude doctor` sin errores
 - [ ] Ejecutada al menos una consulta one-shot
 - [ ] Sesion interactiva completada

@@ -18,7 +18,7 @@
 #   ./script-release-notes.sh v2.1.0 --since="2025-06-01"
 #
 # Requisitos:
-#   - Claude Code instalado (npm install -g @anthropic-ai/claude-code)
+#   - Claude Code instalado (curl -fsSL https://claude.ai/install.sh | bash)
 #   - ANTHROPIC_API_KEY configurada
 #   - Git inicializado con historial de commits
 #
@@ -101,7 +101,7 @@ log_error() {
 verificar_requisitos() {
     if ! command -v claude &>/dev/null; then
         log_error "Claude Code no esta instalado."
-        echo "  Instala con: npm install -g @anthropic-ai/claude-code"
+        echo "  Instala con: curl -fsSL https://claude.ai/install.sh | bash"
         exit 1
     fi
 

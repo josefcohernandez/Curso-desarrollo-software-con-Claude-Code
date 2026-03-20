@@ -323,9 +323,10 @@ pipeline {
 # .gitlab-ci.yml
 claude-review:
   stage: review
-  image: node:20
+  image: ubuntu:latest
   before_script:
-    - npm install -g @anthropic-ai/claude-code
+    - apt-get update && apt-get install -y curl git
+    - curl -fsSL https://claude.ai/install.sh | bash
   script:
     - |
       git diff $CI_MERGE_REQUEST_DIFF_BASE_SHA..HEAD | claude -p \
@@ -348,12 +349,12 @@ version: 2.1
 jobs:
   claude-review:
     docker:
-      - image: cimg/node:20.0
+      - image: cimg/base:stable
     steps:
       - checkout
       - run:
           name: Instalar Claude Code
-          command: npm install -g @anthropic-ai/claude-code
+          command: curl -fsSL https://claude.ai/install.sh | bash
       - run:
           name: Revisión de código
           command: |
@@ -388,12 +389,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-  - task: NodeTool@0
-    inputs:
-      versionSpec: '20.x'
-    displayName: 'Instalar Node.js'
-
-  - script: npm install -g @anthropic-ai/claude-code
+  - script: curl -fsSL https://claude.ai/install.sh | bash
     displayName: 'Instalar Claude Code'
 
   - script: |

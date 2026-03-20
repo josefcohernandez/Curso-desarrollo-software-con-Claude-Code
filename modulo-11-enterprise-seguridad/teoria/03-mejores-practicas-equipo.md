@@ -9,13 +9,10 @@ La incorporación de nuevos miembros a un equipo que usa Claude Code debe ser gr
 #### Fase 1: Instalación y configuración (Día 1)
 
 ```bash
-# 1. Instalar Claude Code
-npm install -g @anthropic-ai/claude-code
+# 1. Instalar Claude Code (instalador nativo, no requiere Node.js)
+curl -fsSL https://claude.ai/install.sh | bash
 
-# 2. Autenticarse
-claude auth login
-
-# 3. Clonar el repositorio del proyecto
+# 2. Clonar el repositorio del proyecto
 git clone git@github.com:empresa/mi-proyecto.git
 cd mi-proyecto
 

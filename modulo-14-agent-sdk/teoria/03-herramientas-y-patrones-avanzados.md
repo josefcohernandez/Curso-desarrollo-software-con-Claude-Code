@@ -518,6 +518,41 @@ asyncio.run(main())
 
 ---
 
+## Deprecaciones API en Opus 4.6 (v3.0)
+
+Las siguientes API han cambiado en la generación Opus 4.6:
+
+### Adaptive thinking reemplaza `thinking: {type: "enabled"}`
+
+```python
+# ANTES (deprecado en Opus 4.6)
+options = ClaudeAgentOptions(
+    thinking={"type": "enabled", "budget_tokens": 50000},
+)
+
+# AHORA (recomendado)
+# Opus 4.6 usa adaptive thinking por defecto.
+# No necesitas configurar thinking explícitamente.
+# Si necesitas forzar razonamiento profundo, usa effort:
+options = ClaudeAgentOptions(
+    effort="max",  # Nuevo nivel máximo para Opus 4.6
+)
+```
+
+El parámetro `budget_tokens` también está deprecado. Opus 4.6 decide automáticamente cuánto razonar basándose en la complejidad de la tarea.
+
+### `output_format` → `output_config.format`
+
+```python
+# ANTES (deprecado)
+options = ClaudeAgentOptions(output_format="json")
+
+# AHORA (recomendado)
+options = ClaudeAgentOptions(output_config={"format": "json"})
+```
+
+---
+
 ## Resumen
 
 - El patrón de orquestación usa `AgentDefinition` y la herramienta `"Agent"` para delegar a especialistas
@@ -527,3 +562,4 @@ asyncio.run(main())
 - Las sesiones permiten retomar trabajo previo con `resume=session_id`
 - Los hooks del SDK son callbacks Python/TypeScript que interceptan eventos del bucle agéntico
 - Implementa reintentos con backoff exponencial para errores transitorios
+- **Deprecaciones v3.0:** `thinking: {type: "enabled"}` y `budget_tokens` → usar adaptive thinking; `output_format` → usar `output_config.format`

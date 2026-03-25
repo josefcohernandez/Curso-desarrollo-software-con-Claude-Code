@@ -7,7 +7,9 @@ eventos específicos en Claude Code. Son como "triggers" o "callbacks".
 
 ---
 
-## Los 7 Eventos
+## Los 16 Eventos
+
+### Eventos básicos (desde v2.0)
 
 | Evento | Cuándo se dispara | Uso típico |
 |--------|------------------|-----------|
@@ -18,6 +20,20 @@ eventos específicos en Claude Code. Son como "triggers" o "callbacks".
 | **PreCompact** | Antes de compactar el contexto | Inyectar contexto crítico |
 | **TextInput** | Cuando el usuario escribe texto | Preprocesar input |
 | **Notification** | Cuando hay una notificación | Alertas externas |
+
+### Eventos nuevos (v2.1.76 - v2.1.83)
+
+| Evento | Cuándo se dispara | Uso típico |
+|--------|------------------|-----------|
+| **PostCompact** | Después de compactar el contexto | Verificar resumen, logging. Incluye campo `compact_summary` |
+| **CwdChanged** | Cuando cambia el directorio de trabajo | Recargar .env, activar direnv |
+| **FileChanged** | Cuando se modifica un fichero | Auto-reload, validación |
+| **InstructionsLoaded** | Cuando se cargan instrucciones (CLAUDE.md, rules) | Validar reglas, auditoría |
+| **ConfigChange** | Cuando cambia la configuración | Auditar cambios, notificar |
+| **WorktreeCreate** | Cuando se crea un worktree para un subagente | Setup del worktree |
+| **WorktreeRemove** | Cuando se elimina un worktree | Cleanup de recursos |
+| **Elicitation** | Cuando un servidor MCP solicita input (MCP Elicitation) | Interceptar solicitudes de input |
+| **ElicitationResult** | Cuando el usuario responde a una elicitation | Interceptar/override respuestas |
 
 ---
 

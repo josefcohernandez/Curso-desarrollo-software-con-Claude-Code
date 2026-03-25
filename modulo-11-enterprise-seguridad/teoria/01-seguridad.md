@@ -28,6 +28,19 @@ mi-proyecto/
 
 > **Principio clave**: Si está en tu directorio de proyecto y Claude tiene permisos, puede accederlo.
 
+### Protección de credenciales en subprocesos
+
+> **Novedad v3.0**
+
+La variable de entorno `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB=1` elimina automáticamente las credenciales y tokens del entorno de los subprocesos que Claude Code lanza. Esto previene la filtración accidental de secrets a través de comandos ejecutados por Claude.
+
+```bash
+export CLAUDE_CODE_SUBPROCESS_ENV_SCRUB=1
+claude
+```
+
+Cuando está activada, variables como `AWS_SECRET_ACCESS_KEY`, `GITHUB_TOKEN`, `DATABASE_URL` y similares se eliminan del entorno antes de pasar al subproceso. Esto es especialmente importante cuando Claude ejecuta scripts de terceros o comandos que podrían enviar datos a servicios externos.
+
 ### 2. Salida de comandos
 
 Cada comando que Claude ejecuta (o que le autorizas ejecutar) genera una salida que se incorpora al contexto de la conversación:

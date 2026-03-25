@@ -135,10 +135,57 @@ Si Opus está saturado en ese momento, Sonnet toma el relevo y el pipeline no fa
 
 **Confundir sesiones remotas con sincronización automática**: Las sesiones remotas no sincronizan cambios de vuelta a tu repositorio local automáticamente. Necesitas hacer `git pull` o usar `--teleport` para integrar los cambios.
 
+## Remote Control: control desde cualquier dispositivo
+
+> **Novedad v3.0 (research preview, macOS only)**
+
+Remote Control es una evolución de las sesiones remotas que permite **conectar la app de claude.ai/code, la app iOS o la app Android** directamente a tu sesión local de Claude Code. A diferencia de `--remote`, aquí la sesión se ejecuta en tu máquina local — Remote Control simplemente la expone para control externo.
+
+### Cómo funciona
+
+```bash
+# En tu terminal local
+/remote-control
+# Claude Code muestra un código QR o enlace para conectar
+```
+
+Al conectar desde claude.ai/code o la app móvil, la sesión mantiene acceso completo a tu entorno local:
+- Filesystem, herramientas, MCP servers y configuración locales
+- Variables de entorno del proyecto
+- La conversación se sincroniza en tiempo real entre dispositivos
+
+### Diferencias con `--remote`
+
+| | `--remote` | Remote Control |
+|-|-----------|----------------|
+| Ejecución | VM en la nube | Tu máquina local |
+| Acceso a filesystem | Solo repo subido | Completo (es local) |
+| Caso de uso | Trabajo sin máquina | Control desde móvil/web |
+| Disponibilidad | General | Research preview, macOS |
+
+### Computer Use + Remote Control
+
+Computer Use es la capacidad de Claude para controlar el teclado, ratón y navegador de tu máquina. Combinado con Remote Control, puedes:
+
+1. Enviar instrucciones desde el móvil
+2. Claude ejecuta acciones en tu desktop (abrir apps, interactuar con la UI, navegar)
+3. Observar el resultado en tiempo real desde el móvil
+
+```
+Ejemplo: Desde tu teléfono le dices a Claude "Abre VS Code, navega a src/auth/
+y ejecuta los tests de ese módulo". Claude controla tu máquina local y lo hace.
+```
+
+> Computer Use se cubre en detalle en el [Módulo 13](../../modulo-13-multimodalidad-notebooks/teoria/05-voice-y-computer-use.md).
+
+---
+
 ## Resumen
 
 - `--remote` crea una sesión en la nube de Anthropic accesible desde cualquier navegador
 - `--teleport` reanuda una sesión remota activa en tu terminal local con acceso al filesystem
+- **Remote Control** conecta apps externas (web/iOS/Android) a tu sesión local, manteniendo acceso completo al entorno
+- **Computer Use** permite a Claude controlar teclado, ratón y navegador de tu máquina, combinable con Remote Control
 - Las sesiones remotas permiten compartir trabajo, continuar desde otros dispositivos y ejecutar tareas largas sin supervisión
 - `--fallback-model` garantiza continuidad cuando el modelo principal no está disponible
 - Las sesiones remotas tienen acceso limitado al filesystem local: solo el repositorio subido al inicio

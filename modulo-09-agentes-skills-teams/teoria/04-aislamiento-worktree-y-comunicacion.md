@@ -231,6 +231,7 @@ Cada teammate puede ver el estado de las tareas de los demás y saber cuándo un
 | Agente borrando trabajo del repo principal | No usar worktree isolation en experimentos | Siempre usar `isolation: "worktree"` para trabajo experimental |
 | Polling manual de background agents | Confundir con procesos background de bash | La notificación es automática; no hay que preguntar |
 | SendMessage a agente sin nombre | El agente no puede recibir mensajes dirigidos | Siempre asignar nombre al lanzar agentes que recibirán mensajes |
+| Usar `task.resume` para continuar agentes | `task.resume` ha sido eliminado en v3.0 | Usar `SendMessage(to: "nombre-agente")` para continuar un agente existente |
 | Tareas usadas como memoria permanente | Las tareas desaparecen al terminar la sesión | Usar CLAUDE.md o ficheros de contexto para persistencia |
 | Demasiados background agents a la vez | Consumo de tokens muy elevado | Limitar a 3-4 agentes paralelos como máximo |
 

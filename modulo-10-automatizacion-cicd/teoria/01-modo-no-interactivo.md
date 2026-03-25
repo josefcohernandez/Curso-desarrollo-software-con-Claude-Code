@@ -88,7 +88,41 @@ grep -rn "TODO\|FIXME\|HACK" src/ | claude -p "Prioriza estos TODOs por importan
 
 ---
 
+## El Flag `--bare`: ejecución mínima
+
+> **Novedad v3.0 (v2.1.81)**
+
+El flag `--bare` ejecuta Claude Code saltándose hooks, LSP y sincronización de plugins. Está diseñado para llamadas scripteadas con `-p` donde quieres la ejecución más rápida y limpia posible:
+
+```bash
+# Ejecución mínima sin hooks ni plugins
+claude --bare -p "Genera un commit message para estos cambios" < diff.txt
+```
+
+**Cuándo usar `--bare`:**
+- Scripts de CI/CD donde los hooks no son necesarios
+- Llamadas rápidas `-p` en pipelines de automatización
+- Cuando los hooks interfieren con la salida esperada
+- Scripting de alta frecuencia donde cada milisegundo cuenta
+
+**Cuándo NO usar `--bare`:**
+- Sesiones interactivas (los hooks aportan valor)
+- Cuando necesitas que se ejecuten hooks de seguridad
+- Cuando dependes de plugins o servidores MCP
+
+---
+
 ## Formatos de Salida: `--output-format`
+
+> **Nota de deprecación v3.0:** El flag `--output-format` está **deprecado** y será eliminado en una versión futura. Usa `--output-config format=<formato>` en su lugar:
+>
+> ```bash
+> # Antes (deprecado)
+> claude -p "consulta" --output-format json
+>
+> # Ahora (recomendado)
+> claude -p "consulta" --output-config format=json
+> ```
 
 Claude Code soporta tres formatos de salida para adaptarse a diferentes necesidades:
 

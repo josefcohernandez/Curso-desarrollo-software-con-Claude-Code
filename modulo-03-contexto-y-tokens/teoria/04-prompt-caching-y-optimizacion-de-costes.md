@@ -118,7 +118,18 @@ Principio: si una regla no cambia el comportamiento de Claude en tu proyecto,
 elimínala. Un CLAUDE.md de 50 líneas bien elegidas es más eficiente que uno
 de 200 líneas con duplicados y reglas obsoletas.
 
-### 6. Reducir herramientas cargadas (Deferred Tools)
+### 6. Code execution gratuita con web search/fetch
+
+Cuando una llamada a la API combina **code execution** con web search o web fetch, la ejecución de código es **gratuita**. Esto significa que puedes usar code execution para filtrar y procesar dinámicamente los resultados de búsquedas web sin coste adicional por la ejecución.
+
+```bash
+# El code execution que filtra los resultados de la búsqueda no se factura
+claude -p "Busca las últimas versiones de React y filtra solo las stable releases"
+```
+
+Este patrón es especialmente útil en pipelines de monitorización donde necesitas buscar información en la web y procesarla programáticamente.
+
+### 7. Reducir herramientas cargadas (Deferred Tools)
 
 Cada herramienta MCP que Claude tiene disponible ocupa tokens en el prefijo del
 sistema. Si tienes 10 herramientas configuradas pero solo usas 3 regularmente,
@@ -128,7 +139,7 @@ La configuración de Deferred Tools (detallada en el Capítulo 7) permite cargar
 herramientas solo cuando se necesitan, reduciendo el overhead de tokens en
 sesiones donde no se usan.
 
-### 7. Subagentes con modelo económico
+### 8. Subagentes con modelo económico
 
 En tareas que combinan investigación y ejecución, puedes asignar el trabajo de
 exploración al modelo más barato y reservar el modelo potente para la
@@ -142,7 +153,7 @@ claude -p "Lista todos los endpoints de la API en src/" --model claude-haiku-4-5
 cat endpoints.txt | claude -p "Genera tests de integración para estos endpoints"
 ```
 
-### 8. `/clear` vs `/compact`: impacto en caché
+### 9. `/clear` vs `/compact`: impacto en caché
 
 - **`/clear`**: elimina todo el historial de la sesión. El siguiente mensaje se
   procesa sin ninguna parte cacheada del contexto anterior. Útil cuando la tarea
@@ -151,7 +162,7 @@ cat endpoints.txt | claude -p "Genera tests de integración para estos endpoints
   Mantiene parte del caché de prefijo intacto. Es la opción más eficiente cuando
   quieres liberar contexto sin perder el arranque en caliente del caché.
 
-### 9. Controlar el nivel de esfuerzo
+### 10. Controlar el nivel de esfuerzo
 
 La variable de entorno `CLAUDE_CODE_EFFORT_LEVEL` controla cuántos tokens de
 razonamiento interno usa Claude antes de responder:

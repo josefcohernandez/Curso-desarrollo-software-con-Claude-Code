@@ -54,13 +54,13 @@ Todo. Literalmente todo lo que Claude necesita para funcionar:
 
 | Modelo | Ventana de contexto | Tokens de salida máx |
 |--------|--------------------|-----------------------|
-| Claude Sonnet 4 | 200K tokens | 16,384 tokens |
-| Claude Opus 4 | 200K tokens | 32,768 tokens |
-| Claude Haiku 3.5 | 200K tokens | 8,192 tokens |
+| Claude Opus 4.6 | 1M tokens (Max/Team/Enterprise) | 128,000 tokens |
+| Claude Sonnet 4.6 | 1M tokens (beta) | 64,000 tokens |
+| Claude Haiku 4.5 | 200K tokens | 8,192 tokens |
 
-> **Nota:** 200K tokens son aproximadamente 150,000 palabras, o unas 500 páginas de texto.
-> Suena mucho, pero se llena más rápido de lo que piensas cuando Claude lee archivos y
-> ejecuta comandos.
+> **Nota v3.0:** Opus 4.6 duplicó su límite de salida de 64K a **128K tokens** en marzo 2026.
+> Sonnet 4.6 alcanza 1M de contexto en beta. Estos incrementos permiten sesiones más largas
+> y respuestas más completas, pero el contexto sigue siendo un recurso finito: cada token cuenta.
 
 ## Qué consume contexto (y cuánto)
 

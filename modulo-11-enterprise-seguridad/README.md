@@ -8,7 +8,7 @@ El contenido esta orientado a equipos mixtos poliglotas que trabajan con multipl
 
 ## Tiempo estimado
 
-**1 hora** (incluye teoria y ejercicios practicos)
+**1 hora 15 minutos** (incluye teoria y ejercicios practicos)
 
 ## Objetivos de aprendizaje
 
@@ -31,6 +31,7 @@ Al finalizar este modulo seras capaz de:
 | [01-seguridad.md](teoria/01-seguridad.md) | Seguridad y privacidad de datos | 20 min |
 | [02-enterprise.md](teoria/02-enterprise.md) | Funcionalidades enterprise | 15 min |
 | [03-mejores-practicas-equipo.md](teoria/03-mejores-practicas-equipo.md) | Mejores practicas para equipos | 15 min |
+| [04-managed-settings-d.md](teoria/04-managed-settings-d.md) | managed-settings.d/: politicas granulares por capa | 15 min |
 
 ### Ejercicios practicos
 

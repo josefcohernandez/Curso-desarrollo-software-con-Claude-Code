@@ -78,6 +78,25 @@ docker --version  # Verificar
 | `CLAUDE_CODE_ENABLE_SANDBOX=1` | Activar sandbox |
 | `DISABLE_NONESSENTIAL_TRAFFIC=1` | Bloquear telemetría y tráfico no esencial |
 | `CLAUDE_CODE_DISABLE_NETWORK=1` | Sin acceso a red (sandbox estricto) |
+| `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB=1` | Eliminar credenciales del entorno de subprocesos |
+
+---
+
+## Configuración avanzada del Sandbox
+
+### `sandbox.failIfUnavailable`
+
+Por defecto, si el sandbox no está disponible (Docker no instalado en Linux, o restricción del sistema en macOS), Claude Code continúa sin sandbox y muestra un aviso. Con esta opción activada, Claude Code **termina con error** si el sandbox no está disponible, garantizando que nunca se ejecuten comandos sin aislamiento.
+
+```json
+{
+  "sandbox": {
+    "failIfUnavailable": true
+  }
+}
+```
+
+Esto es especialmente útil en entornos enterprise y CI/CD donde el sandbox es un requisito obligatorio de seguridad.
 
 ---
 

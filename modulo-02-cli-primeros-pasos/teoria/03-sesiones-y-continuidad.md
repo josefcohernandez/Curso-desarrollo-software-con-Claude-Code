@@ -136,6 +136,14 @@ claude -p "genera código largo" --output-format stream-json
 
 ---
 
+## Títulos de Sesión Generados por IA
+
+En la extensión de VSCode, Claude Code genera automáticamente un **título descriptivo** para cada sesión basándose en el contenido de la conversación. Esto facilita identificar sesiones pasadas al hacer resume sin necesidad de recordar IDs o fechas.
+
+Los títulos se generan al vuelo y se actualizan conforme avanza la conversación. Por ejemplo, una sesión que comienza con "arregla el bug de login" puede titularse automáticamente como "Fix: autenticación con caracteres especiales".
+
+---
+
 ## Mejores Prácticas de Sesión
 
 1. **Una tarea = una sesión** (o `/clear` entre tareas)

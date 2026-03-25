@@ -213,6 +213,10 @@ Estos puntos pueden sumarse al total pero no superar 100:
 | Agente personalizado con Agent SDK funcional | +3 | C14 |
 | Uso de memoria estructurada con tipos (user, feedback, project, reference) | +1 | C04 |
 | Plugin propio empaquetado y funcional | +2 | C15 |
+| Auto Mode configurado con documentación de resultados | +2 | C05 |
+| Uso de nuevos hooks (PostCompact, CwdChanged, FileChanged) | +2 | C08 |
+| Compaction API configurada en tarea larga | +1 | C03 |
+| Computer Use para testing visual | +2 | C13 |
 
 > **Nota:** Los puntos extra requieren que la funcionalidad extra funcione correctamente y esté documentada.
 

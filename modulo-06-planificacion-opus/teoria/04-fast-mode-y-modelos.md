@@ -9,7 +9,7 @@ Claude Code ofrece controles granulares sobre la velocidad y la profundidad de r
 Fast Mode no es un modelo distinto. Es una optimización de velocidad sobre el modelo Opus 4.6 que reduce el tiempo de respuesta priorizando la rapidez frente a la profundidad de razonamiento.
 
 **Lo que Fast Mode hace:**
-- Reduce la latencia de respuesta notablemente
+- Genera output **2.5x más rápido** que el modo estándar (research preview)
 - Mantiene el mismo modelo (Opus 4.6) y sus capacidades de base
 - Es útil cuando necesitas iteraciones rápidas y la tarea no requiere razonamiento complejo
 
@@ -17,6 +17,8 @@ Fast Mode no es un modelo distinto. Es una optimización de velocidad sobre el m
 - No cambia de modelo a uno más barato o pequeño
 - No reduce la calidad en tareas de complejidad baja o media
 - No es equivalente a usar Haiku (que sí es un modelo diferente)
+
+> **Nota v3.0 — Pricing de Fast Mode:** Fast Mode tiene un coste de $30/$150 por MTok (input/output), el doble del modo estándar de Opus. El incremento se justifica por la infraestructura de generación acelerada. Es un research preview disponible en planes Max/Team/Enterprise.
 
 **Activar Fast Mode en el CLI:**
 

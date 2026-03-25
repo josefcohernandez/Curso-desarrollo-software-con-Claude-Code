@@ -400,10 +400,116 @@ La solución es marcar el hook como `"async": true`:
 
 ---
 
+## Nuevos eventos del ciclo de vida (v2.1.76 - v2.1.83)
+
+Los siguientes eventos se añadieron en las versiones más recientes de Claude Code:
+
+### PostCompact
+
+Se dispara **después de que el contexto ha sido compactado**, ya sea por `/compact` manual o por la Compaction API automática. Incluye el campo `compact_summary` con el resumen generado.
+
+```json
+{
+  "hooks": {
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"$(date): Compactación realizada\" >> ~/.claude/compaction.log"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Casos de uso: logging de compactaciones, verificar que el resumen mantiene información crítica, enviar alerta si la compactación se dispara demasiado frecuentemente.
+
+### CwdChanged
+
+Se dispara **cuando cambia el directorio de trabajo** de la sesión. Útil para integración con herramientas que dependen del directorio, como `direnv`.
+
+```json
+{
+  "hooks": {
+    "CwdChanged": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -f .env ]; then echo 'Cargando .env del nuevo directorio'; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### FileChanged
+
+Se dispara **cuando se modifica un fichero en el filesystem**. Permite reacciones automáticas a cambios.
+
+```json
+{
+  "hooks": {
+    "FileChanged": [
+      {
+        "matcher": "*.ts",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx tsc --noEmit $FILEPATH 2>&1 | head -5"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### InstructionsLoaded
+
+Se dispara **cuando se cargan instrucciones** (CLAUDE.md, ficheros de rules). Útil para validar o auditar las reglas que se están aplicando.
+
+### ConfigChange
+
+Se dispara **cuando cambia la configuración** de Claude Code (settings.json, permisos). Útil para auditoría en entornos enterprise.
+
+### WorktreeCreate / WorktreeRemove
+
+Se disparan cuando se **crea o elimina un worktree** para un subagente. Permiten setup y cleanup de recursos asociados al worktree.
+
+```json
+{
+  "hooks": {
+    "WorktreeCreate": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"Worktree creado: $WORKTREE_PATH\" >> ~/.claude/worktrees.log"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Elicitation / ElicitationResult
+
+Se disparan durante el flujo de **MCP Elicitation** (ver [Módulo 07](../../modulo-07-mcp/teoria/05-mcp-elicitation.md)). `Elicitation` intercepta la solicitud de input del servidor MCP; `ElicitationResult` intercepta la respuesta del usuario.
+
+---
+
 ## Resumen
 
 - Los hooks de tipo `agent` lanzan subagentes completos como respuesta a eventos; son los más potentes pero también los más costosos en tokens
 - Los eventos avanzados (`SessionStart`, `SessionEnd`, `UserPromptSubmit`, `PermissionRequest`, `PostToolUseFailure`, `TeammateIdle`, `TaskCompleted`, `Notification`) cubren todo el ciclo de vida de la sesión
+- Los **nuevos eventos v3.0** (`PostCompact`, `CwdChanged`, `FileChanged`, `InstructionsLoaded`, `ConfigChange`, `WorktreeCreate`, `WorktreeRemove`, `Elicitation`, `ElicitationResult`) amplían la cobertura a compactación, filesystem, configuración, worktrees y MCP Elicitation
 - Los hooks pueden definirse en el frontmatter YAML de skills y subagentes, con alcance limitado a su ejecución
 - El parámetro `"async": true` permite ejecutar hooks en background para operaciones largas sin bloquear la sesión
 - `"timeout"` limita el tiempo máximo de ejecución de un hook async

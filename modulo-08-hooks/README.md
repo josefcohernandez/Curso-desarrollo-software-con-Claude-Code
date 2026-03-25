@@ -7,12 +7,12 @@ del ciclo de vida de Claude Code. Desde auto-formateo hasta validacion de seguri
 
 ## Objetivos
 
-1. Comprender el sistema de 7 eventos de hooks
+1. Comprender el sistema de 16 eventos de hooks
 2. Configurar hooks practicos para desarrollo
 3. Implementar hooks de seguridad
 4. Crear scripts reutilizables
 
-## Duracion: 1 hora 50 minutos (65 min teoria + 45 min ejercicios)
+## Duracion: 2h 05min (80 min teoria + 45 min ejercicios)
 
 ## Prerequisitos: Modulos 01-07 completados
 

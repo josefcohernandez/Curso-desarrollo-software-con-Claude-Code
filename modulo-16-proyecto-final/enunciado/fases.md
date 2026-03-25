@@ -753,6 +753,41 @@ python agente_docs.py
 
 > **Consejo (Capítulo 14):** Empieza con un agente simple de un solo paso antes de añadir complejidad. El Agent SDK permite construir flujos de razonamiento multi-paso con herramientas personalizadas.
 
+### Opción 7G: Auto Mode y Computer Use (Capítulos 5, 6, 13)
+
+> **Novedad v3.0**
+
+Configura Auto Mode para el proyecto y demuestra Computer Use:
+
+```
+1. Activa Auto Mode en tu sesión y realiza un refactoring completo
+   de un módulo sin confirmar manualmente ningún permiso. Documenta
+   cuántas confirmaciones te ahorró y si el clasificador IA bloqueó
+   alguna acción inesperada.
+
+2. (Opcional, requiere macOS) Usa Computer Use para automatizar
+   un flujo de testing visual: que Claude abra el navegador,
+   navegue a la documentación de tu API y verifique que los
+   endpoints están correctamente documentados.
+```
+
+### Opción 7H: Nuevos Hooks y Compaction API (Capítulos 3, 8)
+
+> **Novedad v3.0**
+
+Configura hooks con los nuevos eventos y la Compaction API:
+
+```
+1. Configura un hook CwdChanged que cargue automáticamente las
+   variables de entorno del directorio al cambiar de módulo.
+
+2. Configura un hook PostCompact que registre cada compactación
+   en un fichero de log con timestamp y tamaño del resumen.
+
+3. Activa la Compaction API para una tarea larga y documenta
+   cómo afectó al rendimiento de la sesión.
+```
+
 ### Checklist de la Fase 7
 
 - [ ] Al menos una opción extra implementada

@@ -41,6 +41,7 @@ Los slash commands se invocan escribiendo `/` seguido del nombre del comando en 
 | `/model` | `/model [modelo]` | Selecciona o cambia el modelo de IA. Con flechas izquierda/derecha, ajusta el nivel de esfuerzo para modelos que lo soportan. El cambio es inmediato | — |
 | `/effort` | `/effort [low\|medium\|high\|max\|auto]` | Establece el nivel de esfuerzo del modelo. `low`, `medium`, `high` persisten entre sesiones. `max` solo para la sesion actual (requiere Opus 4.6). `auto` resetea al defecto del modelo | Sin argumento muestra el nivel actual |
 | `/fast` | `/fast [on\|off]` | Activa o desactiva el modo rapido | — |
+| `/loop` | `/loop [on\|off]` | Activa o desactiva el modo de bucle agentivo, en el que Claude repite turnos hasta completar la tarea sin esperar confirmacion del usuario | Solo disponible en sesiones interactivas |
 
 ### Configuracion e informacion
 
@@ -113,6 +114,7 @@ Los slash commands se invocan escribiendo `/` seguido del nombre del comando en 
 | `/remote-control` | `/remote-control` | Hace que esta sesion este disponible para control remoto desde claude.ai | Alias: `/rc` |
 | `/desktop` | `/desktop` | Continua la sesion actual en la app de escritorio de Claude Code | Solo macOS y Windows. Alias: `/app` |
 | `/mobile` | `/mobile` | Muestra codigo QR para descargar la app movil de Claude | Alias: `/ios`, `/android` |
+| `/voice` | `/voice` | Activa el modo push-to-talk para dictado por voz. Mantener la barra espaciadora para hablar, soltarla para enviar. Soporta 20 idiomas | Requiere cuenta Claude.ai. Configurable en `/config`. Ver [atajos de teclado](./referencia-cli-atajos-teclado.md) para el atajo Space |
 
 ### Sesiones remotas
 

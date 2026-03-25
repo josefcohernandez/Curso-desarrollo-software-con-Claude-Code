@@ -36,6 +36,7 @@ Al completar este modulo seras capaz de:
 | [02-tecnicas-ahorro-tokens.md](teoria/02-tecnicas-ahorro-tokens.md) | 11 tecnicas practicas para reducir consumo de tokens | 40 min |
 | [03-estrategias-sesion.md](teoria/03-estrategias-sesion.md) | Cuando usar /clear, /compact, /rewind, subagentes y sesiones paralelas | 20 min |
 | [04-prompt-caching-y-optimizacion-de-costes.md](teoria/04-prompt-caching-y-optimizacion-de-costes.md) | Prompt caching automatico, costes por modelo y estrategias de optimizacion | 20 min |
+| [05-compaction-api.md](teoria/05-compaction-api.md) | Compaction API (beta): compactacion automatica server-side, hook PostCompact y configuracion | 20 min |
 
 ### Ejercicios practicos
 
@@ -52,7 +53,7 @@ Al completar este modulo seras capaz de:
 
 ## Tiempo total estimado
 
-**2 horas 20 minutos** (110 min teoria + 35 min ejercicios)
+**2 horas 15 minutos** (100 min teoria + 35 min ejercicios)
 
 ## Prerequisitos
 

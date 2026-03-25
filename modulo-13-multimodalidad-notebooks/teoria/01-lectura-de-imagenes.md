@@ -42,6 +42,8 @@ En la mayoría de terminales y en el editor de VS Code con la extensión de Clau
 
 Si hiciste un screenshot (por ejemplo con `Cmd+Shift+4` en macOS o `PrtSc` en Windows/Linux), puedes pegarlo directamente en el CLI con `Ctrl+V` o `Cmd+V`. Claude recibirá la imagen pegada.
 
+> **Novedad v3.0:** Las imágenes pegadas ahora insertan chips `[Image #N]` en el texto del prompt. Esto permite referenciar imágenes por posición cuando pegas varias: "En la [Image #1] veo un botón rojo, pero en la [Image #2] es azul — ¿cuál prefieres?"
+
 ```
 [Cmd+Shift+4 para capturar un área de la pantalla]
 [Cmd+V para pegar en el CLI de Claude Code]

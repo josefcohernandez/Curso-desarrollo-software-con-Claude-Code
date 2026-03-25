@@ -32,6 +32,7 @@ Ejecuta `/terminal-setup` en Claude Code para configurar automaticamente los key
 | `Ctrl+D` | Todas | Sale de Claude Code (senial EOF) | Siempre |
 | `Ctrl+F` | Todas | Termina todos los agentes en segundo plano. Pulsar dos veces en 3 segundos para confirmar | Modo interactivo |
 | `Ctrl+G` | Todas | Abre el prompt o una respuesta personalizada en el editor de texto por defecto | Modo interactivo |
+| `Ctrl+X Ctrl+E` | Todas | Abre el editor externo configurado en `$EDITOR` para redactar el prompt actual. Al guardar y cerrar, el contenido se inserta en el prompt | Prompt |
 | `Ctrl+L` | Todas | Limpia la pantalla del terminal (conserva el historial de conversacion) | Modo interactivo |
 | `Ctrl+O` | Todas | Alterna el output verbose (muestra el uso detallado de herramientas y ejecucion) | Modo interactivo |
 | `Ctrl+R` | Todas | Busqueda inversa en el historial de comandos (busqueda interactiva) | Prompt |
@@ -151,6 +152,16 @@ Para que `Shift+Enter` funcione en VS Code, Alacritty, Zed o Warp, ejecuta `/ter
 | `!` al inicio | Modo bash: ejecuta el comando directamente y anade la salida al contexto | `! npm test` |
 | `@` | Dispara el autocompletado de rutas de ficheros | `@src/auth` |
 | `Space` (mantener) | Push-to-talk: dictado por voz | Requiere `/voice` activado |
+
+---
+
+## Busqueda en la transcripcion
+
+| Atajo | Plataforma | Accion | Contexto |
+|-------|-----------|--------|---------|
+| `/` | Todas | Activa la busqueda interactiva en la transcripcion de la sesion. Escribe texto para filtrar mensajes | Modo transcript (historial visible) |
+| `n` | Todas | Salta al siguiente resultado de busqueda | Busqueda activa en transcript |
+| `N` | Todas | Salta al resultado de busqueda anterior | Busqueda activa en transcript |
 
 ---
 

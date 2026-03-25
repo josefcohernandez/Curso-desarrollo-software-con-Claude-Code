@@ -20,16 +20,20 @@ de su razonamiento según la complejidad de la tarea.
 
 Opus decide automáticamente cuánto "pensar" basándose en la complejidad.
 
-### Extended Thinking
+### Adaptive Thinking (reemplaza Extended Thinking)
 
-Para forzar razonamiento profundo:
+> **Cambio v3.0:** En Opus 4.6, el parámetro `thinking: {type: "enabled"}` y `budget_tokens` están **deprecados**. Se sustituyen por **adaptive thinking**, que decide automáticamente cuándo y cuánto razonar.
+
+Con adaptive thinking, no necesitas activar ni desactivar el razonamiento profundo manualmente. Opus ajusta dinámicamente la profundidad de su razonamiento basándose en la complejidad detectada.
+
+Si necesitas forzar razonamiento extendido, puedes usar:
 
 | Método | Cómo |
 |--------|------|
 | Atajo | `Alt+T` (toggle) |
-| Variable | `MAX_THINKING_TOKENS=50000` |
+| Slash command | `/effort max` (nuevo nivel máximo para Opus) |
 
-Extended thinking es útil para:
+Extended thinking sigue siendo útil para:
 - Debugging de problemas complejos
 - Decisiones arquitectónicas
 - Análisis de seguridad
@@ -42,8 +46,10 @@ Extended thinking es útil para:
 | Modelo | Coste (in/out) | Usar para | No usar para |
 |--------|---------------|-----------|-------------|
 | **Haiku 4.5** | $0.80/$4 | Commit messages, formateo, tareas triviales | Cualquier cosa que requiera razonamiento |
-| **Sonnet 4.5** | $3/$15 | Desarrollo diario, features, tests, refactoring | Decisiones arquitectónicas complejas |
+| **Sonnet 4.6** | $3/$15 | Desarrollo diario, features, tests, refactoring | Decisiones arquitectónicas complejas |
 | **Opus 4.6** | $15/$75 | Planificación, debug complejo, arquitectura | Tareas rutinarias (5x más caro que Sonnet) |
+
+> **Nota v3.0:** Opus 4.6 ahora soporta hasta **128K tokens de salida** (duplicado desde 64K). Sonnet 4.6 alcanza **1M de contexto** en beta con 64K tokens de salida.
 
 ### Árbol de Decisión
 

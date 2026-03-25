@@ -108,6 +108,23 @@ await server.connect(transport);
 
 ---
 
+## Dynamic Filtering en Web Search/Fetch
+
+> **Novedad v3.0**
+
+Cuando Claude usa web search o web fetch, puede aplicar **dynamic filtering** para filtrar y procesar los resultados mediante code execution antes de incorporarlos al contexto. Esto reduce la cantidad de tokens que entran en la ventana de contexto y mejora la relevancia de la información.
+
+```
+Ejemplo: Claude busca "últimas vulnerabilidades de Node.js" en la web,
+recibe 10 resultados, ejecuta código para filtrar solo las CVEs de
+severidad alta del último mes, y solo incorpora esos resultados filtrados
+al contexto.
+```
+
+Este filtrado es automático cuando Claude lo considera útil. La ejecución de código asociada al filtrado es **gratuita** (no se factura por separado).
+
+---
+
 ## Seguridad MCP
 
 ### Riesgos

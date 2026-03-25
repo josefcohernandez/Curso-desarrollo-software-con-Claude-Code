@@ -143,6 +143,7 @@ claude
 | `CLAUDE_CODE_SHELL` | path | `/bin/bash` | Shell a usar para ejecutar comandos bash |
 | `CLAUDE_CODE_TMPDIR` | path | directorio temporal del sistema | Directorio temporal para ficheros de trabajo de Claude Code |
 | `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS` | `1` | — | Desactiva toda la funcionalidad de tareas en segundo plano |
+| `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` | `1` | — | Elimina las credenciales del entorno antes de lanzar subprocesos desde Claude Code. Impide que comandos bash ejecutados por Claude hereden `ANTHROPIC_API_KEY` y otras variables sensibles. Recomendado en entornos de produccion (v2.1.81+) |
 
 ### Ejemplo: ajuste de timeouts para CI
 

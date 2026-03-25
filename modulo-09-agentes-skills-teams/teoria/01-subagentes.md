@@ -262,6 +262,22 @@ tu-proyecto/
       docs-writer.md         # Agente escritor de documentación
 ```
 
+### `initialPrompt` en frontmatter
+
+> **Novedad v3.0**
+
+Los agentes personalizados pueden declarar un `initialPrompt` en su frontmatter YAML. Cuando el agente se lanza, este prompt se envía automáticamente sin necesidad de que el usuario escriba nada:
+
+```markdown
+---
+name: daily-standup
+description: Recopila el estado del trabajo pendiente
+initialPrompt: "Revisa las tareas pendientes en TaskList, el git log de las últimas 24h y genera un resumen para la daily standup"
+---
+```
+
+Esto es útil para agentes que siempre ejecutan la misma tarea inicial, como auditorías periódicas o reportes de estado.
+
 ### Formato del Archivo de Agente
 
 ```markdown
@@ -383,5 +399,10 @@ Paso 3: Presentar el plan al usuario en el contexto principal
 | General-Purpose | Capacidades completas |
 | Aislamiento | Solo el resumen vuelve al contexto principal |
 | Modelo | haiku (barato), sonnet (equilibrado), opus (potente) |
-| Agentes custom | `.claude/agents/nombre.md` |
+| Agentes custom | `.claude/agents/nombre.md` con frontmatter YAML |
+| `initialPrompt` | Prompt automático al lanzar un agente (v3.0) |
 | Paralelismo | Múltiples subagentes simultáneos para tareas independientes |
+
+> **Deprecaciones v3.0:**
+> - La herramienta `TaskOutput` está deprecada. Usa `Read` sobre el fichero de output de la tarea en su lugar.
+> - El parámetro `task.resume` ha sido eliminado. Usa `SendMessage()` para continuar un agente existente (ver [fichero 04](04-aislamiento-worktree-y-comunicacion.md)).

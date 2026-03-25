@@ -448,6 +448,41 @@ Para cumplimiento con GDPR (relevante para equipos europeos):
 
 ---
 
+## Data Residency Controls
+
+> **Novedad v3.0**
+
+El parámetro `inference_geo` permite controlar en qué región geográfica se procesa la inferencia:
+
+| Valor | Comportamiento |
+|-------|---------------|
+| `global` | Procesamiento en cualquier región disponible (por defecto) |
+| `us-only` | Procesamiento exclusivamente en servidores de EE.UU. |
+
+```json
+{
+  "inference_geo": "us-only"
+}
+```
+
+Esto es complementario a los backends de Bedrock/Vertex AI. Mientras que Bedrock y Vertex ejecutan la inferencia dentro de tu propia cuenta cloud, `inference_geo` controla la ubicación cuando usas la API directa de Anthropic.
+
+---
+
+## Auto Mode en entornos enterprise
+
+> **Novedad v3.0 (research preview)**
+
+Auto Mode permite que Claude Code tome decisiones de permisos automáticamente usando un clasificador IA dual de seguridad (ver [Módulo 05](../../modulo-05-configuracion-permisos/teoria/05-auto-mode.md)).
+
+**Consideraciones enterprise:**
+- Los teammates en Agent Teams heredan Auto Mode del lead si está activado
+- Las políticas gestionadas (`/etc/claude-code/settings.json`) tienen prioridad sobre Auto Mode: si una política deniega una acción, Auto Mode no puede aprobarla
+- Disponible primero en plan Team, desplegándose progresivamente a Enterprise
+- Recomendado para entornos de desarrollo y staging, **no para producción** sin validación previa
+
+---
+
 ## Resumen de funcionalidades enterprise
 
 | Funcionalidad | Propósito | Disponible en |
@@ -462,3 +497,6 @@ Para cumplimiento con GDPR (relevante para equipos europeos):
 | Rate limiting configurable | Control de capacidad | Scale / Enterprise |
 | --max-budget-usd | Control de costes por sesión | Todos |
 | ZDR | Cero retención de datos | API / Enterprise |
+| Data residency (`inference_geo`) | Control de región de procesamiento | API / Enterprise |
+| Auto Mode | Permisos automáticos con IA de seguridad | Team (research preview) |
+| `managed-settings.d/` | Fragmentos de políticas drop-in | Enterprise |

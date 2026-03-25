@@ -297,6 +297,16 @@ El ecosistema de frameworks para construir agentes es amplio. Aquí una comparat
 
 ---
 
+## Nota sobre prefill en Opus 4.6
+
+> **Deprecación v3.0:** El **prefilling** de mensajes del asistente (insertar texto al inicio de la respuesta de Claude para guiar su formato) ya **no es soportado en Opus 4.6**. Si tu código usa prefill para forzar un formato de respuesta (por ejemplo, empezar con `{` para forzar JSON), debes migrar a:
+>
+> - `output_config.format` para forzar formato de salida
+> - `--json-schema` para respuestas JSON con esquema validado
+> - System prompts explícitos que instruyan el formato deseado
+
+---
+
 ## Resumen
 
 - Claude Code es el entorno ideal para diseñar y desarrollar agentes con el Agent SDK
@@ -304,3 +314,4 @@ El ecosistema de frameworks para construir agentes es amplio. Aquí una comparat
 - La traducción de subagente a SDK es directa: `tools:` → `allowed_tools`, cuerpo del `.md` → `system_prompt`
 - Puedes desplegar agentes como CLI, servicio web (FastAPI) o GitHub Action
 - El Agent SDK es la mejor opción para agentes Claude puros; otros frameworks tienen ventajas para casos multi-modelo o con abstracciones de alto nivel
+- **Deprecación v3.0:** Prefill removal en Opus 4.6 — usar `output_config.format` o system prompts para guiar el formato de salida

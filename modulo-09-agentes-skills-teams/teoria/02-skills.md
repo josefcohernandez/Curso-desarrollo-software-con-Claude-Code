@@ -149,6 +149,21 @@ context: fork  # Ejecutar en subagente
 - El skill es corto y su output es pequeño
 - Necesitas que la información esté disponible para tareas posteriores en la misma sesión
 
+### paths (opcional)
+
+> **Novedad v3.1 (v2.1.84)**
+
+Limita la activacion del skill a ficheros que coincidan con una lista de patrones glob. El skill solo se sugerira o activara cuando el usuario trabaje con ficheros que coincidan:
+
+```yaml
+paths:
+  - "src/api/**/*.ts"
+  - "src/routes/**/*.ts"
+  - "tests/api/**/*.test.ts"
+```
+
+Esto permite que un skill de "deploy" solo aparezca cuando trabajas en ficheros de infraestructura, o que un skill de "test" solo se active en directorios de tests. Acepta listas YAML de globs estandar.
+
 ### disable-model-invocation (opcional)
 
 Controla si Claude procesa las instrucciones o simplemente las devuelve como texto:

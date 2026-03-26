@@ -84,6 +84,16 @@ claude
 | `ANTHROPIC_DEFAULT_SONNET_MODEL` | ID del modelo Sonnet en Bedrock (ej: `us.anthropic.claude-sonnet-4-6`) |
 | `ANTHROPIC_DEFAULT_HAIKU_MODEL` | ID del modelo Haiku en Bedrock (ej: `us.anthropic.claude-haiku-4-5-20251001-v1:0`) |
 
+### Variables de capacidades de modelo (v2.1.84+)
+
+Permiten declarar explicitamente las capacidades del modelo configurado, necesario cuando Claude Code no puede detectarlas automaticamente (por ejemplo, con modelos personalizados en Bedrock o Vertex).
+
+| Variable | Descripcion |
+|----------|-------------|
+| `ANTHROPIC_DEFAULT_OPUS_MODEL_SUPPORTS` | Capacidades del modelo Opus por defecto. Permite sobreescribir la deteccion automatica de features para el modelo Opus configurado |
+| `ANTHROPIC_DEFAULT_SONNET_MODEL_SUPPORTS` | Capacidades del modelo Sonnet por defecto. Idem para el modelo Sonnet configurado |
+| `ANTHROPIC_DEFAULT_HAIKU_MODEL_SUPPORTS` | Capacidades del modelo Haiku por defecto. Idem para el modelo Haiku configurado |
+
 ### Ejemplo: configuracion completa con Bedrock
 
 ```bash
@@ -144,6 +154,7 @@ claude
 | `CLAUDE_CODE_TMPDIR` | path | directorio temporal del sistema | Directorio temporal para ficheros de trabajo de Claude Code |
 | `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS` | `1` | — | Desactiva toda la funcionalidad de tareas en segundo plano |
 | `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` | `1` | — | Elimina las credenciales del entorno antes de lanzar subprocesos desde Claude Code. Impide que comandos bash ejecutados por Claude hereden `ANTHROPIC_API_KEY` y otras variables sensibles. Recomendado en entornos de produccion (v2.1.81+) |
+| `CLAUDE_STREAM_IDLE_TIMEOUT_MS` | numero (ms) | — | Timeout del watchdog de streaming idle. Controla cuanto tiempo espera Claude Code antes de considerar una conexion de streaming como inactiva y cancelarla. Util para ajustar la tolerancia a pausas largas en respuestas de streaming (v2.1.84+) |
 
 ### Ejemplo: ajuste de timeouts para CI
 

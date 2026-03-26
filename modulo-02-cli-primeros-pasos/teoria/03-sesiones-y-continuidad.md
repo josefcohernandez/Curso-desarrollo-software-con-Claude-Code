@@ -144,6 +144,32 @@ Los títulos se generan al vuelo y se actualizan conforme avanza la conversació
 
 ---
 
+## Idle-Return y Deep Links
+
+> **Novedad v3.1 (v2.1.84)**
+
+Cuando una sesion permanece inactiva durante mas de **75 minutos**, Claude Code muestra automaticamente un prompt de retorno que te ayuda a retomar el contexto de lo que estabas haciendo. Esto es util cuando dejas una sesion abierta y vuelves mas tarde.
+
+Ademas, los **deep links** con el protocolo `claude-cli://` ahora abren directamente en tu terminal preferido, facilitando la integracion con herramientas externas que quieran lanzar sesiones de Claude Code.
+
+---
+
+## PowerShell Tool para Windows
+
+> **Novedad v3.1 (v2.1.84, opt-in preview)**
+
+En Windows, Claude Code ahora ofrece una herramienta **PowerShell** como alternativa a Bash. Esto permite ejecutar comandos nativos de PowerShell sin necesidad de WSL:
+
+```powershell
+# Claude puede ejecutar comandos PowerShell nativos
+Get-ChildItem -Recurse -Filter "*.cs" | Select-Object FullName
+Get-Process | Where-Object { $_.CPU -gt 100 }
+```
+
+La herramienta PowerShell es un **opt-in preview**: no esta activada por defecto. Es especialmente util para equipos que trabajan con .NET, Azure o infraestructura Windows.
+
+---
+
 ## Mejores Prácticas de Sesión
 
 1. **Una tarea = una sesión** (o `/clear` entre tareas)

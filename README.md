@@ -277,6 +277,7 @@ claude_tutorial/
 | 0.3 | Marzo 2026 | Claude Code 2.1.x | +M15 Plugins/Marketplaces. Proyecto final movido a M16 |
 | 1.0 | Marzo 2026 | Claude Code 2.1.70+ | Revisión, corrección de errores, licencia, referencia CLI exhaustiva |
 | 2.0 | 25 marzo 2026 | Claude Code 2.1.83 | Auto Mode, MCP Elicitation, Computer Use, Compaction API, 9 nuevos hooks, managed-settings.d/, 128K output tokens |
+| 2.1 | 26 marzo 2026 | Claude Code 2.1.84 | PowerShell tool, TaskCreated hook, paths: en skills, MCP 2KB cap |
 
 ### Novedades v2.0 (25 marzo 2026)
 

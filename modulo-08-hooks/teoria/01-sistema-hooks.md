@@ -7,7 +7,7 @@ eventos específicos en Claude Code. Son como "triggers" o "callbacks".
 
 ---
 
-## Los 16 Eventos
+## Los 17 Eventos
 
 ### Eventos básicos (desde v2.0)
 
@@ -21,10 +21,11 @@ eventos específicos en Claude Code. Son como "triggers" o "callbacks".
 | **TextInput** | Cuando el usuario escribe texto | Preprocesar input |
 | **Notification** | Cuando hay una notificación | Alertas externas |
 
-### Eventos nuevos (v2.1.76 - v2.1.83)
+### Eventos nuevos (v2.1.76 - v2.1.84)
 
 | Evento | Cuándo se dispara | Uso típico |
 |--------|------------------|-----------|
+| **TaskCreated** | Cuando se crea una tarea (TaskCreate) | Logging, notificacion, asignacion automatica |
 | **PostCompact** | Después de compactar el contexto | Verificar resumen, logging. Incluye campo `compact_summary` |
 | **CwdChanged** | Cuando cambia el directorio de trabajo | Recargar .env, activar direnv |
 | **FileChanged** | Cuando se modifica un fichero | Auto-reload, validación |

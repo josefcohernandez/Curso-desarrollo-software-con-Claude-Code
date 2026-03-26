@@ -6,6 +6,8 @@ Cada servidor MCP consume tokens **en cada mensaje** porque Claude necesita
 conocer las herramientas disponibles. Con 3-5 servidores, el overhead
 puede ser de 5K-10K tokens por mensaje.
 
+> **Novedad v3.1 (v2.1.84):** Las descripciones de herramientas MCP ahora estan **limitadas a 2KB**. Descripciones mas largas se truncan automaticamente. Esto reduce el overhead de tokens en servidores con muchas herramientas o descripciones verbose.
+
 ---
 
 ## Estrategias de Optimización

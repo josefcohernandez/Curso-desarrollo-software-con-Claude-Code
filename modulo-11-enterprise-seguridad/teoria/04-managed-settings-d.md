@@ -207,6 +207,14 @@ Cada equipo gestiona su propio fichero. El equipo de compliance puede actualizar
 
 ---
 
+## Bloqueo de Plugins por Política
+
+> **Novedad v3.2 (v2.1.85)**
+
+Los plugins bloqueados por la política de la organización (definida en `managed-settings.json` o en fragmentos de `managed-settings.d/`) ahora **no pueden instalarse ni habilitarse**, y se ocultan completamente de las vistas del marketplace. Esto refuerza el control enterprise: si un administrador bloquea un plugin, los usuarios no pueden eludirlo.
+
+---
+
 ## Puntos clave
 
 - `managed-settings.d/` permite distribuir políticas de Claude Code en fragmentos modulares

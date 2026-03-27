@@ -173,6 +173,8 @@ export BASH_MAX_OUTPUT_CHARS=500000     # Mas output para logs detallados
 |----------|---------|---------|-------------|
 | `MCP_TIMEOUT` | numero (ms) | `30000` | Timeout para operaciones de servidores MCP |
 | `MAX_MCP_OUTPUT_TOKENS` | numero | — | Limite de tokens en la respuesta de una herramienta MCP |
+| `CLAUDE_CODE_MCP_SERVER_NAME` | string (auto) | — | Inyectada automaticamente en scripts `headersHelper` con el nombre del servidor MCP que solicita cabeceras. Permite que un solo script sirva a multiples servidores (v2.1.85+) |
+| `CLAUDE_CODE_MCP_SERVER_URL` | URL (auto) | — | Inyectada automaticamente en scripts `headersHelper` con la URL del servidor MCP. Complementa a `CLAUDE_CODE_MCP_SERVER_NAME` (v2.1.85+) |
 
 ---
 
@@ -204,6 +206,10 @@ export OTEL_EXPORTER_OTLP_ENDPOINT="https://mi-observabilidad.empresa.com"
 export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer mi-token"
 export OTEL_SERVICE_NAME="claude-code-mi-equipo"
 ```
+
+| Variable | Valores | Defecto | Descripcion |
+|----------|---------|---------|-------------|
+| `CLAUDE_CODE_OTEL_LOG_TOOL_DETAILS` | `1` | — | Incluye `tool_parameters` en los eventos `tool_result` de OpenTelemetry. Por defecto no se incluyen para evitar exponer datos sensibles en los logs de observabilidad (v2.1.85+) |
 
 ---
 

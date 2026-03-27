@@ -468,6 +468,21 @@ Los mecanismos previos para obtener input del usuario durante una tarea tienen l
 
 ---
 
+## OAuth y RFC 9728
+
+> **Novedad v3.2 (v2.1.85)**
+
+MCP OAuth ahora cumple con **RFC 9728 (Protected Resource Metadata)** para el descubrimiento del servidor de autorización. En la práctica, esto significa que cuando un servidor MCP requiere autenticación OAuth, Claude Code puede descubrir automáticamente el endpoint de autorización a partir de los metadatos del recurso protegido, sin necesidad de que el servidor especifique manualmente la URL del authorization server.
+
+Para los desarrolladores de servidores MCP esto implica:
+- El servidor puede publicar sus metadatos según RFC 9728 en `/.well-known/oauth-protected-resource`
+- Claude Code los lee y localiza el authorization server automáticamente
+- Se simplifica la configuración del cliente, especialmente en entornos multi-tenant
+
+Además, se ha corregido el flujo de **step-up authorization**: cuando un servidor responde con `403 insufficient_scope` y existe un refresh token previo, Claude Code ahora inicia correctamente el flujo de re-autorización con los scopes elevados, en lugar de fallar silenciosamente.
+
+---
+
 ## Configuración y permisos necesarios
 
 Para que elicitation funcione correctamente, el servidor MCP debe declarar la capacidad `elicitation` al registrarse. Si no la declara, Claude Code no enviará las solicitudes de elicitation y el servidor recibirá un error.

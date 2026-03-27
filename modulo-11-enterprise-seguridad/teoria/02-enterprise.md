@@ -307,6 +307,8 @@ Aspectos que se pueden auditar:
 - Herramientas MCP invocadas
 - Sesiones iniciadas y cerradas
 
+> **Novedad v3.2 (v2.1.85):** Para incluir los parámetros de las herramientas en los eventos `tool_result` de OpenTelemetry, activa la variable `CLAUDE_CODE_OTEL_LOG_TOOL_DETAILS=1`. Por defecto estos datos no se incluyen para evitar exponer información sensible en los logs de observabilidad.
+
 ---
 
 ## Dimensionamiento y rate limiting por tamaño de equipo

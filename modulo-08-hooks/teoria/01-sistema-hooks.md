@@ -96,6 +96,48 @@ Sin matcher, el hook se dispara para **todas** las herramientas del evento.
 
 ---
 
+## Ejecución Condicional con `if`
+
+> **Novedad v3.2 (v2.1.85)**
+
+El campo `if` permite condicionar la ejecución de un hook usando la misma sintaxis de las reglas de permisos. Esto reduce el overhead de spawning de procesos: el hook solo se ejecuta si la condición se cumple, sin necesidad de que el propio script evalúe si debe actuar.
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "if": "Bash(git *)",
+        "command": "/scripts/validar-git.sh"
+      }
+    ]
+  }
+}
+```
+
+En este ejemplo, el hook solo se ejecuta cuando el comando Bash empieza por `git`. Sin el campo `if`, el hook se dispararía para **cualquier** comando Bash y el script tendría que filtrar internamente.
+
+### Sintaxis de `if`
+
+La sintaxis es idéntica a la de las reglas de permisos (`permissions.allow` / `permissions.deny`):
+
+| Condición | Se cumple cuando |
+|-----------|-----------------|
+| `"Bash(git *)"` | El comando empieza por `git` |
+| `"Write(src/**/*.ts)"` | Se escribe un fichero `.ts` dentro de `src/` |
+| `"Edit(*.json)"` | Se edita cualquier fichero JSON |
+
+### Cuándo usar `if` vs lógica en el script
+
+| Escenario | Recomendación |
+|-----------|--------------|
+| Filtrar por nombre de herramienta o patrón de fichero | Usar `if` — evita lanzar el proceso |
+| Filtrar por contenido del comando o lógica compleja | Usar lógica dentro del script |
+| Combinar ambos | Usar `if` para el filtro grueso y el script para el fino |
+
+---
+
 ## Configuración
 
 En `.claude/settings.json`:

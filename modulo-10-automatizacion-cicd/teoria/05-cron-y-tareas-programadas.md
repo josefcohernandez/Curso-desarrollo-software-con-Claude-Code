@@ -18,7 +18,7 @@ Claude Code incluye herramientas nativas para programar tareas recurrentes direc
 
 ### Crear una tarea programada
 
-```
+```text
 Crea una tarea programada con CronCreate que ejecute
 un análisis de seguridad del repositorio cada lunes a las 9:00.
 El prompt debe revisar los ficheros modificados la semana pasada
@@ -27,7 +27,7 @@ buscando patrones de inyección SQL y credenciales hardcodeadas.
 
 El formato de la expresión cron sigue la sintaxis estándar:
 
-```
+```text
 ┌───────────── minuto (0-59)
 │ ┌───────────── hora (0-23)
 │ │ ┌───────────── día del mes (1-31)
@@ -39,7 +39,7 @@ El formato de la expresión cron sigue la sintaxis estándar:
 
 Ejemplos de expresiones útiles:
 
-```
+```text
 0 9 * * 1      Cada lunes a las 9:00
 0 9 * * 1-5    Cada día laborable a las 9:00
 0 */4 * * *    Cada 4 horas
@@ -48,7 +48,7 @@ Ejemplos de expresiones útiles:
 
 ### Ver y eliminar tareas programadas
 
-```
+```text
 # Listar todas las tareas activas
 Usa CronList para mostrarme las tareas programadas que tengo configuradas.
 
@@ -71,13 +71,13 @@ El skill `/loop` permite ejecutar un prompt o un slash command de forma recurren
 
 ### Sintaxis
 
-```
+```text
 /loop <intervalo> <comando-o-prompt>
 ```
 
 El intervalo se especifica con sufijos de tiempo:
 
-```
+```text
 /loop 5m /babysit-prs          Ejecuta el skill cada 5 minutos
 /loop 1h /security-audit       Ejecuta el skill cada hora
 /loop 30s "¿Hay errores nuevos en los logs?"  Pregunta cada 30 segundos
@@ -89,25 +89,25 @@ Si no se especifica intervalo, el valor por defecto es **10 minutos**.
 
 **Monitorizar el estado de un deploy:**
 
-```
+```text
 /loop 5m "Ejecuta 'kubectl get pods -n production' y reporta si algún pod tiene estado diferente a Running. Si hay problemas, descríbelos con detalle."
 ```
 
 **Revisar PRs nuevas periódicamente:**
 
-```
+```text
 /loop 15m /babysit-prs
 ```
 
 **Vigilar logs en busca de errores:**
 
-```
+```text
 /loop 2m "Lee las últimas 50 líneas de /var/log/app/error.log y alerta si hay errores nuevos desde la última revisión."
 ```
 
 **Seguimiento de un proceso largo:**
 
-```
+```text
 /loop 10m "Comprueba el estado del job de migración de base de datos ejecutando 'python manage.py migration_status'. Reporta el porcentaje completado y el tiempo estimado restante."
 ```
 
@@ -116,6 +116,12 @@ Si no se especifica intervalo, el valor por defecto es **10 minutos**.
 - Para tareas puntuales que solo necesitan ejecutarse una vez: usa un prompt directo
 - Para tareas que deben ejecutarse aunque no haya una sesión activa: usa `CronCreate` o crontab del sistema
 - Para intervalos menores a 30 segundos: genera demasiado ruido y puede agotar el contexto rápidamente
+
+### Timestamps en tareas programadas
+
+> **Novedad v3.2 (v2.1.85)**
+
+Cuando una tarea programada (`/loop` o `CronCreate`) se dispara, Claude Code añade automáticamente un **marcador de timestamp** en el transcript. Esto facilita la revisión posterior: puedes ver exactamente a qué hora se ejecutó cada iteración sin depender de los logs del sistema.
 
 ### Detener un /loop activo
 

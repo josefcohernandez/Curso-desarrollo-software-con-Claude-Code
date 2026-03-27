@@ -129,6 +129,53 @@ exit 0
 
 ---
 
+## PreToolUse para Integraciones Headless
+
+> **Novedad v3.2 (v2.1.85)**
+
+Los hooks `PreToolUse` ahora pueden **satisfacer automáticamente** la herramienta `AskUserQuestion` devolviendo `updatedInput` junto con `permissionDecision: "allow"`. Esto permite que integraciones headless (CI/CD, pipelines automatizados, agentes remotos) respondan a preguntas de Claude sin intervención humana.
+
+```bash
+#!/bin/bash
+# auto-responder-headless.sh
+# Responde automáticamente a AskUserQuestion en entornos headless
+
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+
+if [ "$TOOL_NAME" = "AskUserQuestion" ]; then
+  QUESTION=$(echo "$INPUT" | jq -r '.tool_input.question // empty')
+
+  # Responder automáticamente según el patrón de la pregunta
+  if echo "$QUESTION" | grep -qi "continuar"; then
+    echo '{"permissionDecision":"allow","updatedInput":"Sí, continúa con la implementación."}'
+    exit 0
+  fi
+fi
+
+# Para cualquier otra herramienta, permitir sin modificar
+exit 0
+```
+
+Configuración:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "AskUserQuestion",
+        "command": "/scripts/auto-responder-headless.sh"
+      }
+    ]
+  }
+}
+```
+
+Esto es especialmente útil en combinación con el modo no interactivo (`claude -p`) donde no hay un usuario para responder preguntas.
+
+---
+
 ## Riesgos de Hooks Mal Configurados
 
 | Riesgo | Consecuencia | Prevención |

@@ -52,6 +52,46 @@ Esto evita hardcodear secrets en la configuración.
 
 ---
 
+## Variables de Entorno para headersHelper
+
+> **Novedad v3.2 (v2.1.85)**
+
+Cuando un servidor MCP usa `headersHelper` (un script externo que genera cabeceras de autenticación), Claude Code inyecta automáticamente dos variables de entorno que identifican qué servidor está solicitando las cabeceras:
+
+| Variable | Descripción |
+|----------|-------------|
+| `CLAUDE_CODE_MCP_SERVER_NAME` | Nombre del servidor MCP tal como está configurado en settings.json |
+| `CLAUDE_CODE_MCP_SERVER_URL` | URL del servidor MCP |
+
+Esto permite usar **un solo script** `headersHelper` para múltiples servidores:
+
+```bash
+#!/bin/bash
+# headers-helper.sh — un script, múltiples servidores
+
+case "$CLAUDE_CODE_MCP_SERVER_NAME" in
+  "api-produccion")
+    echo "{\"Authorization\": \"Bearer $(vault read -field=token secret/prod)\"}"
+    ;;
+  "api-staging")
+    echo "{\"Authorization\": \"Bearer $(vault read -field=token secret/staging)\"}"
+    ;;
+  *)
+    echo "{}"
+    ;;
+esac
+```
+
+---
+
+## Deduplicación de Servidores MCP
+
+> **Novedad v3.2 (v2.1.85)**
+
+Cuando un servidor MCP está configurado tanto localmente (en `.claude/settings.json`) como en los conectores de claude.ai, Claude Code los **deduplica automáticamente**: la configuración local siempre tiene prioridad. Esto evita que aparezcan herramientas duplicadas en la sesión.
+
+---
+
 ## Verificar Servidores Activos
 
 ```bash

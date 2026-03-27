@@ -148,9 +148,9 @@ Los títulos se generan al vuelo y se actualizan conforme avanza la conversació
 
 > **Novedad v3.1 (v2.1.84)**
 
-Cuando una sesion permanece inactiva durante mas de **75 minutos**, Claude Code muestra automaticamente un prompt de retorno que te ayuda a retomar el contexto de lo que estabas haciendo. Esto es util cuando dejas una sesion abierta y vuelves mas tarde.
+Cuando una sesión permanece inactiva durante más de **75 minutos**, Claude Code muestra automáticamente un prompt de retorno que te ayuda a retomar el contexto de lo que estabas haciendo. Esto es útil cuando dejas una sesión abierta y vuelves más tarde.
 
-Ademas, los **deep links** con el protocolo `claude-cli://` ahora abren directamente en tu terminal preferido, facilitando la integracion con herramientas externas que quieran lanzar sesiones de Claude Code.
+Además, los **deep links** con el protocolo `claude-cli://` ahora abren directamente en tu terminal preferido, facilitando la integración con herramientas externas que quieran lanzar sesiones de Claude Code. Desde v2.1.85, las queries de deep links (`claude-cli://open?q=…`) soportan hasta **5.000 caracteres** (antes el límite era mucho menor), con un aviso de "scroll to review" para prompts largos pre-rellenados.
 
 ---
 

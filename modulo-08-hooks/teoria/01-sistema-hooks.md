@@ -50,7 +50,12 @@ Ejecuta un comando shell:
     "PostToolUse": [
       {
         "matcher": "Write",
-        "command": "prettier --write $FILEPATH"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "prettier --write $FILEPATH"
+          }
+        ]
       }
     ]
   }
@@ -66,15 +71,41 @@ Inyecta texto en el prompt de Claude:
   "hooks": {
     "PreCompact": [
       {
-        "type": "prompt",
-        "prompt": "IMPORTANTE: Mantener siempre el schema de la BD en el resumen"
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "IMPORTANTE: Mantener siempre el schema de la BD en el resumen"
+          }
+        ]
       }
     ]
   }
 }
 ```
 
-### 3. Agent
+### 3. HTTP
+
+Envía una petición POST a un endpoint:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "http",
+            "url": "http://localhost:3000/on-file-write"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### 4. Agent
 
 Ejecuta un agente personalizado.
 
@@ -172,13 +203,16 @@ En `.claude/settings.json`:
 
 ---
 
-## Variables Disponibles
+## Datos Disponibles
 
-| Variable | Descripción | Disponible en |
-|----------|------------|--------------|
-| `$FILEPATH` | Ruta del archivo afectado | PostToolUse (Write/Edit) |
-| `$TOOL_NAME` | Nombre de la herramienta | Pre/PostToolUse |
-| `$TOOL_INPUT` | Input de la herramienta (JSON) | Pre/PostToolUse |
+Los hooks de tipo `command` reciben los datos del evento como **JSON vía stdin**. Los campos disponibles incluyen `tool_input`, `tool_name`, `session_id`, `cwd`, entre otros dependiendo del evento.
+
+Variables de entorno disponibles:
+
+| Variable | Descripción |
+|----------|------------|
+| `$CLAUDE_PROJECT_DIR` | Directorio raíz del proyecto |
+| `$CLAUDE_ENV_FILE` | Script de shell que se ejecuta antes de cada comando Bash |
 
 ---
 
@@ -189,7 +223,8 @@ En `.claude/settings.json`:
 | Exit code | Comportamiento |
 |-----------|---------------|
 | `0` | Permite la operación |
-| `1` o no-zero | **Bloquea** la operación |
+| `2` | **Bloquea** la operación (el único código que bloquea) |
+| `1` u otro no-zero | Error no bloqueante (stderr se muestra en modo verbose, la ejecución continúa) |
 
 Esto permite crear "guardianes" que validan antes de ejecutar.
 

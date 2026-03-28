@@ -2,11 +2,20 @@
 
 ## Dónde Configurar
 
+La forma recomendada de añadir servidores MCP es con el CLI:
+
+```bash
+claude mcp add nombre-servidor -- npx -y @modelcontextprotocol/server-nombre
+```
+
+Los servidores se almacenan en archivos separados según el scope:
+
 | Nivel | Archivo | Scope |
 |-------|---------|-------|
-| Project | `.claude/settings.json` | Compartido equipo (commitear) |
-| User | `~/.claude/settings.json` | Personal global |
-| Local | `.claude/settings.local.json` | Personal proyecto (no commitear) |
+| Project | `.mcp.json` | Compartido equipo (commitear) |
+| User | `~/.claude.json` | Personal global |
+| Local | `~/.claude.json` (scope local) | Personal proyecto (no commitear) |
+| Managed | `managed-mcp.json` (directorio del sistema) | Enterprise |
 
 ---
 

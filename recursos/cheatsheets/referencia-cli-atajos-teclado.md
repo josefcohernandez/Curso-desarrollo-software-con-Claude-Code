@@ -30,7 +30,7 @@ Ejecuta `/terminal-setup` en Claude Code para configurar automaticamente los key
 |-------|-----------|--------|---------|
 | `Ctrl+C` | Todas | Cancela el input actual o la generacion en curso | Siempre |
 | `Ctrl+D` | Todas | Sale de Claude Code (senial EOF) | Siempre |
-| `Ctrl+F` | Todas | Termina todos los agentes en segundo plano. Pulsar dos veces en 3 segundos para confirmar | Modo interactivo |
+| `Ctrl+X Ctrl+K` | Todas | Termina todos los agentes en segundo plano | Modo interactivo |
 | `Ctrl+G` | Todas | Abre el prompt o una respuesta personalizada en el editor de texto por defecto | Modo interactivo |
 | `Ctrl+X Ctrl+E` | Todas | Abre el editor externo configurado en `$EDITOR` para redactar el prompt actual. Al guardar y cerrar, el contenido se inserta en el prompt | Prompt |
 | `Ctrl+L` | Todas | Limpia la pantalla del terminal (conserva el historial de conversacion) | Modo interactivo |
@@ -47,6 +47,7 @@ Ejecuta `/terminal-setup` en Claude Code para configurar automaticamente los key
 |-------|-----------|--------|---------|
 | `Shift+Tab` | Todas | Cicla entre modos de permisos: Normal → Auto-Accept → Plan → Normal | Modo interactivo |
 | `Alt+M` | Linux/Windows | Cicla entre modos de permisos (configuraciones alternativas) | Modo interactivo |
+| `Alt+O` / `Option+O` | Todas | Activa o desactiva el modo rapido (fast mode) | Modo interactivo |
 | `Esc` | Todas | Detiene a Claude a mitad de una accion | Mientras Claude trabaja |
 | `Esc` + `Esc` | Todas | Abre el menu de rewind: retrocede codigo y/o conversacion a un punto anterior, o resume desde un mensaje | Modo interactivo |
 
@@ -110,7 +111,7 @@ Para que `Shift+Enter` funcione en VS Code, Alacritty, Zed o Warp, ejecuta `/ter
 | Atajo | macOS | Linux/Windows | Accion | Contexto |
 |-------|-------|--------------|--------|---------|
 | `Ctrl+K` | Si | Si | Borra desde el cursor hasta el final de la linea (guarda para pegar) | Prompt |
-| `Ctrl+U` | Si | Si | Borra toda la linea (guarda para pegar) | Prompt |
+| `Ctrl+U` | Si | Si | Borra desde el cursor hasta el inicio de la linea (guarda para pegar) | Prompt |
 | `Ctrl+Y` | Si | Si | Pega el texto borrado con Ctrl+K o Ctrl+U | Prompt |
 | `Alt+Y` (tras Ctrl+Y) | Option+Y | `Alt+Y` | Cicla por el historial de textos pegados | Prompt |
 | `Alt+B` | Option+B | `Alt+B` | Mueve el cursor una palabra hacia atras | Prompt |

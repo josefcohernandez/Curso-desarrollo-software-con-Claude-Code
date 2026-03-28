@@ -74,7 +74,7 @@ Al completar este modulo, seras capaz de:
 | **/voice** | Slash command que activa push-to-talk: mantener Space para grabar, soltar para enviar |
 | **push-to-talk** | Mecanismo de activacion por tecla mantenida; configurable via keybindings.json |
 | **Remote Control** | Conecta claude.ai/code o la app movil con una sesion de Claude Code que corre en local |
-| **Computer Use** | Capacidad de Claude para interactuar con el escritorio: ratón, teclado, navegador, UI |
+| **Computer Use** | Capacidad de **Claude Cowork** (no Claude Code) para interactuar con el escritorio: ratón, teclado, navegador, UI. Disponible como research preview, solo en macOS |
 
 ---
 

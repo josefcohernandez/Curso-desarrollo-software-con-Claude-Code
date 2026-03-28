@@ -14,7 +14,7 @@ Cuando un CLAUDE.md crece demasiado, hay problemas:
 ## Cómo Funcionan
 
 Los archivos en `.claude/rules/*.md` se cargan **condicionalmente** según el archivo
-que Claude está editando, usando globs en el YAML frontmatter.
+que Claude está editando, usando paths en el YAML frontmatter.
 
 ### Estructura
 
@@ -32,7 +32,7 @@ que Claude está editando, usando globs en el YAML frontmatter.
 
 ```markdown
 ---
-globs: ["src/frontend/**", "src/components/**", "*.tsx", "*.jsx"]
+paths: ["src/frontend/**", "src/components/**", "*.tsx", "*.jsx"]
 ---
 
 # Reglas Frontend
@@ -47,7 +47,7 @@ globs: ["src/frontend/**", "src/components/**", "*.tsx", "*.jsx"]
 
 ---
 
-## Globs: Patrones de Coincidencia
+## Paths: Patrones de Coincidencia
 
 | Patrón | Coincide con |
 |--------|-------------|
@@ -59,11 +59,11 @@ globs: ["src/frontend/**", "src/components/**", "*.tsx", "*.jsx"]
 | `"migrations/**"` | Archivos de migración |
 | `"Dockerfile*"` | Dockerfiles |
 
-### Múltiples Globs
+### Múltiples Paths
 
 ```yaml
 ---
-globs: ["src/api/**/*.py", "src/services/**/*.py", "tests/api/**"]
+paths: ["src/api/**/*.py", "src/services/**/*.py", "tests/api/**"]
 ---
 ```
 
@@ -75,7 +75,7 @@ globs: ["src/api/**/*.py", "src/services/**/*.py", "tests/api/**"]
 
 ```markdown
 ---
-globs: ["src/components/**", "src/pages/**", "*.tsx", "*.jsx"]
+paths: ["src/components/**", "src/pages/**", "*.tsx", "*.jsx"]
 ---
 
 # Reglas Frontend
@@ -100,7 +100,7 @@ globs: ["src/components/**", "src/pages/**", "*.tsx", "*.jsx"]
 
 ```markdown
 ---
-globs: ["src/api/**", "src/services/**", "src/models/**", "*.py"]
+paths: ["src/api/**", "src/services/**", "src/models/**", "*.py"]
 ---
 
 # Reglas Backend
@@ -126,7 +126,7 @@ globs: ["src/api/**", "src/services/**", "src/models/**", "*.py"]
 
 ```markdown
 ---
-globs: ["**/*.test.*", "**/*.spec.*", "tests/**", "**/__tests__/**"]
+paths: ["**/*.test.*", "**/*.spec.*", "tests/**", "**/__tests__/**"]
 ---
 
 # Reglas de Testing
@@ -152,7 +152,7 @@ globs: ["**/*.test.*", "**/*.spec.*", "tests/**", "**/__tests__/**"]
 
 ```markdown
 ---
-globs: ["migrations/**", "src/models/**", "alembic/**", "prisma/**"]
+paths: ["migrations/**", "src/models/**", "alembic/**", "prisma/**"]
 ---
 
 # Reglas Base de Datos
@@ -172,9 +172,9 @@ globs: ["migrations/**", "src/models/**", "alembic/**", "prisma/**"]
 
 ---
 
-## Reglas sin Globs
+## Reglas sin Paths
 
-Si un archivo en `rules/` no tiene frontmatter con globs,
+Si un archivo en `rules/` no tiene frontmatter con paths,
 se carga **siempre** (como si estuviera en CLAUDE.md):
 
 ```markdown
@@ -203,6 +203,6 @@ se carga **siempre** (como si estuviera en CLAUDE.md):
 
 1. **CLAUDE.md global**: Solo reglas universales (<50 líneas)
 2. **Rules por dominio**: frontend, backend, testing, infra
-3. **Globs precisos**: No usar `**/*` (cargaría siempre)
+3. **Paths precisos**: No usar `**/*` (cargaría siempre)
 4. **Revisar periódicamente**: Eliminar reglas obsoletas
 5. **Versionado**: Commitear rules/ al repo (excepto local)

@@ -97,7 +97,6 @@ Lo más específico tiene prioridad sobre lo más general.
 | **Project** | `./CLAUDE.md` o `./.claude/CLAUDE.md` | Instrucciones del equipo | Todo el equipo (via Git) |
 | **Project rules** | `./.claude/rules/*.md` | Reglas modulares por tema | Todo el equipo (via Git) |
 | **User** | `~/.claude/CLAUDE.md` | Preferencias personales globales | Solo tú |
-| **Local** | `./CLAUDE.local.md` | Preferencias locales del proyecto | Solo tú (en `.gitignore`) |
 | **Auto memory** | `~/.claude/projects/<proyecto>/memory/` | Notas automáticas | Solo tú |
 
 ### Diagrama de precedencia
@@ -105,7 +104,6 @@ Lo más específico tiene prioridad sobre lo más general.
 ```
 Más específico (gana en conflictos)
   ^
-  |  CLAUDE.local.md          (tú, este proyecto)
   |  .claude/rules/*.md       (equipo, reglas modulares)
   |  CLAUDE.md del proyecto   (equipo, instrucciones generales)
   |  ~/.claude/CLAUDE.md      (tú, todos los proyectos)
@@ -116,8 +114,8 @@ Más general
 
 Cuando hay un conflicto entre niveles, **el más específico gana**. Por ejemplo:
 
-- Si tu `CLAUDE.md` de proyecto dice "usa tabs" pero tu `CLAUDE.local.md` dice "usa espacios",
-  Claude usará espacios (porque `local` es más específico).
+- Si tu `CLAUDE.md` de proyecto dice "usa tabs" pero una regla en `.claude/rules/` dice
+  "usa espacios", Claude usará espacios (porque las reglas modulares son más específicas).
 - Si la política de la organización dice "no hagas push directo a main" y tu `CLAUDE.md` no
   dice nada al respecto, la política se aplica.
 
@@ -145,11 +143,10 @@ Cuando hay un conflicto entre niveles, **el más específico gana**. Por ejemplo
 - Estilo personal de commits.
 - Aplica a TODOS tus proyectos.
 
-**Local** (`./CLAUDE.local.md`):
-- Rutas específicas de tu máquina (ej: path a un SDK).
-- Variables de entorno locales.
-- Overrides personales para este proyecto.
-- Se añade a `.gitignore`, no se comparte.
+**Preferencias locales personales**:
+- Para preferencias locales que no se comparten, usar `.claude/settings.local.json`.
+- Para instrucciones personales más extensas, crear un fichero personal e importarlo
+  desde CLAUDE.md con `@~/.claude/mis-preferencias.md`.
 
 ---
 
@@ -161,8 +158,7 @@ Al iniciar una sesión, Claude Code:
 2. Busca y carga `~/.claude/CLAUDE.md` (si existe).
 3. Busca y carga `./CLAUDE.md` o `./.claude/CLAUDE.md` (si existe).
 4. Busca y carga todos los archivos en `./.claude/rules/` (si existen).
-5. Busca y carga `./CLAUDE.local.md` (si existe).
-6. Carga las primeras 200 líneas de la auto memory del proyecto.
+5. Carga las primeras 200 líneas de la auto memory del proyecto.
 
 Todo esto se incorpora al contexto inicial de la sesión. Las reglas con filtro de ruta
 (path-specific) se activan solo cuando Claude trabaja con archivos que coinciden con el
@@ -193,7 +189,7 @@ Las rutas pueden ser relativas (al archivo que importa) o absolutas. Esto es út
 |----------|-----------|
 | Quiero que todo el equipo siga las mismas reglas | `./CLAUDE.md` + `.claude/rules/` |
 | Quiero mis preferencias personales en todos los proyectos | `~/.claude/CLAUDE.md` |
-| Quiero un override local que no se suba a Git | `./CLAUDE.local.md` |
+| Quiero un override local que no se suba a Git | `.claude/settings.local.json` o importar `@~/.claude/mis-preferencias.md` |
 | Quiero que Claude recuerde cosas automáticamente | Auto memory (por defecto) |
 | Quiero que cierta regla solo aplique a archivos `.tsx` | `.claude/rules/` con frontmatter de paths |
 | Quiero políticas de organización obligatorias | `/etc/claude-code/CLAUDE.md` |

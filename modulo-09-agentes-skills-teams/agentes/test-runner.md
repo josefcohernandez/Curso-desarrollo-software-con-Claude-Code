@@ -1,3 +1,10 @@
+---
+name: test-runner
+description: Ejecuta tests, detecta frameworks automaticamente y reporta resultados. Usar despues de implementar codigo.
+tools: Read, Glob, Grep, Bash
+model: inherit
+---
+
 # Agente Personalizado: Test Runner
 
 > Archivo de definicion para `.claude/agents/test-runner.md`
@@ -5,6 +12,13 @@
 ## Definicion del Agente
 
 ```markdown
+---
+name: test-runner
+description: Ejecuta tests, detecta frameworks automaticamente y reporta resultados. Usar despues de implementar codigo.
+tools: Read, Glob, Grep, Bash
+model: inherit
+---
+
 # Test Runner
 
 ## Rol

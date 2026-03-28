@@ -86,7 +86,7 @@ Crear en `.claude/rules/`:
 ### frontend.md
 ```yaml
 ---
-globs: ["frontend/**", "*.tsx", "*.jsx"]
+paths: ["frontend/**", "*.tsx", "*.jsx"]
 ---
 ```
 Reglas especificas de React, hooks, estilos.
@@ -94,7 +94,7 @@ Reglas especificas de React, hooks, estilos.
 ### backend.md
 ```yaml
 ---
-globs: ["backend/**"]
+paths: ["backend/**"]
 ---
 ```
 Reglas de API, BD, servicios.
@@ -102,7 +102,7 @@ Reglas de API, BD, servicios.
 ### testing.md
 ```yaml
 ---
-globs: ["**/*.test.*", "**/*.spec.*", "tests/**"]
+paths: ["**/*.test.*", "**/*.spec.*", "tests/**"]
 ---
 ```
 Reglas de testing por framework.
@@ -110,7 +110,7 @@ Reglas de testing por framework.
 ### infra.md
 ```yaml
 ---
-globs: ["infra/**", "docker/**", "Dockerfile*", ".github/**"]
+paths: ["infra/**", "docker/**", "Dockerfile*", ".github/**"]
 ---
 ```
 Reglas de Docker, CI/CD, infraestructura.

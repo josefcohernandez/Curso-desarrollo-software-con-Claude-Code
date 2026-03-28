@@ -33,13 +33,21 @@ Aprender a diseñar, crear y utilizar skills personalizados en Claude Code. Crea
    # Debería mostrar: skills/
    ```
 
+> **Importante:** Cada skill es un **directorio** con un archivo `SKILL.md` como entrypoint, no un fichero plano. La estructura correcta es `.claude/skills/nombre-skill/SKILL.md`.
+
 ---
 
 ## Parte 2: Crear un Skill Básico de Despliegue
 
 ### Instrucciones
 
-1. Crea el archivo `.claude/skills/deploy-staging.md` con el siguiente contenido:
+1. Crea el directorio del skill y su archivo `SKILL.md`:
+
+   ```bash
+   mkdir -p .claude/skills/deploy-staging
+   ```
+
+   Crea el archivo `.claude/skills/deploy-staging/SKILL.md` con el siguiente contenido:
 
    ```markdown
    ---
@@ -121,7 +129,13 @@ Aprender a diseñar, crear y utilizar skills personalizados en Claude Code. Crea
 
 ### Instrucciones
 
-1. Crea el archivo `.claude/skills/crear-componente.md`:
+1. Crea el directorio del skill y su archivo `SKILL.md`:
+
+   ```bash
+   mkdir -p .claude/skills/crear-componente
+   ```
+
+   Crea el archivo `.claude/skills/crear-componente/SKILL.md`:
 
    ```markdown
    ---
@@ -212,7 +226,13 @@ Aprender a diseñar, crear y utilizar skills personalizados en Claude Code. Crea
 
 ### Instrucciones
 
-1. Crea el archivo `.claude/skills/analizar-dependencias.md`:
+1. Crea el directorio del skill y su archivo `SKILL.md`:
+
+   ```bash
+   mkdir -p .claude/skills/analizar-dependencias
+   ```
+
+   Crea el archivo `.claude/skills/analizar-dependencias/SKILL.md`:
 
    ```markdown
    ---
@@ -294,7 +314,13 @@ Aprender a diseñar, crear y utilizar skills personalizados en Claude Code. Crea
 
 ### Instrucciones
 
-1. Crea el archivo `.claude/skills/checklist-pr.md`:
+1. Crea el directorio del skill y su archivo `SKILL.md`:
+
+   ```bash
+   mkdir -p .claude/skills/checklist-pr
+   ```
+
+   Crea el archivo `.claude/skills/checklist-pr/SKILL.md`:
 
    ```markdown
    ---
@@ -374,4 +400,4 @@ Responde a estas preguntas:
 >
 > 3. **`disable-model-invocation: true`**: Para checklists de referencia, guías de estilo, documentación de procedimientos que el humano sigue manualmente (no necesita que Claude los ejecute).
 >
-> 4. **Organización políglota**: Crear skills con prefijo de lenguaje o en subdirectorios (`python-deploy.md`, `node-deploy.md`, etc.) o usar argumentos: `/deploy python`, `/deploy node`.
+> 4. **Organización políglota**: Crear skills con prefijo de lenguaje (`python-deploy/SKILL.md`, `node-deploy/SKILL.md`, etc.) o usar argumentos: `/deploy python`, `/deploy node`.

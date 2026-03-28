@@ -1,17 +1,18 @@
 # 03 - Hooks de Seguridad
 
-## PreToolUse como Guardián
+## PreToolUse como Guardian
 
 El evento **PreToolUse** es la herramienta principal de seguridad:
-- Se ejecuta **antes** de cada operación
-- Si el script retorna **exit 1**, la operación se **bloquea**
+- Se ejecuta **antes** de cada operacion
+- Si el script retorna **exit 2**, la operacion se **bloquea**
+- Si el script retorna **exit 1** u otro codigo distinto de 0 y 2, la operacion **no se bloquea** (solo se muestra en modo verbose)
 - Puede validar comandos, archivos y patrones
 
 ---
 
 ## Hook: Validar Comandos Bash
 
-Bloquear comandos peligrosos que no están en la lista de deny:
+Bloquear comandos peligrosos que no estan en la lista de deny:
 
 ```json
 {
@@ -19,7 +20,12 @@ Bloquear comandos peligrosos que no están en la lista de deny:
     "PreToolUse": [
       {
         "matcher": "Bash",
-        "command": "/ruta/a/validate-bash.sh"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/ruta/a/validate-bash.sh"
+          }
+        ]
       }
     ]
   }
@@ -29,7 +35,8 @@ Bloquear comandos peligrosos que no están en la lista de deny:
 ```bash
 #!/bin/bash
 # validate-bash.sh
-COMMAND="$TOOL_INPUT"
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
 
 # Patrones peligrosos
 DANGEROUS_PATTERNS=(
@@ -46,8 +53,8 @@ DANGEROUS_PATTERNS=(
 
 for pattern in "${DANGEROUS_PATTERNS[@]}"; do
     if echo "$COMMAND" | grep -qiF "$pattern"; then
-        echo "BLOQUEADO: Comando peligroso detectado: $pattern"
-        exit 1
+        echo "BLOQUEADO: Comando peligroso detectado: $pattern" >&2
+        exit 2
     fi
 done
 
@@ -61,7 +68,8 @@ exit 0
 ```bash
 #!/bin/bash
 # protect-files.sh
-FILEPATH="$FILEPATH"
+INPUT=$(cat)
+FILEPATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
 
 PROTECTED_PATTERNS=(
     ".env"
@@ -76,8 +84,8 @@ PROTECTED_PATTERNS=(
 
 for pattern in "${PROTECTED_PATTERNS[@]}"; do
     if echo "$FILEPATH" | grep -qi "$pattern"; then
-        echo "BLOQUEADO: Archivo protegido: $FILEPATH"
-        exit 1
+        echo "BLOQUEADO: Archivo protegido: $FILEPATH" >&2
+        exit 2
     fi
 done
 
@@ -86,16 +94,20 @@ exit 0
 
 ---
 
-## Hook: Auditoría de Operaciones
+## Hook: Auditoria de Operaciones
 
-Registrar todas las operaciones para revisión posterior:
+Registrar todas las operaciones para revision posterior:
 
 ```bash
 #!/bin/bash
 # audit-log.sh
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty')
+FILEPATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+
 LOG_FILE="${HOME}/.claude/audit.log"
 
-echo "$(date -Iseconds) | USER=${USER} | TOOL=${TOOL_NAME} | FILE=${FILEPATH}" >> "$LOG_FILE"
+echo "$(date -Iseconds) | USER=${USER} | TOOL=${TOOL_NAME} | FILE=${FILEPATH:-N/A}" >> "$LOG_FILE"
 ```
 
 ### Formato del log
@@ -113,14 +125,15 @@ echo "$(date -Iseconds) | USER=${USER} | TOOL=${TOOL_NAME} | FILE=${FILEPATH}" >
 ```bash
 #!/bin/bash
 # check-project-boundary.sh
+INPUT=$(cat)
+FILEPATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
 PROJECT_ROOT="/home/user/mi-proyecto"
-FILEPATH="$FILEPATH"
 
 if [ -n "$FILEPATH" ]; then
     REAL_PATH=$(realpath "$FILEPATH" 2>/dev/null || echo "$FILEPATH")
     if [[ "$REAL_PATH" != "$PROJECT_ROOT"* ]]; then
-        echo "BLOQUEADO: Acceso fuera del proyecto: $FILEPATH"
-        exit 1
+        echo "BLOQUEADO: Acceso fuera del proyecto: $FILEPATH" >&2
+        exit 2
     fi
 fi
 
@@ -133,12 +146,12 @@ exit 0
 
 > **Novedad v3.2 (v2.1.85)**
 
-Los hooks `PreToolUse` ahora pueden **satisfacer automáticamente** la herramienta `AskUserQuestion` devolviendo `updatedInput` junto con `permissionDecision: "allow"`. Esto permite que integraciones headless (CI/CD, pipelines automatizados, agentes remotos) respondan a preguntas de Claude sin intervención humana.
+Los hooks `PreToolUse` ahora pueden **satisfacer automaticamente** la herramienta `AskUserQuestion` devolviendo `updatedInput` junto con `permissionDecision: "allow"`. Esto permite que integraciones headless (CI/CD, pipelines automatizados, agentes remotos) respondan a preguntas de Claude sin intervencion humana.
 
 ```bash
 #!/bin/bash
 # auto-responder-headless.sh
-# Responde automáticamente a AskUserQuestion en entornos headless
+# Responde automaticamente a AskUserQuestion en entornos headless
 
 INPUT=$(cat)
 TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
@@ -146,9 +159,9 @@ TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
 if [ "$TOOL_NAME" = "AskUserQuestion" ]; then
   QUESTION=$(echo "$INPUT" | jq -r '.tool_input.question // empty')
 
-  # Responder automáticamente según el patrón de la pregunta
+  # Responder automaticamente segun el patron de la pregunta
   if echo "$QUESTION" | grep -qi "continuar"; then
-    echo '{"permissionDecision":"allow","updatedInput":"Sí, continúa con la implementación."}'
+    echo '{"permissionDecision":"allow","updatedInput":"Si, continua con la implementacion."}'
     exit 0
   fi
 fi
@@ -157,7 +170,7 @@ fi
 exit 0
 ```
 
-Configuración:
+Configuracion:
 
 ```json
 {
@@ -165,50 +178,50 @@ Configuración:
     "PreToolUse": [
       {
         "matcher": "AskUserQuestion",
-        "command": "/scripts/auto-responder-headless.sh"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/scripts/auto-responder-headless.sh"
+          }
+        ]
       }
     ]
   }
 }
 ```
 
-Esto es especialmente útil en combinación con el modo no interactivo (`claude -p`) donde no hay un usuario para responder preguntas.
+Esto es especialmente util en combinacion con el modo no interactivo (`claude -p`) donde no hay un usuario para responder preguntas.
 
 ---
 
 ## Riesgos de Hooks Mal Configurados
 
-| Riesgo | Consecuencia | Prevención |
+| Riesgo | Consecuencia | Prevencion |
 |--------|-------------|-----------|
-| Hook lento | Bloquea cada operación | Timeout, async cuando posible |
+| Hook lento | Bloquea cada operacion | Timeout, async cuando posible |
 | Hook con bug | Bloquea todo | Probar hooks aislados |
-| Hook que expone datos | Log con secrets | No loggear TOOL_INPUT completo |
-| Hook sin exit 0 | Bloquea operaciones válidas | Siempre exit 0 al final |
+| Hook que expone datos | Log con secrets | No loggear tool_input completo |
+| Hook sin exit 0 | Bloquea operaciones validas si retorna exit 2 | Siempre exit 0 al final |
 | Hook recursivo | Loop infinito | No llamar Claude desde hooks |
 
 ---
 
 ## Testing de Hooks
 
-Antes de activar un hook, pruébalo aislado:
+Antes de activar un hook, pruebalo aislado. Dado que los hooks reciben datos via stdin (JSON), se deben simular con un pipe:
 
 ```bash
-# Simular variables
-export FILEPATH="src/auth.ts"
-export TOOL_NAME="Write"
-
-# Ejecutar
-bash hook-protect-files.sh
+# Simular datos de entrada como JSON via stdin
+echo '{"tool_name":"Write","tool_input":{"file_path":"src/auth.ts"}}' | bash hook-protect-files.sh
 echo "Exit code: $?"   # Debe ser 0 (no protegido)
 
-export FILEPATH=".env.production"
-bash hook-protect-files.sh
-echo "Exit code: $?"   # Debe ser 1 (protegido)
+echo '{"tool_name":"Write","tool_input":{"file_path":".env.production"}}' | bash hook-protect-files.sh
+echo "Exit code: $?"   # Debe ser 2 (protegido, bloqueado)
 ```
 
 ---
 
-## Configuración Recomendada de Seguridad
+## Configuracion Recomendada de Seguridad
 
 ```json
 {
@@ -216,21 +229,41 @@ echo "Exit code: $?"   # Debe ser 1 (protegido)
     "PreToolUse": [
       {
         "matcher": "Bash",
-        "command": "/scripts/validate-bash.sh"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/scripts/validate-bash.sh"
+          }
+        ]
       },
       {
         "matcher": "Write",
-        "command": "/scripts/protect-files.sh"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/scripts/protect-files.sh"
+          }
+        ]
       },
       {
         "matcher": "Edit",
-        "command": "/scripts/protect-files.sh"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/scripts/protect-files.sh"
+          }
+        ]
       }
     ],
     "PostToolUse": [
       {
-        "command": "/scripts/audit-log.sh",
-        "async": true
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/scripts/audit-log.sh",
+            "async": true
+          }
+        ]
       }
     ]
   }

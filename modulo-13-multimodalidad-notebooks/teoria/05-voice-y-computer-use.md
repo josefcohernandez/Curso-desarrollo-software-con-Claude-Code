@@ -152,6 +152,8 @@ Remote Control requiere Claude Code v2.1.51 o superior y autenticación con cuen
 
 ### Computer Use: control del entorno a nivel de sistema operativo
 
+> **Nota**: Computer Use es una capacidad de **Claude Cowork** (no de Claude Code directamente). Está disponible como research preview, actualmente solo en **macOS**. Claude Cowork permite a Claude interactuar con el escritorio (ratón, teclado, navegador), mientras que Claude Code está enfocado en el terminal y editor de código. Ambos productos comparten la base de Claude pero tienen interfaces y capacidades distintas.
+
 Computer Use es la capacidad de Claude para interactuar con el entorno gráfico del sistema operativo: mover el ratón, hacer clicks, escribir en campos de texto, abrir aplicaciones y usar el navegador. Mientras que Claude Code opera dentro del terminal (ejecuta comandos, edita ficheros, llama a APIs), Computer Use opera a nivel de pantalla, igual que lo haría un usuario humano frente al escritorio.
 
 | Ámbito | Claude Code (herramientas normales) | Computer Use |
@@ -163,7 +165,9 @@ Computer Use es la capacidad de Claude para interactuar con el entorno gráfico 
 
 ### Combinar Remote Control con Computer Use
 
-La combinación más potente es enviar instrucciones desde el móvil mientras Claude ejecuta tareas en el escritorio de tu laptop usando Computer Use. Puedes estar en una reunión, ver que hay un fallo en el pipeline de CI, dictar la instrucción desde el móvil y que Claude abra el navegador, navegue hasta la interfaz de CI, identifique el error y aplique el fix, todo en el desktop.
+> **Importante**: Remote Control es una funcionalidad de Claude Code, mientras que Computer Use es una funcionalidad de Claude Cowork (solo macOS). Son productos distintos que pueden complementarse pero no están integrados directamente en un mismo flujo. Remote Control permite controlar tu sesión de Claude Code en el terminal desde otro dispositivo; Computer Use permite a Claude Cowork interactuar con la interfaz gráfica del escritorio.
+
+La combinación conceptual más potente sería enviar instrucciones desde el móvil mientras Claude ejecuta tareas en el escritorio de tu laptop. En la práctica, Remote Control te permite continuar usando Claude Code desde otro dispositivo para tareas de terminal, y Computer Use (vía Claude Cowork, solo macOS) permite interactuar con la UI del escritorio de forma independiente.
 
 ### Cómo iniciar una sesión Remote Control
 
@@ -309,8 +313,8 @@ El proceso local se cerró o hubo un corte de red de más de ~10 minutos. Vuelve
 - El dictado soporta 20 idiomas; usa el ajuste `language` en los settings de usuario o en `/config`
 - Para eliminar el calentamiento de `Space`, reasigna el keybinding a una combinación con modificador como `meta+k` en `~/.claude/keybindings.json`
 - Remote Control conecta una sesión local con claude.ai/code o la app móvil de Claude sin mover el código a la nube
-- Computer Use opera a nivel de escritorio (ratón, teclado, navegador, UI gráfica), mientras que las herramientas normales de Claude Code operan dentro del terminal
-- La combinación Remote Control + Computer Use permite enviar instrucciones desde el móvil y que Claude actúe sobre la interfaz gráfica del desktop
+- Computer Use es una capacidad de **Claude Cowork** (no de Claude Code), disponible como research preview solo en **macOS**. Opera a nivel de escritorio (ratón, teclado, navegador, UI gráfica), mientras que las herramientas normales de Claude Code operan dentro del terminal
+- Remote Control (Claude Code) y Computer Use (Claude Cowork) son productos distintos que pueden complementarse pero no están integrados directamente
 - Remote Control solo hace peticiones HTTPS salientes; nunca abre puertos entrantes
 - Limitaciones clave: el terminal debe permanecer abierto, un corte de red de ~10 min expira la sesión, requiere cuenta claude.ai
 

@@ -12,8 +12,7 @@ La diferencia fundamental con los componentes individuales es que un plugin:
 
 - Los **agrupa** bajo un manifest con nombre, versión y autor
 - Los **distribuye** como una unidad indivisible: instalar el plugin instala todos sus componentes
-- Los **configura** de forma coherente con valores por defecto y opciones personalizables
-- Los **declara dependencias** entre ellos y con software externo (como un servidor MCP específico)
+- Los **descubre automáticamente** por la estructura de directorios: skills, hooks, agentes y servidores MCP no se declaran en el manifest
 
 Dicho de otro modo: un skill resuelve una tarea, un hook intercepta un evento, un subagente delega trabajo. Un plugin organiza todos esos elementos en un paquete listo para usar sin configuración manual.
 
@@ -29,146 +28,115 @@ Un plugin reside en una carpeta con la siguiente estructura:
 
 ```
 mi-plugin/
-├── plugin.json          # Manifest obligatorio
+├── .claude-plugin/
+│   └── plugin.json      # Manifest obligatorio
 ├── skills/
-│   └── deploy.md        # Uno o más archivos SKILL.md
+│   └── mi-skill/
+│       └── SKILL.md     # Uno o más skills (descubiertos automáticamente)
 ├── agents/
 │   └── revisor.md       # Uno o más subagentes (.md con frontmatter)
 ├── hooks/
-│   └── pre-deploy.sh    # Uno o más scripts de hook
+│   └── hooks.json       # Configuración de hooks del plugin
+├── commands/             # Comandos personalizados (opcional)
 └── README.md            # Documentación del plugin (recomendado)
 ```
 
-No todos los directorios son obligatorios. Un plugin mínimo puede contener solo `plugin.json` y un subdirectorio con un componente.
+No todos los directorios son obligatorios. Un plugin mínimo puede contener solo `.claude-plugin/plugin.json` y un subdirectorio con un componente. Los componentes (skills, agents, hooks, MCP servers) se descubren automáticamente por la estructura de directorios, no se declaran en el manifest.
 
-### El manifest `plugin.json`
+### El manifest `.claude-plugin/plugin.json`
 
-El manifest es el único fichero obligatorio. Define la identidad y el contenido del plugin:
+El manifest es el único fichero obligatorio. Reside dentro del directorio `.claude-plugin/` y define únicamente la identidad del plugin con un formato muy simple:
 
 ```json
 {
   "name": "deploy-safe",
-  "version": "1.2.0",
   "description": "Flujo de deploy seguro con validaciones pre-deploy y skill de rollback",
-  "author": "equipo-plataforma@empresa.com",
-  "license": "MIT",
-  "dependencies": {
-    "mcp": ["@modelcontextprotocol/server-github"],
-    "tools": ["git", "docker"]
-  },
-  "configuration": {
-    "environment": {
-      "type": "string",
-      "enum": ["staging", "production"],
-      "default": "staging",
-      "description": "Entorno de destino del deploy"
-    },
-    "notify_slack": {
-      "type": "boolean",
-      "default": false,
-      "description": "Enviar notificación a Slack tras el deploy"
-    }
-  },
-  "components": {
-    "skills": ["skills/deploy.md"],
-    "agents": ["agents/revisor.md"],
-    "hooks": [
-      {
-        "file": "hooks/pre-deploy.sh",
-        "event": "PreToolUse",
-        "matcher": "Bash"
-      }
-    ]
-  }
+  "version": "1.2.0",
+  "author": "equipo-plataforma@empresa.com"
 }
 ```
 
-Los campos `name`, `version` y `description` son obligatorios. El resto es opcional pero recomendado para plugins que se van a compartir.
+El manifest solo contiene estos cuatro campos: `name`, `description`, `version` y `author`. Los componentes del plugin (skills, hooks, agentes, servidores MCP) se descubren automáticamente por la estructura de directorios; no se declaran en el manifest.
 
 ---
 
 ## Ámbitos de Instalación
 
-Cuando instalas un plugin, debes elegir en qué ámbito aplica:
+Los plugins se instalan a nivel de usuario por defecto. Para plugins de proyecto, se incluyen como parte del repositorio (commiteando la carpeta del plugin).
 
-| Ámbito | Dónde se guarda | Quién lo usa |
-|--------|-----------------|--------------|
-| `project` | `.claude/plugins/` del proyecto | Solo los miembros de ese repositorio |
-| `user` | `~/.claude/plugins/` | Tu usuario en todos los proyectos |
-| `managed` | Gestionado por el administrador enterprise | Todos los usuarios de la organización |
+| Ámbito | Descripción |
+|--------|-------------|
+| Usuario | Instalado con `claude plugin install`. Disponible para tu usuario en todos los proyectos |
+| Proyecto | El plugin reside dentro del repositorio. Todos los miembros del equipo lo usan al clonar |
+| Managed (enterprise) | Gestionado por el administrador enterprise. Los usuarios no pueden desinstalarlo |
 
-**Usar `project` scope** cuando el plugin es específico del repositorio (por ejemplo, un plugin de deploy que solo aplica a ese servicio). El directorio `.claude/plugins/` debe commitearse al repositorio para que el equipo comparta la instalación.
+**Para plugins de usuario**, usa `claude plugin install <nombre>@<marketplace>`. Útil para plugins de productividad personal.
 
-**Usar `user` scope** cuando el plugin mejora tu flujo de trabajo personal en cualquier proyecto (por ejemplo, un plugin de productividad con tus atajos preferidos).
+**Para plugins de proyecto**, incluye la carpeta del plugin en el repositorio y commitéala. Todos los que clonen el repo tendrán el plugin disponible.
 
-**El ámbito `managed`** solo es gestionable por administradores enterprise. Los usuarios no pueden instalar ni desinstalar plugins managed; solo pueden usarlos.
+**El ámbito managed** solo es gestionable por administradores enterprise. Los usuarios no pueden instalar ni desinstalar plugins managed; solo pueden usarlos.
 
 ---
 
 ## Ciclo de Vida de un Plugin
 
 ```
-instalar  -->  configurar  -->  usar  -->  actualizar  -->  desinstalar
-    |               |             |             |                |
-/plugin install  Rellenar      Invocar       /plugin update   /plugin remove
-<nombre>         opciones de   skills,       <nombre>         <nombre>
-                 configuración hooks se
-                 (si las hay)  activan
-                               automáticamente
+instalar  -->  usar  -->  actualizar  -->  desinstalar
+    |             |             |                |
+claude         Invocar       claude plugin    claude plugin
+plugin         skills con    install (nueva   remove <nombre>
+install        /plugin-name  versión)
+<nombre>@      :skill-name,
+<marketplace>  hooks se
+               activan
+               automáticamente
 ```
 
 ### Instalar
 
 ```bash
-# Desde el marketplace público
-/plugin install deploy-safe
+# Desde el marketplace oficial de Anthropic
+claude plugin install deploy-safe@claude-plugins-official
 
-# Con ámbito explícito
-/plugin install deploy-safe --scope project
+# Desde un marketplace de terceros
+claude plugin install deploy-safe@mi-org-marketplace
 
-# Desde una URL o ruta local (plugins privados o en desarrollo)
-/plugin install ./mi-plugin-local
-/plugin install https://github.com/mi-org/mi-plugin
+# Para desarrollo local (cargar plugin sin instalar)
+claude --plugin-dir ./mi-plugin
 ```
 
-### Configurar
-
-Si el plugin declara campos de `configuration` en su manifest, Claude Code te pedirá los valores durante la instalación o puedes editarlos después:
-
-```bash
-/plugin configure deploy-safe
-```
-
-Los valores de configuración se guardan en el mismo ámbito que la instalación y se pasan como variables de entorno o argumentos a los componentes del plugin.
+> **Nota:** No existen los flags `--scope user` ni `--scope project`. Los plugins se instalan a nivel de usuario por defecto. Para plugins de proyecto, se incluyen como parte del repositorio.
 
 ### Usar
 
 Una vez instalado, los componentes del plugin están disponibles de forma inmediata:
 
-- Los **skills** se pueden invocar por nombre: `@deploy-safe/deploy`
+- Los **skills** se pueden invocar por nombre: `/deploy-safe:deploy`
 - Los **hooks** se activan automáticamente según el evento configurado
 - Los **subagentes** aparecen disponibles en el contexto de la sesión
 
-### Actualizar y Desinstalar
+### Gestionar plugins
 
 ```bash
 # Ver plugins instalados
-/plugin list
+claude plugin list
 
-# Actualizar a la última versión
-/plugin update deploy-safe
+# Explorar marketplace y plugins (interfaz interactiva con pestañas)
+/plugin
 
 # Desinstalar
-/plugin remove deploy-safe
+claude plugin remove deploy-safe
 ```
+
+La interfaz interactiva `/plugin` ofrece pestañas para navegar: **Discover** (explorar plugins disponibles), **Installed** (ver los instalados), **Marketplaces** (gestionar fuentes) y **Errors** (diagnosticar problemas).
 
 ---
 
 ## Errores Comunes
 
-**Confundir el ámbito `user` con el ámbito `project`.** Un plugin instalado con ámbito `user` no aparece en `.claude/plugins/` del repositorio. Si quieres que tu equipo use el mismo plugin sin instalar manualmente, usa ámbito `project` y commitea la carpeta `.claude/plugins/`.
+**Confundir la instalación de usuario con plugins de proyecto.** Un plugin instalado con `claude plugin install` es de usuario y no aparece en el repositorio. Si quieres que tu equipo use el mismo plugin sin instalar manualmente, incluye la carpeta del plugin en el repositorio y commitéala.
 
-**No commitear `.claude/plugins/` en el repositorio.** Si instalas un plugin con ámbito `project` pero no lo incluyes en el commit, los demás miembros del equipo no lo tendrán. Verifica que `.claude/plugins/` está trackeado por git.
+**Usar comandos inexistentes.** No existen `/plugin install`, `/plugin search`, `/plugin info` ni `/plugin configure` como comandos individuales. El CLI oficial usa `claude plugin install <nombre>@<marketplace>`, `claude plugin list` y `claude plugin remove <nombre>`. Para explorar el marketplace, usa `/plugin` (interfaz interactiva con pestañas).
 
 **Asumir que los hooks del plugin tienen permisos ilimitados.** Los hooks de un plugin siguen las mismas restricciones de permisos que cualquier hook. Si el hook necesita ejecutar comandos que no están en la lista permitida, Claude Code pedirá confirmación o bloqueará la ejecución.
 
@@ -177,7 +145,9 @@ Una vez instalado, los componentes del plugin están disponibles de forma inmedi
 ## Resumen
 
 - Un plugin es un bundle que agrupa skills, hooks, subagentes y servidores MCP en una unidad distribuible con manifest
-- La diferencia con los componentes individuales es que el plugin los empaqueta, versiona y configura juntos
-- La estructura mínima es `plugin.json` (manifest obligatorio) más al menos un componente
-- Existen tres ámbitos: `project` (por repositorio), `user` (por usuario) y `managed` (enterprise)
-- El ciclo de vida es: instalar → configurar → usar → actualizar → desinstalar
+- La diferencia con los componentes individuales es que el plugin los empaqueta y versiona juntos
+- La estructura mínima es `.claude-plugin/plugin.json` (manifest con 4 campos: name, description, version, author) más al menos un componente
+- Los componentes se descubren automáticamente por la estructura de directorios; no se declaran en el manifest
+- Los plugins se instalan a nivel de usuario con `claude plugin install`. Para plugins de proyecto, se incluyen en el repositorio
+- El ciclo de vida es: instalar → usar → actualizar → desinstalar
+- Para desarrollo local se usa `claude --plugin-dir ./ruta`

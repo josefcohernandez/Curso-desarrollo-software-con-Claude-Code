@@ -1,25 +1,28 @@
 #!/bin/bash
 # hook-block-protected.sh
 # Hook PreToolUse: Bloquear escritura en archivos/directorios protegidos
-# Exit 1 = bloquear, Exit 0 = permitir
+# Exit 2 = bloquear (blocking error), Exit 0 = permitir
 #
 # Uso en settings.json:
 # {
 #   "hooks": {
 #     "PreToolUse": [
 #       {
-#         "matcher": "Write",
-#         "command": "./scripts/hook-block-protected.sh"
-#       },
-#       {
-#         "matcher": "Edit",
-#         "command": "./scripts/hook-block-protected.sh"
+#         "matcher": "Write|Edit",
+#         "hooks": [
+#           {
+#             "type": "command",
+#             "command": "./scripts/hook-block-protected.sh"
+#           }
+#         ]
 #       }
 #     ]
 #   }
 # }
 
-FILEPATH="$FILEPATH"
+# Leer datos del hook via JSON en stdin
+INPUT=$(cat)
+FILEPATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
 
 # Si no hay filepath, permitir (puede ser otro tipo de operacion)
 if [ -z "$FILEPATH" ]; then
@@ -45,9 +48,9 @@ PROTECTED_PATTERNS=(
 
 for pattern in "${PROTECTED_PATTERNS[@]}"; do
     if echo "$FILEPATH" | grep -qi "$pattern"; then
-        echo "BLOQUEADO: No se permite modificar archivo protegido: $FILEPATH"
-        echo "Patron detectado: $pattern"
-        exit 1
+        echo "BLOQUEADO: No se permite modificar archivo protegido: $FILEPATH" >&2
+        echo "Patron detectado: $pattern" >&2
+        exit 2
     fi
 done
 

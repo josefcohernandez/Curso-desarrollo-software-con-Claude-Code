@@ -32,7 +32,7 @@ Crea `.claude/rules/frontend.md`:
 
 ```markdown
 ---
-globs: ["src/frontend/**", "src/components/**", "*.tsx", "*.jsx"]
+paths: ["src/frontend/**", "src/components/**", "*.tsx", "*.jsx"]
 ---
 
 # Frontend Rules
@@ -51,7 +51,7 @@ Crea `.claude/rules/backend.md`:
 
 ```markdown
 ---
-globs: ["src/api/**", "src/services/**", "src/models/**"]
+paths: ["src/api/**", "src/services/**", "src/models/**"]
 ---
 
 # Backend Rules
@@ -70,7 +70,7 @@ Crea `.claude/rules/testing.md`:
 
 ```markdown
 ---
-globs: ["tests/**", "**/*.test.*", "**/*.spec.*"]
+paths: ["tests/**", "**/*.test.*", "**/*.spec.*"]
 ---
 
 # Testing Rules
@@ -89,7 +89,7 @@ Crea `.claude/rules/infra.md`:
 
 ```markdown
 ---
-globs: ["infra/**", "docker/**", "Dockerfile*", "docker-compose*", ".github/**"]
+paths: ["infra/**", "docker/**", "Dockerfile*", "docker-compose*", ".github/**"]
 ---
 
 # Infrastructure Rules
@@ -146,7 +146,7 @@ Compara tokens con y sin reglas modulares:
 ## Criterios de Completitud
 
 - [ ] 4 archivos de reglas creados en .claude/rules/
-- [ ] Cada uno con globs correctos en frontmatter YAML
+- [ ] Cada uno con paths correctos en frontmatter YAML
 - [ ] Verificado que frontend.md se aplica a archivos .tsx
 - [ ] Verificado que backend.md se aplica a archivos en src/api/
 - [ ] Verificado que testing.md se aplica a archivos .test.*

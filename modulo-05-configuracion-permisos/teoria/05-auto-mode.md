@@ -40,19 +40,21 @@ Sí → ejecuta  |  No → bloquea y notifica al usuario
 
 ---
 
-## Disponibilidad
+## Disponibilidad y requisitos de modelo
 
-Auto Mode está disponible actualmente como **research preview** en el plan **Team** de Claude.ai. Se está desplegando progresivamente hacia los planes **Enterprise** y la **API** de Anthropic.
+Auto Mode esta disponible actualmente como **research preview** en el plan **Team** de Claude.ai. Se esta desplegando progresivamente hacia los planes **Enterprise** y la **API** de Anthropic.
+
+**Requisito de modelo**: Auto Mode requiere **Claude Sonnet 4.6** o **Claude Opus 4.6** como minimo. Modelos anteriores no soportan el clasificador de seguridad necesario para este modo.
 
 | Plan | Auto Mode disponible |
 |------|---------------------|
 | Free | No |
 | Pro | No |
-| Team | Sí (research preview) |
+| Team | Si (research preview) |
 | Enterprise | En despliegue |
 | API | En despliegue |
 
-Al ser research preview, las capacidades y el comportamiento del clasificador pueden variar entre versiones. Consulta la documentación oficial de Anthropic para el estado actual.
+Al ser research preview, las capacidades y el comportamiento del clasificador pueden variar entre versiones. Consulta la documentacion oficial de Anthropic para el estado actual.
 
 ---
 
@@ -62,26 +64,27 @@ Al ser research preview, las capacidades y el comportamiento del clasificador pu
 
 Auto Mode se activa desde la configuración de la organización en Claude.ai. Los administradores del equipo pueden habilitarlo para todos los miembros o dejarlo como opción individual.
 
-### Activación mediante flag de CLI
+### Activacion mediante flag de CLI
 
 ```bash
-# Iniciar una sesión con Auto Mode activo
-claude --auto-mode
+# Iniciar una sesion con Auto Mode activo
+claude --permission-mode auto
+
+# Forma alternativa
+claude --enable-auto-mode
 
 # Equivalente en modo no interactivo (pipeline o CI controlado)
-claude -p "refactoriza el módulo de pagos eliminando código duplicado" --auto-mode
+claude -p "refactoriza el modulo de pagos eliminando codigo duplicado" --permission-mode auto
 ```
 
-### Activación en settings.json
+### Activacion en settings.json
 
-Para que Auto Mode sea el comportamiento por defecto en un proyecto o para el usuario, se puede persistir en la configuración:
+Para que Auto Mode sea el comportamiento por defecto en un proyecto o para el usuario, se configura como `defaultMode` dentro de `permissions`:
 
 ```json
 {
-  "autoMode": {
-    "enabled": true
-  },
   "permissions": {
+    "defaultMode": "auto",
     "allow": [
       "Read",
       "Glob",
@@ -100,14 +103,32 @@ Para que Auto Mode sea el comportamiento por defecto en un proyecto o para el us
 }
 ```
 
-### Desactivación durante una sesión activa
+### Personalizacion del clasificador
+
+El comportamiento del clasificador de seguridad se puede ajustar mediante las siguientes claves en `settings.json`:
+
+```json
+{
+  "autoMode": {
+    "environment": "development",
+    "allow": ["Edit(src/**)", "Bash(npm test*)"],
+    "soft_deny": ["Bash(git push*)", "Write(.env*)"]
+  }
+}
+```
+
+- `autoMode.environment`: Describe el entorno de trabajo para que el clasificador ajuste su nivel de cautela.
+- `autoMode.allow`: Acciones que el clasificador debe permitir sin analisis adicional.
+- `autoMode.soft_deny`: Acciones que el clasificador debe tratar con cautela extra (puede bloquearlas o pedir confirmacion).
+
+### Desactivacion durante una sesion activa
+
+Para cambiar de modo durante una sesion interactiva, usar `Shift+Tab` para ciclar entre los modos disponibles:
 
 ```bash
-# Desde el prompt interactivo de Claude Code
-/mode normal
-
-# O salir de la sesión y relanzar sin el flag
-claude  # sin --auto-mode
+# Shift+Tab cicla entre: default → acceptEdits → plan → auto → ...
+# O relanzar sin el flag
+claude  # sin --permission-mode auto
 ```
 
 ---
@@ -145,10 +166,10 @@ Cuando Claude Code trabaja con equipos de agentes (ver Módulo 09), el agente l�
 {
   "agents": {
     "lead": {
-      "autoMode": { "enabled": true }
+      "permissions": { "defaultMode": "auto" }
     },
     "teammates": {
-      "autoMode": { "enabled": false }
+      "permissions": { "defaultMode": "default" }
     }
   }
 }
@@ -181,7 +202,7 @@ claude "renombra getUserData a fetchUserProfile en todo el proyecto y actualiza 
 ### Con Auto Mode
 
 ```bash
-claude --auto-mode "renombra getUserData a fetchUserProfile en todo el proyecto y actualiza los tests"
+claude --permission-mode auto "renombra getUserData a fetchUserProfile en todo el proyecto y actualiza los tests"
 
 # Claude Code empieza y trabaja sin interrupciones:
 # Editando src/controllers/userController.ts...
@@ -239,10 +260,10 @@ Auto Mode es potente, pero hay contextos donde la confirmación manual es la opc
 **Confundir Auto Mode con `--dangerously-skip-permissions`**: El flag `--dangerously-skip-permissions` deshabilita toda verificación de permisos, incluyendo el clasificador. Auto Mode mantiene la verificación activa. Son opciones radicalmente distintas en términos de seguridad.
 
 ```bash
-# Auto Mode: autonomía con clasificador de seguridad activo
-claude --auto-mode "actualiza los snapshots de los tests"
+# Auto Mode: autonomia con clasificador de seguridad activo
+claude --permission-mode auto "actualiza los snapshots de los tests"
 
-# dangerously-skip-permissions: sin ninguna verificación (solo CI/CD controlado)
+# dangerously-skip-permissions: sin ninguna verificacion (solo CI/CD controlado)
 claude -p "ejecuta suite completa" --dangerously-skip-permissions
 ```
 

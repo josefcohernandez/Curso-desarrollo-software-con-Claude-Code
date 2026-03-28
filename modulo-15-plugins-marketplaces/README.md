@@ -7,7 +7,7 @@
 > **Prerequisitos:** Modulos 07 (MCP), 08 (Hooks), 09 (Subagentes y Skills)
 
 > [!WARNING]
-> **Estado del ecosistema de plugins:** El sistema de plugins de Claude Code está en fase temprana de desarrollo. Algunas funcionalidades descritas en este módulo (como el marketplace público, el comando `/plugin install` o la estructura exacta de `plugin.json`) pueden no estar disponibles en tu versión o funcionar de forma diferente a lo documentado aquí. El flag `--plugin-dir` para cargar plugins locales sí está disponible. Consulta la documentación oficial de tu versión para confirmar la disponibilidad de cada feature.
+> **Estado del ecosistema de plugins:** El sistema de plugins de Claude Code está en fase temprana de desarrollo. Algunas funcionalidades descritas en este módulo (como el marketplace público, el comando `claude plugin install` o la estructura exacta de `.claude-plugin/plugin.json`) pueden no estar disponibles en tu versión o funcionar de forma diferente a lo documentado aquí. El flag `--plugin-dir` para cargar plugins locales sí está disponible. Consulta la documentación oficial de tu versión para confirmar la disponibilidad de cada feature.
 
 ---
 
@@ -67,12 +67,14 @@ Al terminar este modulo seras capaz de:
 | Concepto | Descripcion |
 |----------|-------------|
 | Plugin | Bundle que agrupa skills, hooks, subagentes y/o servidores MCP en una unidad distribuible con manifest |
-| `plugin.json` | Manifest del plugin: nombre, version, dependencias, configuracion y componentes incluidos |
-| `/plugin` | Comando interactivo para explorar el marketplace, instalar y gestionar plugins |
-| Scope de plugin | Nivel de alcance de la instalacion: `project`, `user` o `managed` (enterprise) |
-| Marketplace privado | Repositorio interno de plugins de una organizacion, configurable en managed settings |
+| `.claude-plugin/plugin.json` | Manifest del plugin: nombre, version, autor y descripcion. Los componentes se descubren automaticamente por estructura de directorios |
+| `/plugin` | Comando interactivo con pestanas (Discover, Installed, Marketplaces, Errors) para explorar y gestionar plugins |
+| `claude plugin install` | Comando CLI para instalar plugins: `claude plugin install <nombre>@<marketplace>` |
+| `claude --plugin-dir` | Flag para cargar un plugin local durante desarrollo/testing |
+| Marketplace privado | Repositorio de plugins de una organizacion, configurable con `extraKnownMarketplaces` en settings |
 | `strictKnownMarketplaces` | Configuracion enterprise que limita las instalaciones a marketplaces aprobados |
-| Ciclo de vida | Secuencia: instalar -> configurar -> usar -> actualizar -> desinstalar |
+| `blockedMarketplaces` | Configuracion enterprise para bloquear fuentes de plugins especificas |
+| Ciclo de vida | Secuencia: instalar -> usar -> actualizar -> desinstalar |
 
 ---
 
@@ -84,18 +86,20 @@ Al terminar este modulo seras capaz de:
         |
         v
 2. EXPLORAR el marketplace
-   /plugin → buscar → evaluar permisos y reputacion
+   /plugin → navegar pestanas (Discover, Installed) → evaluar permisos y reputacion
         |
         v
-3. INSTALAR y PROBAR en un proyecto de prueba
-   Scope: project (no afecta a otros proyectos todavia)
+3. INSTALAR y PROBAR
+   claude plugin install <nombre>@<marketplace>
         |
         v
-4. PROMOVER a scope user si resulta util en varios proyectos
+4. Si no existe lo que necesitas:
+   CREAR plugin propio (teoria/03)
+   Probar localmente con: claude --plugin-dir ./mi-plugin
         |
         v
-5. Si no existe lo que necesitas:
-   CREAR plugin propio (teoria/03) → PUBLICAR (opcional)
+5. PUBLICAR (opcional)
+   Formulario web en platform.claude.com
         |
         v
 6. En contexto enterprise:
@@ -113,7 +117,7 @@ Este modulo es la capa de empaquetado y distribucion por encima de los component
 | Skills | [M09](../modulo-09-agentes-skills-teams/README.md) | Se incluyen en `skills/` del plugin |
 | Hooks | [M08](../modulo-08-hooks/README.md) | Se incluyen en `hooks/` del plugin |
 | Subagentes | [M09](../modulo-09-agentes-skills-teams/README.md) | Se incluyen en `agents/` del plugin |
-| MCP servers | [M07](../modulo-07-mcp/README.md) | Se declaran en `plugin.json` como dependencias |
+| MCP servers | [M07](../modulo-07-mcp/README.md) | Se descubren automaticamente en la estructura del plugin |
 
 ---
 

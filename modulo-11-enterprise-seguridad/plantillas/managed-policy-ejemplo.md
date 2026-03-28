@@ -1,7 +1,11 @@
 # Plantilla: Managed Policy para Enterprise
 
-> Los administradores colocan este archivo en `~/.claude/managed/settings.json`
-> de las maquinas de los desarrolladores. Los usuarios NO pueden sobreescribirlo.
+> Los administradores colocan este archivo en la ruta de managed settings del sistema operativo:
+> - Linux/WSL: `/etc/claude-code/managed-settings.json`
+> - macOS: `/Library/Application Support/ClaudeCode/managed-settings.json`
+> - Windows: `C:\Program Files\ClaudeCode\managed-settings.json`
+>
+> Este archivo requiere permisos de administrador y los usuarios NO pueden sobreescribirlo.
 
 ## Politica Restrictiva (Produccion/Regulado)
 
@@ -38,7 +42,7 @@
 
   "env": {
     "ANTHROPIC_MODEL": "claude-sonnet-4-6",
-    "DISABLE_NONESSENTIAL_TRAFFIC": "1"
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
   }
 }
 ```
@@ -60,34 +64,41 @@
   },
 
   "env": {
-    "DISABLE_NONESSENTIAL_TRAFFIC": "1"
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
   }
 }
 ```
 
 ## Como Desplegar
 
-### Opcion 1: Script de aprovisionamiento
+### Opcion 1: Script de aprovisionamiento (Linux/WSL)
 
 ```bash
 #!/bin/bash
 # deploy-managed-policy.sh
-MANAGED_DIR="$HOME/.claude/managed"
-mkdir -p "$MANAGED_DIR"
-curl -s https://internal.company.com/claude-policy.json > "$MANAGED_DIR/settings.json"
-chmod 444 "$MANAGED_DIR/settings.json"  # Solo lectura
+MANAGED_DIR="/etc/claude-code"
+sudo mkdir -p "$MANAGED_DIR"
+sudo curl -s https://internal.company.com/claude-policy.json > /tmp/managed-settings.json
+sudo mv /tmp/managed-settings.json "$MANAGED_DIR/managed-settings.json"
+sudo chmod 444 "$MANAGED_DIR/managed-settings.json"  # Solo lectura
+sudo chown root:root "$MANAGED_DIR/managed-settings.json"
 ```
 
 ### Opcion 2: Ansible/Chef/Puppet
 
 ```yaml
-# Ansible playbook
+# Ansible playbook (Linux/WSL)
 - name: Deploy Claude Code managed policy
   copy:
     src: claude-managed-settings.json
-    dest: "{{ ansible_env.HOME }}/.claude/managed/settings.json"
+    dest: /etc/claude-code/managed-settings.json
     mode: '0444'
-    owner: "{{ ansible_user }}"
+    owner: root
+    group: root
+  become: true
+
+# Para macOS, cambiar dest a:
+# /Library/Application Support/ClaudeCode/managed-settings.json
 ```
 
 ### Opcion 3: MDM (macOS)

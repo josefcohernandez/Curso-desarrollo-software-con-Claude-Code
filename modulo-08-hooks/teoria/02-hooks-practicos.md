@@ -1,8 +1,8 @@
-# 02 - 7 Hooks Prácticos
+# 02 - 7 Hooks Practicos
 
 ## Hook 1: Auto-formateo con Prettier
 
-Después de que Claude escriba o edite un archivo, formatearlo automáticamente:
+Despues de que Claude escriba o edite un archivo, formatearlo automaticamente:
 
 ```json
 {
@@ -10,11 +10,21 @@ Después de que Claude escriba o edite un archivo, formatearlo automáticamente:
     "PostToolUse": [
       {
         "matcher": "Write(*.{ts,tsx,js,jsx,json,css,md})",
-        "command": "npx prettier --write $FILEPATH"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx prettier --write $FILEPATH"
+          }
+        ]
       },
       {
         "matcher": "Edit(*.{ts,tsx,js,jsx,json,css,md})",
-        "command": "npx prettier --write $FILEPATH"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx prettier --write $FILEPATH"
+          }
+        ]
       }
     ]
   }
@@ -26,13 +36,18 @@ Para Python:
 ```json
 {
   "matcher": "Write(*.py)",
-  "command": "ruff format $FILEPATH && ruff check --fix $FILEPATH"
+  "hooks": [
+    {
+      "type": "command",
+      "command": "ruff format $FILEPATH && ruff check --fix $FILEPATH"
+    }
+  ]
 }
 ```
 
 ---
 
-## Hook 2: Linter después de Cambios
+## Hook 2: Linter despues de Cambios
 
 ```json
 {
@@ -40,7 +55,12 @@ Para Python:
     "PostToolUse": [
       {
         "matcher": "Edit(*.ts)",
-        "command": "npx eslint $FILEPATH --max-warnings 0"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx eslint $FILEPATH --max-warnings 0"
+          }
+        ]
       }
     ]
   }
@@ -51,7 +71,7 @@ Si el linter falla (exit code no-zero), Claude ve el error y puede corregir.
 
 ---
 
-## Hook 3: Tests Automáticos
+## Hook 3: Tests Automaticos
 
 Ejecutar tests del archivo modificado:
 
@@ -61,7 +81,12 @@ Ejecutar tests del archivo modificado:
     "PostToolUse": [
       {
         "matcher": "Edit(src/**/*.ts)",
-        "command": "npx vitest run --reporter=verbose $(echo $FILEPATH | sed 's/src/tests/' | sed 's/.ts/.test.ts/')"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx vitest run --reporter=verbose $(echo $FILEPATH | sed 's/src/tests/' | sed 's/.ts/.test.ts/')"
+          }
+        ]
       }
     ]
   }
@@ -72,19 +97,35 @@ Ejecutar tests del archivo modificado:
 
 ## Hook 4: Logging de Operaciones
 
-Registrar todas las operaciones de Claude para auditoría:
+Registrar todas las operaciones de Claude para auditoria:
 
 ```json
 {
   "hooks": {
     "PostToolUse": [
       {
-        "command": "echo \"$(date +%Y-%m-%dT%H:%M:%S) | $TOOL_NAME | $FILEPATH\" >> /tmp/claude-audit.log",
-        "async": true
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/scripts/hook-audit-log.sh",
+            "async": true
+          }
+        ]
       }
     ]
   }
 }
+```
+
+Script `hook-audit-log.sh`:
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty')
+FILEPATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+
+echo "$(date +%Y-%m-%dT%H:%M:%S) | ${TOOL_NAME} | ${FILEPATH:-N/A}" >> /tmp/claude-audit.log
 ```
 
 ---
@@ -97,32 +138,61 @@ Registrar todas las operaciones de Claude para auditoría:
     "PreToolUse": [
       {
         "matcher": "Write",
-        "command": "bash -c 'echo $FILEPATH | grep -qE \"(config/production|.env|secrets/)\" && exit 1 || exit 0'"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/scripts/hook-block-protected.sh"
+          }
+        ]
       },
       {
         "matcher": "Edit",
-        "command": "bash -c 'echo $FILEPATH | grep -qE \"(config/production|.env|secrets/)\" && exit 1 || exit 0'"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/scripts/hook-block-protected.sh"
+          }
+        ]
       }
     ]
   }
 }
 ```
 
-Si el archivo está en un directorio protegido, exit 1 → operación bloqueada.
+Script `hook-block-protected.sh`:
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILEPATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+
+if echo "$FILEPATH" | grep -qE "(config/production|\.env|secrets/)"; then
+  echo "BLOQUEADO: Archivo protegido: $FILEPATH" >&2
+  exit 2  # Exit 2 = bloquea la operacion
+fi
+
+exit 0
+```
+
+> **Importante:** Se usa `exit 2` para bloquear. Un `exit 1` no bloquea la operacion, solo muestra el error en modo verbose.
 
 ---
 
 ## Hook 6: Inyectar Contexto en PreCompact
 
-Cuando el contexto se compacta, asegurar que información crítica no se pierde:
+Cuando el contexto se compacta, asegurar que informacion critica no se pierde:
 
 ```json
 {
   "hooks": {
     "PreCompact": [
       {
-        "type": "prompt",
-        "prompt": "CRÍTICO: Mantener en el resumen: schema actual de BD (users, orders, products), endpoints implementados, y decisiones de arquitectura pendientes."
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "CRITICO: Mantener en el resumen: schema actual de BD (users, orders, products), endpoints implementados, y decisiones de arquitectura pendientes."
+          }
+        ]
       }
     ]
   }
@@ -131,9 +201,9 @@ Cuando el contexto se compacta, asegurar que información crítica no se pierde:
 
 ---
 
-## Hook 7: Notificación al Terminar
+## Hook 7: Notificacion al Terminar
 
-Recibir notificación cuando Claude termina una tarea larga:
+Recibir notificacion cuando Claude termina una tarea larga:
 
 ### Linux
 
@@ -142,8 +212,13 @@ Recibir notificación cuando Claude termina una tarea larga:
   "hooks": {
     "Stop": [
       {
-        "command": "notify-send 'Claude Code' 'Tarea completada'",
-        "async": true
+        "hooks": [
+          {
+            "type": "command",
+            "command": "notify-send 'Claude Code' 'Tarea completada'",
+            "async": true
+          }
+        ]
       }
     ]
   }
@@ -157,8 +232,13 @@ Recibir notificación cuando Claude termina una tarea larga:
   "hooks": {
     "Stop": [
       {
-        "command": "osascript -e 'display notification \"Tarea completada\" with title \"Claude Code\"'",
-        "async": true
+        "hooks": [
+          {
+            "type": "command",
+            "command": "osascript -e 'display notification \"Tarea completada\" with title \"Claude Code\"'",
+            "async": true
+          }
+        ]
       }
     ]
   }
@@ -169,12 +249,12 @@ Recibir notificación cuando Claude termina una tarea larga:
 
 ## Resumen de Hooks
 
-| # | Propósito | Evento | Matcher | ¿Sync? |
+| # | Proposito | Evento | Matcher | Sync? |
 |---|----------|--------|---------|-------|
-| 1 | Auto-formateo | PostToolUse | Write/Edit(*.ts) | Sí |
-| 2 | Linter | PostToolUse | Edit(*.ts) | Sí |
-| 3 | Tests auto | PostToolUse | Edit(src/**) | Sí |
+| 1 | Auto-formateo | PostToolUse | Write/Edit(*.ts) | Si |
+| 2 | Linter | PostToolUse | Edit(*.ts) | Si |
+| 3 | Tests auto | PostToolUse | Edit(src/**) | Si |
 | 4 | Logging | PostToolUse | (todos) | No (async) |
-| 5 | Bloquear protegido | PreToolUse | Write/Edit | Sí |
-| 6 | Contexto crítico | PreCompact | - | Sí |
-| 7 | Notificación | Stop | - | No (async) |
+| 5 | Bloquear protegido | PreToolUse | Write/Edit | Si |
+| 6 | Contexto critico | PreCompact | - | Si |
+| 7 | Notificacion | Stop | - | No (async) |

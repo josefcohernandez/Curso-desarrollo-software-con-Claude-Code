@@ -36,11 +36,21 @@ Crea `.claude/settings.json`:
     "PostToolUse": [
       {
         "matcher": "Write(*.{js,ts,json,md})",
-        "command": "npx prettier --write $FILEPATH 2>/dev/null || true"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx prettier --write $FILEPATH 2>/dev/null || true"
+          }
+        ]
       },
       {
         "matcher": "Edit(*.{js,ts,json,md})",
-        "command": "npx prettier --write $FILEPATH 2>/dev/null || true"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx prettier --write $FILEPATH 2>/dev/null || true"
+          }
+        ]
       }
     ]
   }
@@ -99,11 +109,21 @@ Actualiza `.claude/settings.json`:
     "PostToolUse": [
       {
         "matcher": "Write(*.{js,ts,json,md})",
-        "command": "npx prettier --write $FILEPATH 2>/dev/null || true"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx prettier --write $FILEPATH 2>/dev/null || true"
+          }
+        ]
       },
       {
         "matcher": "Edit(src/**/*.js)",
-        "command": "npm test 2>&1 | tail -20"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npm test 2>&1 | tail -20"
+          }
+        ]
       }
     ]
   }

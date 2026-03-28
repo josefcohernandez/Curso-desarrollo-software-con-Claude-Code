@@ -40,8 +40,10 @@ C:\Program Files\ClaudeCode\managed-settings.json          # Windows
     ]
   },
   "env": {
-    "DISABLE_NONESSENTIAL_TRAFFIC": "1",
-    "CLAUDE_CODE_ENABLE_SANDBOX": "1"
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+  },
+  "sandbox": {
+    "enabled": true
   },
   "model": "claude-sonnet-4-20250514"
 }
@@ -64,7 +66,7 @@ Las políticas gestionadas tienen la **máxima prioridad**:
 ```
 Prioridad más alta
   |
-  |  1. /etc/claude-code/settings.json  (GESTIONADO - no modificable)
+  |  1. /etc/claude-code/managed-settings.json  (GESTIONADO - no modificable)
   |  2. Proyecto: .claude/settings.json
   |  3. Usuario: ~/.claude/settings.json
   |
@@ -442,9 +444,11 @@ Para cumplimiento con GDPR (relevante para equipos europeos):
     ]
   },
   "env": {
-    "DISABLE_NONESSENTIAL_TRAFFIC": "1",
-    "CLAUDE_CODE_ENABLE_SANDBOX": "1",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
     "CLAUDE_CODE_USE_BEDROCK": "1"
+  },
+  "sandbox": {
+    "enabled": true
   },
   "model": "claude-sonnet-4-20250514"
 }
@@ -481,7 +485,7 @@ Auto Mode permite que Claude Code tome decisiones de permisos automáticamente u
 
 **Consideraciones enterprise:**
 - Los teammates en Agent Teams heredan Auto Mode del lead si está activado
-- Las políticas gestionadas (`/etc/claude-code/settings.json`) tienen prioridad sobre Auto Mode: si una política deniega una acción, Auto Mode no puede aprobarla
+- Las políticas gestionadas (`/etc/claude-code/managed-settings.json`) tienen prioridad sobre Auto Mode: si una política deniega una acción, Auto Mode no puede aprobarla
 - Disponible primero en plan Team, desplegándose progresivamente a Enterprise
 - Recomendado para entornos de desarrollo y staging, **no para producción** sin validación previa
 

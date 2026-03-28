@@ -262,7 +262,7 @@ brew install tmux
 **Habilitar modo tmux:**
 ```bash
 # Al lanzar el equipo, especificar el modo de display
-claude --agents frontend-dev,backend-dev --display tmux
+claude --agents frontend-dev,backend-dev --teammate-mode tmux
 ```
 
 ---
@@ -533,7 +533,7 @@ export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
 
 **2. Lanzar el equipo:**
 ```bash
-claude --agents backend-dev,frontend-dev --display tmux
+claude --agents backend-dev,frontend-dev --teammate-mode tmux
 ```
 
 **3. Dar la instrucción al Team Lead:**

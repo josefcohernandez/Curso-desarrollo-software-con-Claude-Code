@@ -5,28 +5,41 @@
 Claude Code tiene 5 niveles de configuración con **precedencia estricta**:
 
 ```
-Managed (más alta)     ~/.claude/managed/        Administrador empresa
+Managed (más alta)     Ruta de sistema (ver abajo) Administrador empresa
   ↓
-CLI Flags              --model, --allowedTools    Por ejecución
+CLI Flags              --model, --allowedTools      Por ejecución
   ↓
-Local                  .claude/settings.local.json No se commitea
+Local                  .claude/settings.local.json  No se commitea
   ↓
-Project                .claude/settings.json       Compartido equipo
+Project                .claude/settings.json        Compartido equipo
   ↓
-User (más baja)        ~/.claude/settings.json     Personal global
+User (más baja)        ~/.claude/settings.json      Personal global
 ```
+
+Rutas de Managed settings según plataforma:
+
+| Plataforma | Ruta |
+|------------|------|
+| Linux/WSL | `/etc/claude-code/managed-settings.json` |
+| macOS | `/Library/Application Support/ClaudeCode/managed-settings.json` |
+| Windows | `C:\Program Files\ClaudeCode\managed-settings.json` |
 
 **Regla**: El nivel superior siempre gana. Managed > CLI > Local > Project > User.
 
 ---
 
-## Nivel 1: Managed (~/.claude/managed/)
+## Nivel 1: Managed (ruta de sistema)
 
 Configuración impuesta por administradores de empresa.
 Los usuarios **no pueden sobreescribirla**.
 
+La ubicación depende del sistema operativo:
+- **Linux/WSL**: `/etc/claude-code/managed-settings.json`
+- **macOS**: `/Library/Application Support/ClaudeCode/managed-settings.json`
+- **Windows**: `C:\Program Files\ClaudeCode\managed-settings.json`
+
 ```json
-// ~/.claude/managed/settings.json
+// Ejemplo: /etc/claude-code/managed-settings.json (Linux)
 {
   "permissions": {
     "deny": ["Bash(rm -rf*)", "Bash(sudo*)", "Bash(curl*|wget*)"]
@@ -243,7 +256,7 @@ claude
 
 | Nivel | Archivo | ¿Commitear? | Quién configura | Precedencia |
 |-------|---------|------------|----------------|------------|
-| Managed | ~/.claude/managed/ | N/A | Admin empresa | 1 (máx) |
+| Managed | Ruta de sistema (ver arriba) | N/A | Admin empresa | 1 (máx) |
 | CLI | flags | N/A | Dev (por ejecución) | 2 |
 | Local | .claude/settings.local.json | No (.gitignore) | Dev (personal) | 3 |
 | Project | .claude/settings.json | Sí | Equipo | 4 |

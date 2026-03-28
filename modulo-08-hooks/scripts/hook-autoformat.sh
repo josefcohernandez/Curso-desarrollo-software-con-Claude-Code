@@ -7,14 +7,21 @@
 #   "hooks": {
 #     "PostToolUse": [
 #       {
-#         "matcher": "Write(*.{js,ts,tsx,jsx,json,css,md})",
-#         "command": "./scripts/hook-autoformat.sh"
+#         "matcher": "Write|Edit",
+#         "hooks": [
+#           {
+#             "type": "command",
+#             "command": "./scripts/hook-autoformat.sh"
+#           }
+#         ]
 #       }
 #     ]
 #   }
 # }
 
-FILEPATH="$FILEPATH"
+# Leer datos del hook via JSON en stdin
+INPUT=$(cat)
+FILEPATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
 
 if [ -z "$FILEPATH" ] || [ ! -f "$FILEPATH" ]; then
     exit 0

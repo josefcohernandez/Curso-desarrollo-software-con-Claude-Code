@@ -12,11 +12,11 @@ Si `CLAUDE.md` es el "manual del empleado" que todo el mundo lee el primer día,
 CLAUDE.md                          Skills
 +--------------------------+       +---------------------------+
 | Se carga SIEMPRE         |       | Se cargan BAJO DEMANDA    |
-| - Reglas del proyecto    |       | - deploy-staging.md       |
-| - Convenciones de código |       | - generar-migracion.md    |
-| - Stack tecnológico      |       | - crear-componente.md     |
-| - Estructura general     |       | - release-process.md      |
-|                          |       |                           |
+| - Reglas del proyecto    |       | - deploy-staging/SKILL.md |
+| - Convenciones de código |       | - generar-migracion/      |
+| - Stack tecnológico      |       |   SKILL.md                |
+| - Estructura general     |       | - crear-componente/       |
+|                          |       |   SKILL.md                |
 | Consumo: CADA sesión     |       | Consumo: SOLO cuando se   |
 |                          |       |           invoca           |
 +--------------------------+       +---------------------------+
@@ -30,13 +30,21 @@ Los skills pueden estar en dos ubicaciones:
 
 ### Skills de Proyecto (compartidos con el equipo)
 
+Cada skill es un **directorio** con un archivo `SKILL.md` como entrypoint:
+
 ```
 tu-proyecto/
   .claude/
     skills/
-      deploy-staging.md
-      generar-migracion.md
-      crear-componente.md
+      deploy-staging/
+        SKILL.md              # Instrucciones principales (requerido)
+        template.md           # Plantilla opcional
+        scripts/              # Scripts opcionales
+      generar-migracion/
+        SKILL.md
+      crear-componente/
+        SKILL.md
+        examples/             # Ejemplos opcionales
 ```
 
 Estos skills se comparten vía control de versiones (git) y están disponibles para todos los miembros del equipo.
@@ -46,15 +54,27 @@ Estos skills se comparten vía control de versiones (git) y están disponibles p
 ```
 ~/.claude/
   skills/
-    mi-workflow-personal.md
-    atajos-favoritos.md
+    mi-workflow-personal/
+      SKILL.md
+    atajos-favoritos/
+      SKILL.md
 ```
 
 Estos skills son personales y no se comparten con el equipo.
 
+### Skills de Enterprise (organizacionales)
+
+Los administradores pueden definir skills a nivel de organización que se distribuyen a todos los proyectos.
+
 ### Prioridad de Carga
 
-Si existe un skill con el mismo nombre en ambas ubicaciones, el skill de **proyecto** tiene prioridad sobre el de **usuario**.
+Si existe un skill con el mismo nombre en varias ubicaciones, la prioridad es:
+
+1. **Enterprise** (mayor prioridad)
+2. **Personal** (usuario)
+3. **Proyecto** (menor prioridad)
+
+> **Nota:** Los skills personales tienen **más prioridad** que los de proyecto. Esto permite que un desarrollador personalice un skill de proyecto sin afectar al equipo.
 
 ---
 
@@ -187,7 +207,7 @@ Los skills soportan una variable especial `$ARGUMENTS` que se sustituye con los 
 
 ### Ejemplo
 
-**Definición del skill (generar-migracion.md):**
+**Definición del skill (generar-migracion/SKILL.md):**
 ```markdown
 ---
 name: "Generar Migración"
@@ -453,9 +473,10 @@ Este skill se ejecuta en un subagente (`context: fork`) porque:
 
 | Concepto | Descripción |
 |----------|-------------|
-| Skill | Archivo SKILL.md con capacidades reutilizables |
-| Ubicación proyecto | `.claude/skills/nombre.md` |
-| Ubicación usuario | `~/.claude/skills/nombre.md` |
+| Skill | Directorio con SKILL.md como entrypoint |
+| Ubicación proyecto | `.claude/skills/nombre-skill/SKILL.md` |
+| Ubicación usuario | `~/.claude/skills/nombre-skill/SKILL.md` |
+| Prioridad | Enterprise > Personal > Proyecto |
 | Carga | Bajo demanda (no al inicio de cada sesión) |
 | `$ARGUMENTS` | Variable sustituida con los argumentos del usuario |
 | `context: fork` | Ejecuta en subagente (contexto aislado) |

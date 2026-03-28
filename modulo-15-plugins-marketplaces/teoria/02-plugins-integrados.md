@@ -26,7 +26,7 @@ Los plugins de code intelligence mejoran la capacidad de Claude para navegar y c
 Claude Code lo activa automáticamente si detecta un language server compatible en el proyecto (por ejemplo, `pyright` para Python, `typescript-language-server` para TypeScript o `rust-analyzer` para Rust). También puedes instalarlo explícitamente:
 
 ```bash
-/plugin install code-intelligence --scope user
+claude plugin install code-intelligence@claude-plugins-official
 ```
 
 ### Ejemplo de uso práctico
@@ -66,7 +66,7 @@ El plugin de JetBrains es compatible con IntelliJ IDEA, WebStorm, PyCharm, GoLan
 
 ```bash
 # Desde la línea de comandos (alternativa al marketplace de JetBrains)
-/plugin install jetbrains-integration --scope user
+claude plugin install jetbrains-integration@claude-plugins-official
 ```
 
 **Funcionalidades compartidas con la extensión de VS Code:**
@@ -93,7 +93,7 @@ Estos plugins exponen herramientas de servicios externos como herramientas de Cl
 Conecta Claude directamente con tu cuenta de GitHub para gestionar pull requests, issues y code reviews sin salir del terminal.
 
 ```bash
-/plugin install github --scope user
+claude plugin install github@claude-plugins-official
 # Requiere: GITHUB_TOKEN con permisos repo
 ```
 
@@ -118,7 +118,7 @@ Claude ejecuta `git push`, crea el PR vía API de GitHub y añade el asignado, t
 Permite a Claude leer y escribir en tu workspace de Notion: documentación, wikis, bases de datos de proyectos.
 
 ```bash
-/plugin install notion --scope user
+claude plugin install notion@claude-plugins-official
 # Requiere: NOTION_API_KEY y compartir las páginas con la integración
 ```
 
@@ -131,7 +131,7 @@ Permite a Claude leer y escribir en tu workspace de Notion: documentación, wiki
 Integra el análisis de errores de producción directamente en el flujo de desarrollo.
 
 ```bash
-/plugin install sentry --scope project
+claude plugin install sentry@claude-plugins-official
 # Requiere: SENTRY_AUTH_TOKEN y SENTRY_ORG configurados
 ```
 
@@ -145,11 +145,11 @@ Gestión de tickets e issues integrada en el flujo de Claude Code.
 
 ```bash
 # Linear
-/plugin install linear --scope user
+claude plugin install linear@claude-plugins-official
 # LINEAR_API_KEY requerida
 
 # Jira
-/plugin install jira --scope user
+claude plugin install jira@claude-plugins-official
 # JIRA_API_TOKEN, JIRA_BASE_URL y JIRA_EMAIL requeridos
 ```
 
@@ -162,7 +162,7 @@ Gestión de tickets e issues integrada en el flujo de Claude Code.
 Notificaciones y comunicación desde Claude Code hacia canales de Slack.
 
 ```bash
-/plugin install slack --scope project
+claude plugin install slack@claude-plugins-official
 # SLACK_BOT_TOKEN y SLACK_CHANNEL configurados
 ```
 
@@ -176,11 +176,11 @@ Acceso directo a bases de datos relacionales como herramienta de Claude.
 
 ```bash
 # PostgreSQL vía MCP
-/plugin install postgresql --scope project
+claude plugin install postgresql@claude-plugins-official
 # DATABASE_URL requerida (postgresql://usuario:password@host:5432/nombre_bd)
 
 # MySQL vía MCP
-/plugin install mysql --scope project
+claude plugin install mysql@claude-plugins-official
 # MYSQL_URL requerida
 ```
 
@@ -188,14 +188,14 @@ Acceso directo a bases de datos relacionales como herramienta de Claude.
 
 **Ejemplo:** "Analiza las queries más lentas de los últimos 7 días y propón índices que mejoren el rendimiento."
 
-> Precaución: instala estos plugins con ámbito `project` y asegúrate de que las credenciales en `DATABASE_URL` solo tienen permisos de lectura si no quieres que Claude pueda modificar datos.
+> Precaución: asegúrate de que las credenciales en `DATABASE_URL` solo tienen permisos de lectura si no quieres que Claude pueda modificar datos.
 
 ### Figma
 
 Integración con diseños para Visual-Driven Development.
 
 ```bash
-/plugin install figma --scope user
+claude plugin install figma@claude-plugins-official
 # FIGMA_ACCESS_TOKEN requerido
 ```
 
@@ -208,7 +208,7 @@ Integración con diseños para Visual-Driven Development.
 Testing de UI y captura de screenshots integrado en el flujo de Claude.
 
 ```bash
-/plugin install playwright --scope project
+claude plugin install playwright@claude-plugins-official
 # Requiere: @playwright/test instalado en el proyecto
 ```
 
@@ -225,7 +225,7 @@ Testing de UI y captura de screenshots integrado en el flujo de Claude.
 Formateo y linting automático activado mediante hooks.
 
 ```bash
-/plugin install prettier-eslint --scope project
+claude plugin install prettier-eslint@claude-plugins-official
 # Requiere: prettier y eslint configurados en el proyecto
 ```
 
@@ -238,7 +238,7 @@ Formateo y linting automático activado mediante hooks.
 Gestión de contenedores integrada.
 
 ```bash
-/plugin install docker --scope project
+claude plugin install docker@claude-plugins-official
 ```
 
 **Qué hace:** añade herramientas para gestionar imágenes, contenedores y redes de Docker. Claude puede arrancar, parar e inspeccionar contenedores como parte de un workflow de desarrollo o CI.
@@ -250,7 +250,7 @@ Gestión de contenedores integrada.
 Gestión de clusters para flujos de despliegue.
 
 ```bash
-/plugin install kubernetes --scope project
+claude plugin install kubernetes@claude-plugins-official
 # Requiere: kubectl configurado con acceso al cluster
 ```
 
@@ -262,9 +262,9 @@ Gestión de clusters para flujos de despliegue.
 
 ## Errores Comunes
 
-**Instalar plugins con credenciales de producción en ámbito `user`.** Si configuras el plugin de PostgreSQL con las credenciales de la base de datos de producción en tu ámbito de usuario, cualquier proyecto en el que trabajas tiene acceso de escritura a producción. Usa credenciales de solo lectura o instala el plugin en ámbito `project` con credenciales de entorno específicas.
+**Instalar plugins con credenciales de producción sin restricciones.** Si configuras el plugin de PostgreSQL con las credenciales de la base de datos de producción, cualquier proyecto en el que trabajas tiene acceso de escritura a producción. Usa credenciales de solo lectura o variables de entorno específicas por proyecto.
 
-**No revisar los permisos que solicita un plugin antes de instalarlo.** Antes de instalar un plugin del marketplace público, ejecuta `/plugin info <nombre>` para ver qué herramientas usa, qué permisos solicita y quién es el autor. Un plugin que solicita `Bash` sin restricciones merece más escrutinio que uno que solo usa `Read`.
+**No revisar los permisos que solicita un plugin antes de instalarlo.** Antes de instalar un plugin del marketplace público, usa la interfaz interactiva `/plugin` para navegar a la pestaña de detalles del plugin y ver qué herramientas usa, qué permisos solicita y quién es el autor. Un plugin que solicita `Bash` sin restricciones merece más escrutinio que uno que solo usa `Read`.
 
 **Instalar demasiados plugins y aumentar el contexto innecesariamente.** Cada servidor MCP instalado vía plugin ocupa espacio en la ventana de contexto con su lista de herramientas. Si tienes 10 plugins activos, Claude ve cientos de herramientas disponibles, lo que puede degradar la calidad de sus decisiones. Activa solo los plugins que uses regularmente en cada proyecto.
 

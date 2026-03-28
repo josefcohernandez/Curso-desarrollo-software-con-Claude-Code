@@ -56,11 +56,14 @@ claude --model claude-haiku-4-5-20251001
 
 La variable de entorno `CLAUDE_CODE_EFFORT_LEVEL` controla cuánto razonamiento interno aplica Claude antes de responder. Es independiente del modelo elegido.
 
-| Valor | Comportamiento | Tokens de razonamiento |
-|-------|---------------|----------------------|
-| `low` | Respuesta rápida, razonamiento mínimo | Pocos |
-| `medium` | Balance entre velocidad y profundidad (default) | Moderados |
-| `high` | Máximo razonamiento antes de responder | Muchos |
+| Valor | Comportamiento | Tokens de razonamiento | Disponibilidad |
+|-------|---------------|----------------------|----------------|
+| `low` | Respuesta rápida, razonamiento mínimo | Pocos | Todos los modelos |
+| `medium` | Balance entre velocidad y profundidad **(default)** | Moderados | Todos los modelos |
+| `high` | Razonamiento profundo antes de responder | Muchos | Todos los modelos |
+| `max` | Máximo razonamiento posible, sin límites | Máximos | **Solo Opus 4.6** |
+
+> **Nota:** Opus 4.6 y Sonnet 4.6 usan **medium** como nivel de esfuerzo por defecto. Medium es el nivel recomendado para la mayoría de tareas de programación.
 
 ```bash
 # Configurar para la sesión actual
@@ -70,10 +73,34 @@ claude
 # Configurar de forma persistente en tu shell
 echo 'export CLAUDE_CODE_EFFORT_LEVEL=medium' >> ~/.bashrc
 
-# Volver al default (high)
+# Volver al default (medium)
 unset CLAUDE_CODE_EFFORT_LEVEL
 claude
 ```
+
+**Formas de cambiar el nivel de esfuerzo durante una sesión:**
+
+```bash
+# Slash command (dentro de una sesión interactiva)
+/effort low
+/effort medium
+/effort high
+/effort max          # Solo Opus 4.6
+
+# Flag CLI (al iniciar sesión)
+claude --effort high
+claude --effort max  # Solo Opus 4.6
+```
+
+**Activar high effort para un solo turno con "ultrathink":**
+
+Si estás en un nivel de esfuerzo bajo o medio y necesitas razonamiento profundo para una pregunta puntual, incluye la palabra **"ultrathink"** en tu prompt. Esto activa temporalmente el nivel high para ese único turno, sin cambiar la configuración de la sesión:
+
+```
+> ultrathink: ¿Cuál es la causa raíz de este bug de concurrencia en el pool de conexiones?
+```
+
+Tras responder, Claude vuelve al nivel de esfuerzo configurado previamente.
 
 ## Ejemplos prácticos
 
@@ -146,6 +173,9 @@ claude --model claude-haiku-4-5-20251001
 - Fast Mode es una optimización de velocidad sobre Opus 4.6, no un cambio de modelo
 - Se activa con `/fast` en la sesión activa
 - Los modelos actuales son Opus 4.6 (1M tokens), Sonnet 4.6 y Haiku 4.5
-- `CLAUDE_CODE_EFFORT_LEVEL` (low/medium/high) controla la profundidad de razonamiento
+- `CLAUDE_CODE_EFFORT_LEVEL` (low/medium/high/max) controla la profundidad de razonamiento; el default es **medium**
+- Usa `/effort` o `--effort` para cambiar el nivel durante o al iniciar una sesión
+- Incluye "ultrathink" en un prompt para activar high effort en un solo turno
+- El nivel `max` solo está disponible para Opus 4.6
 - La tabla de decisión combina modelo + Fast Mode + esfuerzo según el tipo de tarea
-- Para tareas críticas: Opus, sin Fast Mode, esfuerzo high
+- Para tareas críticas: Opus, sin Fast Mode, esfuerzo high o max

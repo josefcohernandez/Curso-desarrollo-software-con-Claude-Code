@@ -744,8 +744,11 @@ Alternativas igualmente válidas:
 - Un agente que analice el historial de commits y genere un CHANGELOG automáticamente
 
 ```bash
-# Instalar el SDK
-pip install anthropic
+# Instalar el Agent SDK (paquete específico para construir agentes con herramientas de Claude Code)
+pip install claude-agent-sdk
+
+# Nota: "pip install anthropic" es la API de Anthropic para llamadas directas.
+# Para Agent SDK se usa "pip install claude-agent-sdk".
 
 # Ejecutar el agente
 python agente_docs.py
@@ -765,10 +768,15 @@ Configura Auto Mode para el proyecto y demuestra Computer Use:
    cuántas confirmaciones te ahorró y si el clasificador IA bloqueó
    alguna acción inesperada.
 
-2. (Opcional, requiere macOS) Usa Computer Use para automatizar
-   un flujo de testing visual: que Claude abra el navegador,
-   navegue a la documentación de tu API y verifique que los
-   endpoints están correctamente documentados.
+2. (Opcional, requiere macOS) Usa Computer Use a través de
+   **Claude Cowork** (no Claude Code) para automatizar un flujo
+   de testing visual: que Claude abra el navegador, navegue a la
+   documentación de tu API y verifique que los endpoints están
+   correctamente documentados.
+
+   > **Nota**: Computer Use es una capacidad de Claude Cowork, disponible
+   > como research preview solo en macOS. No es una funcionalidad nativa
+   > de Claude Code.
 ```
 
 ### Opción 7H: Nuevos Hooks y Compaction API (Capítulos 3, 8)

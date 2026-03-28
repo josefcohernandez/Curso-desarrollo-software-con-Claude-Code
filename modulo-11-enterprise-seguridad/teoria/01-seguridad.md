@@ -134,13 +134,13 @@ Claude Code envía por defecto datos de telemetría anónimos (uso de funcionali
 
 ```bash
 # Opción 1: Variable de entorno
-export DISABLE_NONESSENTIAL_TRAFFIC=1
+export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
 
 # Opción 2: En tu .bashrc / .zshrc para hacerlo permanente
-echo 'export DISABLE_NONESSENTIAL_TRAFFIC=1' >> ~/.bashrc
+echo 'export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1' >> ~/.bashrc
 
 # Opción 3: En el fichero .env del proyecto (si usas dotenv)
-DISABLE_NONESSENTIAL_TRAFFIC=1
+CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
 ```
 
 Lo que desactiva esta variable:
@@ -263,17 +263,25 @@ En macOS, Claude Code utiliza el sistema de sandbox nativo de Apple:
 - Controla acceso a recursos del sistema
 - Se activa automáticamente
 
-### Linux: Sandbox basado en Docker
+### Linux: Sandbox configurable
 
-En Linux, el sandbox utiliza contenedores Docker:
+En Linux, el sandbox se activa a través de la configuración de settings o el comando `/sandbox`:
+
+```json
+// En settings.json (proyecto o usuario)
+{
+  "sandbox": {
+    "enabled": true
+  }
+}
+```
 
 ```bash
-# Activar el sandbox en Linux
-export CLAUDE_CODE_ENABLE_SANDBOX=1
-
-# Claude Code ejecutará comandos dentro de un contenedor aislado
-# con acceso limitado al directorio del proyecto
+# O dentro de una sesión de Claude Code:
+/sandbox
 ```
+
+Claude Code ejecutará comandos dentro de un entorno aislado con acceso limitado al directorio del proyecto.
 
 ### Qué restringe el sandbox
 
@@ -287,16 +295,34 @@ export CLAUDE_CODE_ENABLE_SANDBOX=1
 
 ### Activar el sandbox
 
-```bash
-# Variable de entorno para activar el sandbox
-export CLAUDE_CODE_ENABLE_SANDBOX=1
-
-# Verificar que Docker está disponible (Linux)
-docker --version
-
-# El sandbox se activa para comandos Bash ejecutados por Claude
-# No afecta a la lectura de archivos ni a las operaciones MCP
+```json
+// Opción 1: En settings.json (proyecto, usuario o managed)
+{
+  "sandbox": {
+    "enabled": true
+  }
+}
 ```
+
+```bash
+# Opción 2: Desde una sesión de Claude Code
+/sandbox
+```
+
+Para restringir el acceso a red del sandbox, usa la configuración de dominios permitidos:
+
+```json
+{
+  "sandbox": {
+    "enabled": true,
+    "network": {
+      "allowedDomains": ["api.github.com", "registry.npmjs.org"]
+    }
+  }
+}
+```
+
+El sandbox se activa para comandos Bash ejecutados por Claude. No afecta a la lectura de archivos ni a las operaciones MCP.
 
 ---
 
@@ -428,8 +454,8 @@ Un servidor MCP comprometido podría:
 |------|--------|------------|
 | Datos en contexto | Envío de datos sensibles a Anthropic | Permisos restrictivos, deny rules |
 | Credenciales | Exposición en CLAUDE.md o Git | .env + .gitignore, gestores de secretos |
-| Telemetría | Datos de uso enviados | DISABLE_NONESSENTIAL_TRAFFIC=1 |
+| Telemetría | Datos de uso enviados | CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1 |
 | Archivos maliciosos | Inyección de prompt | Revisión de fuentes externas, permisos |
 | MCP servers | Servidores comprometidos | Solo fuentes confiables, revisión de código |
-| Sandbox | Ejecución sin restricciones | CLAUDE_CODE_ENABLE_SANDBOX=1 |
+| Sandbox | Ejecución sin restricciones | `sandbox.enabled: true` en settings.json o `/sandbox` |
 | Código generado | Errores de seguridad en el código | Revisión humana obligatoria |

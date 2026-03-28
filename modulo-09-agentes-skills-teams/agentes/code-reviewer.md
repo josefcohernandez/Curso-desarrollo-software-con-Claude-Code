@@ -1,3 +1,10 @@
+---
+name: code-reviewer
+description: Revisa codigo para calidad, seguridad y mantenibilidad. Usar proactivamente despues de escribir o modificar codigo.
+tools: Read, Glob, Grep, Bash
+model: sonnet
+---
+
 # Agente Personalizado: Code Reviewer
 
 > Archivo de definicion para `.claude/agents/code-reviewer.md`
@@ -5,6 +12,13 @@
 ## Definicion del Agente
 
 ```markdown
+---
+name: code-reviewer
+description: Revisa codigo para calidad, seguridad y mantenibilidad. Usar proactivamente despues de escribir o modificar codigo.
+tools: Read, Glob, Grep, Bash
+model: sonnet
+---
+
 # Code Reviewer
 
 ## Rol

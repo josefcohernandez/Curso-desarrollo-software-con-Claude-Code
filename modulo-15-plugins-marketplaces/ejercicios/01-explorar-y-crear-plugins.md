@@ -41,31 +41,23 @@ Familiarizarte con la interfaz interactiva del marketplace, evaluar un plugin an
     /plugin
     ```
 
-3. Busca plugins de code intelligence:
+3. Navega por la pestaña **Discover** para buscar plugins de code intelligence. No existe un subcomando `/plugin search`; la búsqueda se hace navegando las pestañas interactivas.
 
-    ```bash
-    /plugin search code-intelligence
-    ```
-
-4. Antes de instalar, inspecciona los detalles del plugin. Anota las respuestas a estas preguntas:
+4. Antes de instalar, selecciona el plugin en la interfaz para ver sus detalles. Anota las respuestas a estas preguntas:
    - Que permisos solicita el plugin?
    - Que herramientas integra o mejora?
    - Cuando fue la ultima actualizacion?
 
-    ```bash
-    /plugin info code-intelligence
-    ```
-
-5. Instala el plugin con scope `user` (util en todos tus proyectos):
+5. Instala el plugin desde la linea de comandos:
 
     ```bash
-    /plugin install code-intelligence --scope user
+    claude plugin install code-intelligence@claude-plugins-official
     ```
 
 6. Verifica la instalacion:
 
     ```bash
-    /plugin list
+    claude plugin list
     ```
 
 7. Prueba que el plugin funciona: pide a Claude que encuentre todos los usos de una funcion en el proyecto usando navegacion semantica (no grep):
@@ -77,13 +69,13 @@ Familiarizarte con la interfaz interactiva del marketplace, evaluar un plugin an
 
 ### Criterios de Exito
 
-- El plugin aparece en `/plugin list` con estado `activo`
+- El plugin aparece en `claude plugin list` con estado activo
 - Claude responde diferente cuando tiene code intelligence activo: menciona que usa navegacion de simbolos o language server, no solo grep
 - No se producen errores de permisos durante la instalacion
 
 ### Pistas
 
-1. Si el marketplace no tiene un plugin llamado exactamente "code-intelligence", busca con `/plugin search language-server` o `/plugin search navigation` y elige el mas relevante.
+1. Si el marketplace no tiene un plugin llamado exactamente "code-intelligence", usa la pestaña Discover de `/plugin` para navegar por categorias y elegir el mas relevante.
 2. Si trabajas en un proyecto Python, busca un plugin con soporte para `pyright`. Si trabajas en TypeScript, busca soporte para `typescript-language-server`.
 3. El efecto del plugin es mas visible en proyectos grandes. Si el proyecto de prueba es pequeno, el comportamiento puede parecer igual que con grep.
 
@@ -108,19 +100,13 @@ Instalar el plugin de GitHub, configurarlo con un token de acceso y verificar qu
     export GITHUB_TOKEN=<tu-personal-access-token>
     ```
 
-3. Instala el plugin de GitHub con scope `user`:
+3. Instala el plugin de GitHub:
 
     ```bash
-    /plugin install github --scope user
+    claude plugin install github@claude-plugins-official
     ```
 
-4. Configura el plugin con tu token:
-
-    ```bash
-    /plugin configure github
-    ```
-
-    El asistente de configuracion te pedira el `GITHUB_TOKEN`. Introduce el token que creaste en el paso 1.
+4. El plugin utilizara la variable de entorno `GITHUB_TOKEN` que configuraste en el paso 2.
 
 5. Verifica que la integracion funciona preguntando a Claude sobre el estado del repositorio:
 
@@ -188,52 +174,32 @@ Crear desde cero un plugin que empaquete un skill de deploy y un hook de validac
     cd ~/plugins/deploy-safe
     ```
 
-2. Crea el manifest `plugin.json`:
+2. Crea el directorio del manifest y el archivo `plugin.json`:
+
+    ```bash
+    mkdir .claude-plugin
+    ```
+
+    Crea `.claude-plugin/plugin.json`:
 
     ```json
     {
       "name": "deploy-safe",
-      "version": "0.1.0",
       "description": "Flujo de deploy seguro: valida tests antes de desplegar y reporta el resultado",
-      "author": "<tu-nombre>@<tu-empresa>.com",
-      "license": "MIT",
-      "dependencies": {
-        "tools": ["git"]
-      },
-      "configuration": {
-        "environment": {
-          "type": "string",
-          "enum": ["staging", "production"],
-          "default": "staging",
-          "description": "Entorno de destino del deploy"
-        },
-        "run_tests": {
-          "type": "boolean",
-          "default": true,
-          "description": "Ejecutar tests antes de permitir el deploy"
-        }
-      },
-      "components": {
-        "skills": ["skills/deploy.md"],
-        "hooks": [
-          {
-            "file": "hooks/pre-deploy.sh",
-            "event": "PreToolUse",
-            "matcher": "Bash",
-            "description": "Valida tests antes de comandos de deploy"
-          }
-        ]
-      }
+      "version": "0.1.0",
+      "author": "<tu-nombre>@<tu-empresa>.com"
     }
     ```
 
-3. Crea el directorio de skills y el archivo del skill:
+    > **Nota:** El manifest solo contiene estos 4 campos. Los componentes (skills, hooks) se descubren automaticamente por la estructura de directorios.
+
+3. Crea el directorio de skills con su subcarpeta y el archivo SKILL.md:
 
     ```bash
-    mkdir skills
+    mkdir -p skills/deploy
     ```
 
-    Crea `skills/deploy.md`:
+    Crea `skills/deploy/SKILL.md`:
 
     ```markdown
     ---
@@ -324,25 +290,23 @@ Crear desde cero un plugin que empaquete un skill de deploy y un hook de validac
     chmod +x hooks/pre-deploy.sh
     ```
 
-6. Instala el plugin desde la ruta local en un proyecto de prueba:
+6. Carga el plugin desde la ruta local en un proyecto de prueba:
 
     ```bash
     cd /ruta/a/tu/proyecto-prueba
-    /plugin install ~/plugins/deploy-safe --scope project
+    claude --plugin-dir ~/plugins/deploy-safe
     ```
 
-7. Configura el plugin:
+7. Verifica que el plugin se ha cargado:
 
     ```bash
-    /plugin configure deploy-safe
-    # Selecciona environment: staging
-    # run_tests: true
+    claude plugin list
     ```
 
-8. Invoca el skill en una sesion de Claude Code:
+8. Invoca el skill en la sesion de Claude Code:
 
     ```
-    > @deploy-safe/deploy
+    > /deploy-safe:deploy
     ```
 
 9. Verifica que el hook bloquea cuando los tests fallan: crea un test que falle intencionalmente y luego intenta un deploy:
@@ -360,8 +324,8 @@ Crear desde cero un plugin que empaquete un skill de deploy y un hook de validac
 
 ### Criterios de Exito
 
-- El plugin se instala sin errores desde la ruta local
-- El skill `@deploy-safe/deploy` es invocable y sigue los pasos definidos
+- El plugin se carga sin errores con `--plugin-dir`
+- El skill `/deploy-safe:deploy` es invocable y sigue los pasos definidos
 - El hook intercepta comandos que coinciden con el patron de deploy
 - El hook bloquea el deploy cuando los tests fallan, mostrando el mensaje de error configurado
 - El hook no interfiere con comandos que no son deploys (por ejemplo, `git status`)
@@ -397,42 +361,24 @@ Crear un plugin que empaquete el conjunto completo de herramientas de calidad de
     cd ~/plugins/team-standards
     ```
 
-2. Crea el manifest `plugin.json`:
+2. Crea el directorio del manifest y el archivo `plugin.json`:
+
+    ```bash
+    mkdir .claude-plugin
+    ```
+
+    Crea `.claude-plugin/plugin.json`:
 
     ```json
     {
       "name": "team-standards",
-      "version": "1.0.0",
       "description": "Estandares de codigo del equipo: reglas, skill de code review y linting automatico",
-      "author": "equipo-arquitectura@empresa.com",
-      "license": "MIT",
-      "configuration": {
-        "language": {
-          "type": "string",
-          "enum": ["typescript", "python", "go", "java"],
-          "default": "typescript",
-          "description": "Lenguaje principal del proyecto"
-        },
-        "strict_mode": {
-          "type": "boolean",
-          "default": false,
-          "description": "Activar reglas estrictas (bloquear en lugar de advertir)"
-        }
-      },
-      "components": {
-        "skills": ["skills/code-review.md"],
-        "hooks": [
-          {
-            "file": "hooks/auto-lint.sh",
-            "event": "PostToolUse",
-            "matcher": "Edit",
-            "description": "Ejecuta linting automatico tras cada edicion de archivo"
-          }
-        ],
-        "context": ["context/CLAUDE.md"]
-      }
+      "version": "1.0.0",
+      "author": "equipo-arquitectura@empresa.com"
     }
     ```
+
+    > **Nota:** El manifest solo contiene estos 4 campos. Los componentes (skills, hooks, contexto) se descubren automaticamente por la estructura de directorios.
 
 3. Crea el CLAUDE.md compartido del equipo:
 
@@ -479,10 +425,10 @@ Crear un plugin que empaquete el conjunto completo de herramientas de calidad de
 4. Crea el skill de code review:
 
     ```bash
-    mkdir skills
+    mkdir -p skills/code-review
     ```
 
-    Crea `skills/code-review.md`:
+    Crea `skills/code-review/SKILL.md`:
 
     ```markdown
     ---
@@ -589,13 +535,11 @@ Crear un plugin que empaquete el conjunto completo de herramientas de calidad de
     chmod +x hooks/auto-lint.sh
     ```
 
-6. Instala el plugin en un proyecto:
+6. Carga el plugin en un proyecto:
 
     ```bash
     cd /ruta/a/tu/proyecto
-    /plugin install ~/plugins/team-standards --scope project
-    /plugin configure team-standards
-    # Selecciona el lenguaje de tu proyecto
+    claude --plugin-dir ~/plugins/team-standards
     ```
 
 7. Verifica que el CLAUDE.md del plugin esta activo preguntando a Claude sobre los estandares del equipo:
@@ -607,7 +551,7 @@ Crear un plugin que empaquete el conjunto completo de herramientas de calidad de
 8. Prueba el skill de code review en los cambios actuales:
 
     ```
-    > @team-standards/code-review
+    > /team-standards:code-review
     ```
 
 9. Edita un archivo del proyecto y verifica que el hook de linting se ejecuta automaticamente (deberias ver mensajes de `[team-standards]` en el log de Claude Code).
@@ -615,13 +559,13 @@ Crear un plugin que empaquete el conjunto completo de herramientas de calidad de
 ### Criterios de Exito
 
 - El CLAUDE.md del plugin aparece como contexto activo (Claude conoce los estandares del equipo sin que se los hayas explicado)
-- El skill `@team-standards/code-review` genera un informe estructurado con las cinco categorias
+- El skill `/team-standards:code-review` genera un informe estructurado con las cinco categorias
 - El hook de linting se activa automaticamente tras cada edicion de un archivo del lenguaje configurado
 - El plugin puede instalarse en un proyecto nuevo en menos de 2 minutos (reproductibilidad)
 
 ### Pistas
 
-1. El campo `context` en el manifest del plugin es la forma de incluir un CLAUDE.md que se activa automaticamente al usar el plugin. No confundas esto con el `CLAUDE.md` del proyecto.
+1. El CLAUDE.md dentro de la estructura del plugin se descubre automaticamente y se activa al cargar el plugin. No confundas esto con el `CLAUDE.md` del proyecto.
 2. Si el linter (ESLint, Ruff, gofmt) no esta instalado en el proyecto de prueba, el hook termina sin hacer nada (exit 0). Esto es intencional: el hook es resiliente a entornos sin las herramientas instaladas.
 3. Para verificar que el CLAUDE.md del plugin esta activo, pide a Claude que explique los estandares de commit del equipo. Si los conoce (Conventional Commits), el contexto esta funcionando.
 
@@ -647,132 +591,88 @@ Simular la configuracion de un marketplace privado de organizacion que distribuy
     git tag v1.0.0
     ```
 
-2. Crea el fichero `registry.json` que representa el marketplace privado de la empresa:
+2. Crea un repositorio que simule el marketplace privado de la empresa. En un entorno real, este seria un repositorio de GitHub de la organizacion:
 
     ```bash
     mkdir ~/marketplace-privado
     cd ~/marketplace-privado
+    git init
     ```
 
-    Crea `registry.json`:
+    > **Nota:** No se usa un fichero `registry.json`. Los marketplaces privados son repositorios Git, no servidores HTTP con un fichero de registro.
 
-    ```json
-    {
-      "version": "1.0",
-      "name": "Marketplace Interno - Mi Empresa",
-      "plugins": [
-        {
-          "name": "team-standards",
-          "version": "1.0.0",
-          "description": "Estandares de codigo del equipo: reglas, skill de code review y linting automatico",
-          "author": "equipo-arquitectura@empresa.com",
-          "source": "file:///Users/usuario/plugins/team-standards",
-          "verified": true,
-          "internal": true,
-          "tags": ["calidad", "linting", "code-review"]
-        },
-        {
-          "name": "deploy-safe",
-          "version": "0.1.0",
-          "description": "Flujo de deploy seguro con validaciones y hook pre-deploy",
-          "author": "equipo-plataforma@empresa.com",
-          "source": "file:///Users/usuario/plugins/deploy-safe",
-          "verified": true,
-          "internal": true,
-          "tags": ["deploy", "ci-cd", "validacion"]
-        }
-      ]
-    }
-    ```
+3. Registra el marketplace privado en tu configuracion de Claude Code. Existen dos formas:
 
-    Ajusta las rutas `file:///` a las rutas absolutas reales en tu sistema.
-
-3. Levanta un servidor HTTP simple para servir el marketplace (en una terminal separada):
+    **Forma interactiva (desde una sesion de Claude Code):**
 
     ```bash
-    cd ~/marketplace-privado
-    python3 -m http.server 8099
+    /plugin marketplace add mi-empresa/plugins-marketplace
     ```
 
-4. Registra el marketplace privado en tu configuracion local de Claude Code. Edita `~/.claude/settings.json`:
+    **Forma persistente.** Edita `~/.claude/settings.json`:
 
     ```json
     {
-      "marketplaces": [
-        {
-          "name": "Marketplace Interno",
-          "url": "http://localhost:8099",
-          "trusted": true
-        }
+      "extraKnownMarketplaces": [
+        "mi-empresa/plugins-marketplace"
       ]
     }
     ```
 
-5. Verifica que Claude Code detecta el marketplace privado:
+    > Para esta simulacion, usa la forma persistente con el nombre de tu repositorio local o un repositorio de prueba en GitHub.
+
+4. Verifica que Claude Code detecta el marketplace privado:
 
     ```bash
     /plugin
     ```
 
-    Deberias ver los plugins del marketplace interno listados junto con los del marketplace publico.
+    Navega a la pestaña **Marketplaces** para ver las fuentes configuradas.
 
-6. Instala `team-standards` desde el marketplace privado (en lugar de desde la ruta local):
+5. Instala `team-standards` desde el marketplace privado:
 
     ```bash
-    /plugin install team-standards --marketplace "Marketplace Interno" --scope project
+    claude plugin install team-standards@mi-empresa/plugins-marketplace
     ```
 
-7. Simula la distribucion enterprise: crea un fichero `managed_settings.json` que forzaria la instalacion del plugin en todos los proyectos de la organizacion:
+6. Simula la configuracion enterprise: crea un fichero que ilustre las restricciones que un administrador enterprise aplicaria a traves de managed settings:
 
     ```bash
     # Este fichero lo gestionaria el administrador enterprise, no el desarrollador
     # Se crea aqui solo para ilustrar la estructura
     cat > /tmp/managed_settings_ejemplo.json << 'EOF'
     {
-      "marketplaces": [
-        {
-          "name": "Marketplace Interno",
-          "url": "https://plugins.mi-empresa.internal",
-          "trusted": true
-        }
+      "extraKnownMarketplaces": [
+        "mi-empresa/plugins-marketplace"
       ],
-      "plugins": {
-        "strictKnownMarketplaces": true,
-        "allowedMarketplaces": [
-          "https://marketplace.claude.ai",
-          "https://plugins.mi-empresa.internal"
-        ],
-        "managed": [
-          {
-            "name": "team-standards",
-            "version": "1.0.0",
-            "scope": "managed",
-            "description": "Estandares de codigo obligatorios para todos los proyectos de la empresa"
-          }
-        ]
-      }
+      "blockedMarketplaces": [
+        "usuario-no-confiable/marketplace-no-aprobado"
+      ],
+      "strictKnownMarketplaces": true
     }
     EOF
-    echo "Estructura de managed_settings.json generada en /tmp/managed_settings_ejemplo.json"
+    echo "Estructura de managed settings generada en /tmp/managed_settings_ejemplo.json"
     cat /tmp/managed_settings_ejemplo.json
     ```
 
-8. Discute con el equipo (o reflexiona individualmente) sobre estas preguntas:
+    > **Nota:** En un entorno enterprise real, estas configuraciones se gestionan a traves de Claude for Enterprise. Las claves relevantes son `extraKnownMarketplaces` (para añadir fuentes), `blockedMarketplaces` (para bloquear fuentes) y `strictKnownMarketplaces` (para controlar que marketplaces pueden añadirse).
+
+7. Discute con el equipo (o reflexiona individualmente) sobre estas preguntas:
    - Por que es preferible distribuir plugins via marketplace privado en lugar de compartir la carpeta del plugin por Slack o email?
    - Que ventajas aporta `strictKnownMarketplaces` en un entorno enterprise con muchos desarrolladores?
    - Como gestionarias las actualizaciones del plugin `team-standards` cuando el equipo de arquitectura introduce nuevas reglas?
 
 ### Criterios de Exito
 
-- El marketplace privado es accesible desde el navegador en `http://localhost:8099/registry.json`
-- Claude Code lista los plugins del marketplace privado en `/plugin`
-- El plugin `team-standards` se puede instalar desde el marketplace privado (no solo desde la ruta local)
-- El fichero `managed_settings_ejemplo.json` es JSON valido y contiene todos los campos necesarios para una configuracion enterprise real
+- El marketplace privado aparece en la pestaña Marketplaces de `/plugin`
+- Claude Code lista los plugins del marketplace privado junto con los del oficial
+- El plugin `team-standards` se puede instalar desde el marketplace privado con `claude plugin install team-standards@mi-empresa/plugins-marketplace`
+- El fichero `managed_settings_ejemplo.json` es JSON valido y contiene las claves enterprise correctas: `extraKnownMarketplaces`, `blockedMarketplaces` y `strictKnownMarketplaces`
 
 ### Pistas
 
-1. Si Python3 no esta disponible, puedes usar cualquier servidor HTTP simple: `npx serve ~/marketplace-privado --port 8099` o `ruby -run -e httpd ~/marketplace-privado -p 8099`.
-2. En un entorno enterprise real, el servidor del marketplace tendria HTTPS, autenticacion y un proceso de CI/CD para publicar nuevas versiones. La simulacion con `http.server` ilustra el concepto sin esa complejidad.
+1. Los marketplaces privados son repositorios de GitHub, no servidores HTTP. No uses `registry.json` ni servidores locales.
+2. Para añadir un marketplace de forma interactiva, usa `/plugin marketplace add owner/repo`. Para persistirlo, usa `extraKnownMarketplaces` en `.claude/settings.json`.
 3. La politica `strictKnownMarketplaces` en un entorno real se configura en el sistema de gestion centralizada de Anthropic para empresas (Claude for Enterprise). En este ejercicio simulamos el fichero JSON resultante.
 
 ---
@@ -783,6 +683,6 @@ Los ejercicios 3 y 4 construyen plugins completos. El codigo de cada componente 
 
 Para los ejercicios 1 y 2, la solucion depende del marketplace y los repositorios que tengas disponibles. El criterio de exito es funcional, no estructural.
 
-Para el ejercicio 5, el fichero `managed_settings_ejemplo.json` generado en el paso 7 es la solucion de referencia para la configuracion enterprise.
+Para el ejercicio 5, el fichero `managed_settings_ejemplo.json` generado en el paso 6 es la solucion de referencia para la configuracion enterprise.
 
-Si tienes dudas sobre la estructura del manifest `plugin.json`, consulta [teoria/03-crear-plugin-propio.md](../teoria/03-crear-plugin-propio.md) donde se explican todos los campos con ejemplos detallados.
+Si tienes dudas sobre la estructura del manifest `.claude-plugin/plugin.json`, consulta [teoria/03-crear-plugin-propio.md](../teoria/03-crear-plugin-propio.md) donde se explica el formato oficial con ejemplos detallados.

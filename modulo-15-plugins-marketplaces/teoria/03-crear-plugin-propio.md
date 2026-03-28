@@ -23,95 +23,54 @@ Si solo necesitas una capacidad en un proyecto concreto, un skill o hook en `.cl
 
 ```
 mi-plugin/
-├── plugin.json          # Manifest (obligatorio)
+├── .claude-plugin/
+│   └── plugin.json      # Manifest (obligatorio)
 ├── skills/
-│   └── deploy.md        # Skill invocable por nombre
+│   └── deploy/
+│       └── SKILL.md     # Skill invocable por nombre
 ├── agents/
 │   └── revisor.md       # Subagente especializado
 ├── hooks/
-│   ├── pre-deploy.sh    # Hook de validación
-│   └── post-deploy.sh   # Hook de notificación
+│   └── hooks.json       # Configuración de hooks del plugin
+├── commands/             # Comandos personalizados (opcional)
 └── README.md            # Documentación para usuarios del plugin
 ```
 
-Cada subdirectorio es opcional; incluye solo los componentes que necesitas.
+Cada subdirectorio es opcional; incluye solo los componentes que necesitas. Los componentes se descubren automáticamente por la estructura de directorios.
 
 ---
 
-## El Manifest `plugin.json`
+## El Manifest `.claude-plugin/plugin.json`
 
-El manifest define la identidad, dependencias, configuración y componentes del plugin.
+El manifest define únicamente la identidad del plugin. Reside dentro del directorio `.claude-plugin/` y tiene un formato muy simple:
 
 ```json
 {
   "name": "deploy-safe",
-  "version": "1.0.0",
   "description": "Flujo de deploy seguro con validaciones, rollback y notificación a Slack",
-  "author": "equipo-plataforma@empresa.com",
-  "homepage": "https://github.com/mi-empresa/deploy-safe-plugin",
-  "license": "MIT",
-  "engines": {
-    "claude-code": ">=2.0.0"
-  },
-  "dependencies": {
-    "mcp": ["@modelcontextprotocol/server-github"],
-    "tools": ["git", "docker", "kubectl"]
-  },
-  "configuration": {
-    "environment": {
-      "type": "string",
-      "enum": ["staging", "production"],
-      "default": "staging",
-      "description": "Entorno de destino del deploy"
-    },
-    "slack_webhook": {
-      "type": "string",
-      "description": "URL del webhook de Slack para notificaciones (opcional)",
-      "required": false
-    },
-    "require_tests": {
-      "type": "boolean",
-      "default": true,
-      "description": "Exigir que los tests pasen antes de permitir el deploy"
-    }
-  },
-  "components": {
-    "skills": [
-      "skills/deploy.md",
-      "skills/rollback.md"
-    ],
-    "agents": [
-      "agents/revisor.md"
-    ],
-    "hooks": [
-      {
-        "file": "hooks/pre-deploy.sh",
-        "event": "PreToolUse",
-        "matcher": "Bash",
-        "description": "Valida que los tests pasan antes de ejecutar comandos de deploy"
-      },
-      {
-        "file": "hooks/post-deploy.sh",
-        "event": "PostToolUse",
-        "matcher": "Bash",
-        "description": "Notifica a Slack cuando se completa un deploy"
-      }
-    ]
-  }
+  "version": "1.0.0",
+  "author": "equipo-plataforma@empresa.com"
 }
 ```
 
-**Campos obligatorios:** `name`, `version`, `description`.
+El manifest solo contiene estos cuatro campos: `name`, `description`, `version` y `author`.
 
-**Campos recomendados para publicación:** `author`, `license`, `homepage`, `engines`.
+Los componentes del plugin (skills, hooks, agentes, servidores MCP) **no se declaran en el manifest**. Se descubren automáticamente por la estructura de directorios:
+
+- `skills/` - Cada subcarpeta con un `SKILL.md` se registra como skill
+- `agents/` - Los archivos `.md` se registran como subagentes
+- `hooks/` - El archivo `hooks.json` define los hooks del plugin
+- `commands/` - Comandos personalizados del plugin
+
+> **Importante:** No uses campos como `dependencies`, `configuration`, `components`, `engines` o `license` en el manifest. El formato oficial solo reconoce los cuatro campos indicados.
 
 ---
 
 ## Empaquetar Skills Existentes
 
-Si ya tienes skills en `.claude/skills/` de tu proyecto, puedes empaquetarlos en un plugin sin modificarlos. Copia los archivos `SKILL.md` al subdirectorio `skills/` del plugin y regístralos en el manifest.
+Si ya tienes skills en `.claude/skills/` de tu proyecto, puedes empaquetarlos en un plugin. Crea una subcarpeta dentro de `skills/` con el nombre del skill y coloca el archivo `SKILL.md` dentro. El plugin descubrirá automáticamente todos los skills por la estructura de directorios; no es necesario declararlos en el manifest.
 
-Ejemplo de skill de deploy (`skills/deploy.md`):
+Ejemplo de skill de deploy (`skills/deploy/SKILL.md`):
 
 ```markdown
 ---
@@ -133,13 +92,13 @@ Antes de cualquier deploy:
 Reporta cada paso con su resultado (ok/error) antes de continuar al siguiente.
 ```
 
-El skill anterior hace referencia al entorno configurado en `plugin.json`. El plugin inyecta el valor de `environment` como variable de entorno `PLUGIN_ENVIRONMENT` al ejecutar el skill.
+El skill anterior es descubierto automáticamente por el plugin al detectar la estructura `skills/deploy/SKILL.md`.
 
 ---
 
 ## Empaquetar Hooks con el Plugin
 
-Los hooks del plugin se definen en el directorio `hooks/` y se registran en el manifest con el evento y el matcher correspondientes.
+Los hooks del plugin se definen en el directorio `hooks/`. Se configuran en un archivo `hooks.json` dentro de ese directorio (no en el manifest `plugin.json`).
 
 Ejemplo de hook de validación pre-deploy (`hooks/pre-deploy.sh`):
 
@@ -210,61 +169,42 @@ exit 0
 
 ## Incluir un Servidor MCP en el Plugin
 
-Si tu plugin requiere un servidor MCP externo, decláralo en `dependencies.mcp` del manifest. Claude Code instalará y configurará el servidor automáticamente al instalar el plugin.
+Si tu plugin requiere un servidor MCP, inclúyelo dentro de la estructura de directorios del plugin. Claude Code descubrirá automáticamente los servidores MCP disponibles al cargar el plugin.
 
-Para un servidor MCP personalizado que forma parte del plugin (no es un paquete público), inclúyelo en el directorio del plugin y referencíalo en la configuración:
-
-```json
-{
-  "name": "deploy-safe",
-  "version": "1.0.0",
-  "description": "Flujo de deploy con acceso a Kubernetes vía MCP",
-  "dependencies": {
-    "mcp": {
-      "kubernetes-mcp": {
-        "command": "npx",
-        "args": ["-y", "@anthropic-mcp/kubernetes"],
-        "env": {
-          "KUBECONFIG": "${KUBECONFIG}"
-        }
-      }
-    }
-  }
-}
-```
-
-La sintaxis `${VARIABLE}` en los valores de `env` permite pasar variables de entorno del sistema al servidor MCP sin hardcodear credenciales en el manifest.
+Recuerda que el manifest `.claude-plugin/plugin.json` solo contiene los cuatro campos de identidad (`name`, `description`, `version`, `author`). Los servidores MCP no se declaran en el manifest; se descubren por la estructura de directorios.
 
 ---
 
 ## Probar el Plugin Localmente
 
-Antes de publicar, instala el plugin desde la ruta local para verificar que funciona correctamente:
+Antes de publicar, carga el plugin desde la ruta local para verificar que funciona correctamente:
 
 ```bash
-# Desde el directorio del proyecto donde quieres probar el plugin
-/plugin install ./ruta/a/mi-plugin --scope project
+# Cargar el plugin local para desarrollo/testing
+claude --plugin-dir ./ruta/a/mi-plugin
 ```
 
-Lista los plugins instalados para confirmar que se registró correctamente:
+Este flag inicia Claude Code con el plugin cargado desde la ruta especificada, sin necesidad de instalarlo formalmente.
+
+Lista los plugins cargados para confirmar que se registró correctamente:
 
 ```bash
-/plugin list
+claude plugin list
 ```
 
 Verifica que los skills son invocables:
 
 ```bash
 # Dentro de una sesión de Claude Code
-@deploy-safe/deploy
+/deploy-safe:deploy
 ```
 
 Verifica que los hooks se activan en el evento correcto ejecutando el comando que debería disparar el hook y observando los mensajes de stderr del hook en el log de Claude Code.
 
-Para desinstalar la versión local y repetir el ciclo:
+Para desinstalar un plugin instalado:
 
 ```bash
-/plugin remove deploy-safe
+claude plugin remove deploy-safe
 ```
 
 ---
@@ -273,23 +213,17 @@ Para desinstalar la versión local y repetir el ciclo:
 
 Cuando el plugin está listo para compartirse:
 
-1. Crea un repositorio público en GitHub con la estructura del plugin en la raíz
-2. Publica el plugin en el marketplace de Claude Code:
+1. Crea un repositorio público en GitHub con la estructura del plugin en la raíz (incluyendo `.claude-plugin/plugin.json`)
+2. Publica el plugin a través del **formulario web en platform.claude.com**
 
-    ```bash
-    /plugin publish --source https://github.com/mi-usuario/deploy-safe-plugin
-    ```
+> **Importante:** No existe un comando CLI `/plugin publish` para publicar plugins. La publicación se realiza exclusivamente a través del formulario web en la plataforma de Anthropic (platform.claude.com).
 
-3. Claude Code valida el manifest, verifica la estructura de carpetas y registra el plugin con el nombre declarado en `plugin.json`
+3. Anthropic valida el manifest, verifica la estructura de carpetas y registra el plugin con el nombre declarado en `.claude-plugin/plugin.json`
 
-Para publicar desde npm (si prefieres ese registro):
+Una vez publicado, los usuarios pueden instalarlo con:
 
 ```bash
-# El package.json debe incluir los campos claude-code en la sección custom
-npm publish
-
-# Instalar desde npm
-/plugin install npm:@mi-org/deploy-safe
+claude plugin install deploy-safe@claude-plugins-official
 ```
 
 ---
@@ -306,16 +240,12 @@ El versionado sigue semántica SemVer (`MAYOR.MENOR.PARCHE`):
 | Corrección de un hook que fallaba | PARCHE |
 | Cambio en el comportamiento de un hook (no es bug) | MENOR o MAYOR |
 
-Para publicar una nueva versión, incrementa `version` en `plugin.json` y ejecuta de nuevo `/plugin publish`. Los usuarios reciben la actualización con:
+Para publicar una nueva versión, incrementa `version` en `.claude-plugin/plugin.json` y sube los cambios al repositorio. Luego, publica la nueva versión a través del formulario web en platform.claude.com.
+
+Los usuarios pueden reinstalar para obtener la última versión:
 
 ```bash
-/plugin update deploy-safe
-```
-
-Si quieres fijar una versión específica al instalar (para reproducibilidad):
-
-```bash
-/plugin install deploy-safe@1.0.0
+claude plugin install deploy-safe@claude-plugins-official
 ```
 
 ---
@@ -324,7 +254,7 @@ Si quieres fijar una versión específica al instalar (para reproducibilidad):
 
 **No marcar los scripts de hooks como ejecutables.** Si `hooks/pre-deploy.sh` no tiene permisos de ejecución (`chmod +x`), el hook fallará silenciosamente en algunos sistemas. Verifica los permisos antes de publicar.
 
-**Hardcodear URLs o credenciales en el manifest.** Usa el sistema de `configuration` para valores que varían entre instalaciones. Los usuarios configuran sus propios valores; el manifest solo define los campos y sus valores por defecto.
+**Hardcodear URLs o credenciales en los archivos del plugin.** Usa variables de entorno para valores que varían entre instalaciones.
 
 **No probar el plugin en un proyecto limpio.** El plugin puede funcionar en el proyecto donde lo desarrollaste pero fallar en otros si depende de archivos o variables de entorno que no están presentes universalmente. Prueba siempre en un repositorio diferente al de desarrollo.
 
@@ -334,9 +264,9 @@ Si quieres fijar una versión específica al instalar (para reproducibilidad):
 
 ## Resumen
 
-- La estructura mínima de un plugin es `plugin.json` más al menos un subdirectorio con un componente
-- El manifest declara nombre, versión, dependencias, configuración disponible y componentes incluidos
-- Los skills, hooks y subagentes existentes se empaquetan copiándolos a los subdirectorios del plugin y registrándolos en el manifest
-- Para incluir un servidor MCP, decláralo en `dependencies.mcp` con su comando de inicio
-- El ciclo de desarrollo local es: crear → instalar con `--scope project` → probar → desinstalar → iterar
-- La publicación se hace vía `/plugin publish` apuntando al repositorio del plugin
+- La estructura mínima de un plugin es `.claude-plugin/plugin.json` (con 4 campos: name, description, version, author) más al menos un subdirectorio con un componente
+- El manifest solo declara la identidad del plugin; los componentes se descubren automáticamente por estructura de directorios
+- Los skills se colocan en `skills/<nombre-skill>/SKILL.md`, los hooks en `hooks/hooks.json`, los agentes en `agents/`
+- Los servidores MCP se descubren automáticamente, no se declaran en el manifest
+- El ciclo de desarrollo local es: crear estructura -> probar con `claude --plugin-dir ./mi-plugin` -> iterar
+- La publicación se hace a través del formulario web en platform.claude.com (no existe comando CLI para publicar)

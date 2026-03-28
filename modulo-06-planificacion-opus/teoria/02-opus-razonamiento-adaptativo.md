@@ -10,15 +10,18 @@ de su razonamiento según la complejidad de la tarea.
 
 ## Razonamiento Adaptativo
 
-### 3 Niveles de Esfuerzo
+### 4 Niveles de Esfuerzo
 
 | Nivel | Cuándo | Ejemplo |
 |-------|--------|---------|
-| **Bajo** | Tareas simples, respuestas directas | "¿Qué hace git status?" |
-| **Medio** | Tareas con algo de complejidad | "Refactoriza esta función a async" |
-| **Alto** | Problemas complejos, multi-archivo | "Diseña sistema de permisos RBAC" |
+| **Bajo (low)** | Tareas simples, respuestas directas | "¿Qué hace git status?" |
+| **Medio (medium)** | Tareas con algo de complejidad **(default)** | "Refactoriza esta función a async" |
+| **Alto (high)** | Problemas complejos, multi-archivo | "Diseña sistema de permisos RBAC" |
+| **Máximo (max)** | Razonamiento sin límites (**solo Opus 4.6**) | "Analiza y resuelve esta condición de carrera en el sistema distribuido" |
 
-Opus decide automáticamente cuánto "pensar" basándose en la complejidad.
+Opus decide automáticamente cuánto "pensar" basándose en la complejidad. El nivel por defecto es **medium**, recomendado para la mayoría de tareas de programación.
+
+> **Tip:** Para activar razonamiento profundo en un solo turno sin cambiar la configuración de la sesión, incluye la keyword **"ultrathink"** en tu prompt.
 
 ### Adaptive Thinking (reemplaza Extended Thinking)
 
@@ -30,8 +33,10 @@ Si necesitas forzar razonamiento extendido, puedes usar:
 
 | Método | Cómo |
 |--------|------|
-| Atajo | `Alt+T` (toggle) |
-| Slash command | `/effort max` (nuevo nivel máximo para Opus) |
+| Atajo de teclado | `Alt+T` (toggle) |
+| Slash command | `/effort high` o `/effort max` (max solo para Opus) |
+| Flag CLI | `--effort high` o `--effort max` |
+| Keyword por turno | Incluir "ultrathink" en el prompt |
 
 Extended thinking sigue siendo útil para:
 - Debugging de problemas complejos
@@ -167,5 +172,5 @@ cobertura exhaustiva.
 90% del trabajo → Sonnet ($3/$15)
 Planificación   → Opus o opusplan
 Tareas triviales → Haiku ($1/$5)
-Debug complejo  → Opus con Extended Thinking
+Debug complejo  → Opus con effort high/max o "ultrathink"
 ```

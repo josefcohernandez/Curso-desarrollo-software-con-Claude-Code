@@ -116,8 +116,10 @@ Crea un archivo `ejercicio-enterprise/etc/claude-code/settings.json` con las sig
 >     ]
 >   },
 >   "env": {
->     "DISABLE_NONESSENTIAL_TRAFFIC": "1",
->     "CLAUDE_CODE_ENABLE_SANDBOX": "1"
+>     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+>   },
+>   "sandbox": {
+>     "enabled": true
 >   },
 >   "model": "claude-sonnet-4-20250514"
 > }
@@ -129,12 +131,12 @@ Verifica que tu política es un JSON válido y cubre los requisitos:
 
 ```bash
 # Validar JSON
-python3 -c "import json; json.load(open('ejercicio-enterprise/etc/claude-code/settings.json')); print('JSON válido')"
+python3 -c "import json; json.load(open('ejercicio-enterprise/etc/claude-code/managed-settings.json')); print('JSON válido')"
 
 # Verificar que tiene las secciones necesarias
 python3 -c "
 import json
-with open('ejercicio-enterprise/etc/claude-code/settings.json') as f:
+with open('ejercicio-enterprise/etc/claude-code/managed-settings.json') as f:
     data = json.load(f)
 
 checks = {
@@ -142,8 +144,8 @@ checks = {
     'Tiene permissions.deny': 'deny' in data.get('permissions', {}),
     'Tiene env': 'env' in data,
     'Tiene model': 'model' in data,
-    'Telemetría desactivada': data.get('env', {}).get('DISABLE_NONESSENTIAL_TRAFFIC') == '1',
-    'Sandbox activado': data.get('env', {}).get('CLAUDE_CODE_ENABLE_SANDBOX') == '1',
+    'Telemetría desactivada': data.get('env', {}).get('CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC') == '1',
+    'Sandbox activado': data.get('sandbox', {}).get('enabled') is True,
     'Modelo es Sonnet': 'sonnet' in data.get('model', '').lower(),
 }
 

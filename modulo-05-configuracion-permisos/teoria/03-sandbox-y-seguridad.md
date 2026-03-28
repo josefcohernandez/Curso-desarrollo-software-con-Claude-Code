@@ -7,17 +7,23 @@ limitando el acceso a archivos y red.
 
 ---
 
-## Activación
+## Activacion
 
-```bash
-export CLAUDE_CODE_ENABLE_SANDBOX=1
-claude
+La forma oficial de activar el sandbox es mediante `settings.json` o el comando interactivo `/sandbox`:
+
+```json
+{
+  "sandbox": {
+    "enabled": true
+  }
+}
 ```
 
-O de forma persistente:
+O durante una sesion interactiva:
 
 ```bash
-echo 'export CLAUDE_CODE_ENABLE_SANDBOX=1' >> ~/.bashrc
+# Desde el prompt de Claude Code
+/sandbox
 ```
 
 ---
@@ -31,16 +37,19 @@ Usa `sandbox-exec` nativo de macOS para restringir procesos:
 - Red restringida según configuración
 - No puede acceder a archivos fuera del proyecto
 
-### Linux: Docker Sandbox
+### Linux: bubblewrap (bwrap) + socat
 
-Ejecuta comandos dentro de un contenedor Docker:
-- Filesystem aislado (solo directorio del proyecto montado)
-- Red configurable
-- Procesos aislados del host
+Usa **bubblewrap** (bwrap) junto con socat para crear un entorno aislado:
+- Filesystem aislado (solo directorio del proyecto accesible)
+- Red configurable mediante `sandbox.network.allowedDomains`
+- Procesos aislados del host sin necesidad de contenedores
 
 ```bash
-# Requiere Docker instalado
-docker --version  # Verificar
+# Verificar que bubblewrap esta instalado
+bwrap --version
+
+# En Debian/Ubuntu, instalar si no esta disponible
+sudo apt install bubblewrap
 ```
 
 ---
@@ -71,13 +80,34 @@ docker --version  # Verificar
 
 ---
 
-## Variables de Seguridad
+## Configuracion de Seguridad
 
-| Variable | Propósito |
+### En settings.json (forma recomendada)
+
+| Clave | Proposito |
+|-------|----------|
+| `sandbox.enabled: true` | Activar sandbox |
+| `sandbox.network.allowedDomains` | Lista de dominios permitidos para acceso a red dentro del sandbox |
+
+```json
+{
+  "sandbox": {
+    "enabled": true,
+    "network": {
+      "allowedDomains": [
+        "registry.npmjs.org",
+        "api.github.com"
+      ]
+    }
+  }
+}
+```
+
+### Variables de entorno adicionales
+
+| Variable | Proposito |
 |----------|----------|
-| `CLAUDE_CODE_ENABLE_SANDBOX=1` | Activar sandbox |
-| `DISABLE_NONESSENTIAL_TRAFFIC=1` | Bloquear telemetría y tráfico no esencial |
-| `CLAUDE_CODE_DISABLE_NETWORK=1` | Sin acceso a red (sandbox estricto) |
+| `DISABLE_NONESSENTIAL_TRAFFIC=1` | Bloquear telemetria y trafico no esencial |
 | `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB=1` | Eliminar credenciales del entorno de subprocesos |
 
 ---
@@ -86,7 +116,7 @@ docker --version  # Verificar
 
 ### `sandbox.failIfUnavailable`
 
-Por defecto, si el sandbox no está disponible (Docker no instalado en Linux, o restricción del sistema en macOS), Claude Code continúa sin sandbox y muestra un aviso. Con esta opción activada, Claude Code **termina con error** si el sandbox no está disponible, garantizando que nunca se ejecuten comandos sin aislamiento.
+Por defecto, si el sandbox no esta disponible (bubblewrap no instalado en Linux, o restriccion del sistema en macOS), Claude Code continua sin sandbox y muestra un aviso. Con esta opcion activada, Claude Code **termina con error** si el sandbox no esta disponible, garantizando que nunca se ejecuten comandos sin aislamiento.
 
 ```json
 {
@@ -102,10 +132,10 @@ Esto es especialmente útil en entornos enterprise y CI/CD donde el sandbox es u
 
 ## Limitaciones del Sandbox
 
-- **Rendimiento**: Ligero overhead al ejecutar comandos en contenedor
+- **Rendimiento**: Ligero overhead al ejecutar comandos en entorno aislado
 - **Compatibilidad**: Algunas herramientas pueden no funcionar en sandbox
-- **Configuración**: Puede requerir ajustes para MCPs que necesitan acceso a red
-- **Docker requerido** en Linux (no aplica en macOS)
+- **Configuracion**: Puede requerir ajustes para MCPs que necesitan acceso a red (usar `sandbox.network.allowedDomains`)
+- **bubblewrap requerido** en Linux (no aplica en macOS que usa Seatbelt nativo)
 
 ---
 
@@ -143,5 +173,5 @@ Incluso sin sandbox, puedes mejorar la seguridad con:
 |-------------------|-----------|----------|
 | Permisos deny | Comandos específicos | Bajo |
 | Hooks PreToolUse | Validación dinámica | Medio |
-| Sandbox | Aislamiento completo | Bajo (activar variable) |
+| Sandbox | Aislamiento completo | Bajo (activar en settings) |
 | Managed policies | Control corporativo | Admin |

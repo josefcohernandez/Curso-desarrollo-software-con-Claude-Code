@@ -60,35 +60,58 @@
 
 ## Modos de Operación
 
-### 1. Normal (por defecto)
+Claude Code tiene 6 modos de permisos oficiales. Se pueden activar con `--permission-mode <modo>` desde CLI, con `Shift+Tab` durante una sesion interactiva, o persistir en `settings.json` con `"permissions": { "defaultMode": "<modo>" }`.
 
-Claude pide confirmación para Write, Edit y Bash según la configuración de permisos.
+### 1. default (por defecto)
 
-### 2. Auto-accept Edits (acceptEdits)
-
-Acepta automáticamente ediciones de archivos sin preguntar.
-Bash y Write siguen pidiendo confirmación.
+Comportamiento estandar: pide confirmacion para herramientas que modifican (Write, Edit, Bash) segun la configuracion de permisos.
 
 ```bash
-# Activar desde CLI
+claude --permission-mode default
+```
+
+### 2. acceptEdits
+
+Auto-acepta ediciones de archivos (Read + Edit sin preguntar). Bash sigue pidiendo confirmacion.
+
+```bash
 claude --permission-mode acceptEdits
 ```
 
-### 3. Plan Mode
+### 3. plan
 
-Claude solo propone, no ejecuta. Activar con `Shift+Tab` o `/plan`.
+Claude puede analizar codigo y ejecutar Bash para explorar el proyecto, pero **no modifica archivos** (no ejecuta Write ni Edit). Escribe un plan de accion que el usuario revisa antes de aplicar.
 
-### 4. Delegate Mode
+Activar con `Shift+Tab` durante una sesion interactiva o desde CLI:
 
-Claude puede delegar trabajo a subagentes con permisos más amplios.
-Útil para equipos donde el líder revisa y los subagentes ejecutan.
+```bash
+claude --permission-mode plan
+```
 
-### 5. Bypass Permissions (bypassPermissions)
+### 4. dontAsk
 
-**Peligroso**: No pide confirmación para nada. Solo usar en CI/CD controlado.
+Auto-deniega herramientas a menos que esten pre-aprobadas via reglas `allow`. Si una herramienta no tiene una regla `allow` explicita, se deniega automaticamente sin preguntar al usuario.
+
+```bash
+claude --permission-mode dontAsk
+```
+
+Este modo es util cuando se quiere un comportamiento estrictamente controlado: solo se ejecutan las acciones explicitamente permitidas.
+
+### 5. bypassPermissions
+
+**Peligroso**: Salta todos los prompts de permisos, con excepcion de operaciones sobre directorios protegidos (`.git`, `.claude`, `.vscode`, `.idea`). Solo usar en entornos CI/CD controlados.
 
 ```bash
 claude -p "ejecuta tests" --dangerously-skip-permissions
+```
+
+### 6. auto (research preview)
+
+Un clasificador de seguridad basado en IA decide automaticamente si permitir cada accion. Requiere modelos **Claude Sonnet 4.6** o **Claude Opus 4.6**. Ver [05-auto-mode.md](05-auto-mode.md) para detalles completos.
+
+```bash
+claude --permission-mode auto
 ```
 
 ---

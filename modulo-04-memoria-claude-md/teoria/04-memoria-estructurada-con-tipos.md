@@ -1,5 +1,7 @@
 # 04 - Memoria estructurada con tipos
 
+> **Nota importante**: El sistema de tipos de memoria con frontmatter (`user`, `feedback`, `project`, `reference`) descrito en este capitulo es un **patron recomendado por este curso** para organizar la auto memory de forma estructurada. NO es una funcionalidad impuesta por Claude Code. Auto memory es un sistema libre donde Claude escribe ficheros markdown organizados como considere conveniente. Este patron ha demostrado ser efectivo para mantener la memoria organizada y util entre sesiones, y Claude Code lo adopta cuando se configura en el system prompt del proyecto.
+
 ## 1. El sistema de auto-memoria evolucionado
 
 Al inicio de este capítulo vimos que Claude Code puede guardar notas automáticamente entre
@@ -46,10 +48,11 @@ hasta superar 200 líneas, las memorias al final dejan de cargarse en el context
 
 ---
 
-## 2. Los 4 tipos de memoria
+## 2. Los 4 tipos de memoria recomendados
 
-Cada fichero de memoria declara su tipo en el frontmatter YAML. El tipo no es un campo
-decorativo: le indica a Claude el propósito de la información y cómo debe usarla.
+Este curso propone estructurar la memoria en 4 tipos, declarando el tipo en el frontmatter
+YAML de cada fichero. El tipo no es un campo decorativo: le indica a Claude el propósito
+de la información y cómo debe usarla.
 
 ---
 
@@ -420,7 +423,7 @@ futuras Claude sepa si la restricción sigue vigente.
 
 - Los ficheros de memoria viven en `~/.claude/projects/<hash>/memory/` con frontmatter YAML.
 - `MEMORY.md` es solo un índice de punteros; el contenido va en ficheros separados.
-- Hay 4 tipos: `user` (quién eres), `feedback` (correcciones), `project` (contexto del trabajo), `reference` (dónde buscar).
+- Recomendamos organizar la auto memory en 4 tipos: `user` (quién eres), `feedback` (correcciones), `project` (contexto del trabajo), `reference` (dónde buscar).
 - No guardes lo que el código ya dice, ni duplicados de `CLAUDE.md`, ni estado temporal.
 - La memoria es para futuras sesiones; usa plan y tasks para la sesión actual.
 

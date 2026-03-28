@@ -24,7 +24,7 @@ claude
 
 ## Parte 2: Definir Teammates (10 min)
 
-Crea `.claude/teammates/frontend-dev.md`:
+Crea `.claude/agents/frontend-dev.md`:
 
 ```markdown
 # Frontend Developer
@@ -33,7 +33,7 @@ Solo modifica archivos en src/frontend/ y src/components/.
 Escribe tests con Vitest.
 ```
 
-Crea `.claude/teammates/backend-dev.md`:
+Crea `.claude/agents/backend-dev.md`:
 
 ```markdown
 # Backend Developer

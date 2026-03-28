@@ -137,12 +137,17 @@ Se basa en componentes reutilizables.
 
 Compartido con todo el equipo via git. Contiene convenciones del proyecto.
 
-### Local (.claude/CLAUDE.local.md)
+### Preferencias locales personales
 
-Preferencias personales, NO se commitea:
+Para preferencias que no se comparten con el equipo, hay dos opciones:
+
+1. **`.claude/settings.local.json`** para configuraciones locales simples (no se commitea).
+2. **Fichero personal importado** desde CLAUDE.md: añadir `@~/.claude/mis-preferencias.md`
+   en el CLAUDE.md del proyecto para cargar tus preferencias personales. El fichero
+   `~/.claude/mis-preferencias.md` vive en tu home y no afecta al equipo.
 
 ```markdown
-# Preferencias personales
+# Ejemplo de ~/.claude/mis-preferencias.md
 - Yo trabajo principalmente en el módulo de pagos
 - Prefiero explicaciones detalladas
 - Ejecutar siempre lint después de editar

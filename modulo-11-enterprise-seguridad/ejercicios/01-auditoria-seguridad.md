@@ -127,15 +127,14 @@ Si tu configuración actual es insuficiente, crea una versión mejorada:
 ### Paso 3.1: Comprobar el estado del sandbox
 
 ```bash
-# Verificar si el sandbox está activado
-echo $CLAUDE_CODE_ENABLE_SANDBOX
-
-# Verificar si Docker está disponible (necesario para sandbox en Linux)
-docker --version 2>/dev/null || echo "Docker no instalado"
+# Verificar el sandbox desde una sesión de Claude Code:
+# Ejecuta /sandbox para ver el estado actual
 
 # Verificar la plataforma
 uname -s
 ```
+
+El sandbox se configura en `settings.json` con `"sandbox": { "enabled": true }` o mediante el comando `/sandbox` dentro de una sesión.
 
 ### Paso 3.2: Evaluar la necesidad del sandbox
 
@@ -153,14 +152,24 @@ Responde:
 
 ### Paso 3.3: Activar el sandbox si es necesario
 
-```bash
-# Añadir a tu perfil de shell (.bashrc, .zshrc)
-echo 'export CLAUDE_CODE_ENABLE_SANDBOX=1' >> ~/.bashrc
-source ~/.bashrc
+Hay dos formas de activar el sandbox:
 
-# Verificar que se activó correctamente
-echo $CLAUDE_CODE_ENABLE_SANDBOX
-# Debe mostrar: 1
+**Opción 1: En settings.json (persistente)**
+
+```json
+// En .claude/settings.json (proyecto) o ~/.claude/settings.json (usuario)
+{
+  "sandbox": {
+    "enabled": true
+  }
+}
+```
+
+**Opción 2: Desde una sesión de Claude Code**
+
+```bash
+# Dentro de Claude Code:
+/sandbox
 ```
 
 ---

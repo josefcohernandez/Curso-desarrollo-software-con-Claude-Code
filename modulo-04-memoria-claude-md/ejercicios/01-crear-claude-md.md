@@ -82,17 +82,32 @@ Verifica:
 
 ---
 
-## Parte 4: Crear CLAUDE.local.md (5 min)
+## Parte 4: Configurar preferencias locales (5 min)
 
-Crea un archivo personal (no se commitea):
+Para preferencias personales que no se comparten con el equipo, usa `.claude/settings.local.json`
+o crea un fichero personal importado desde CLAUDE.md.
+
+**Opcion A**: Crear un fichero de preferencias personales:
 
 ```bash
-# Crear manualmente o pedir a Claude:
-"Crea un .claude/CLAUDE.local.md con mis preferencias:
+# Crear el fichero personal en tu home:
+mkdir -p ~/.claude
+cat > ~/.claude/mis-preferencias.md << 'EOF'
+# Mis preferencias personales
 - Trabajo principalmente en el modulo de [tu modulo]
 - Prefiero respuestas en espanol
-- Siempre ejecutar lint despues de editar"
+- Siempre ejecutar lint despues de editar
+EOF
 ```
+
+Luego, en el `CLAUDE.md` del proyecto, anade la linea de import:
+
+```markdown
+@~/.claude/mis-preferencias.md
+```
+
+**Opcion B**: Usar `.claude/settings.local.json` para configuraciones simples (este fichero
+no se commitea al repositorio).
 
 ---
 
@@ -143,5 +158,5 @@ API REST para gestion de [dominio].
 - [ ] CLAUDE.md creado con las 6 secciones
 - [ ] Menos de 100 lineas
 - [ ] Verificado con una tarea real
-- [ ] CLAUDE.local.md creado
-- [ ] Commiteado al repositorio (excepto local)
+- [ ] Preferencias locales configuradas (settings.local.json o fichero personal importado)
+- [ ] Commiteado al repositorio (excepto ficheros locales)

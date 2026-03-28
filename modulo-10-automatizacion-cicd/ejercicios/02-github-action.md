@@ -116,10 +116,10 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          model: "claude-sonnet-4-5-20250929"
-          max_turns: 5
-          claude_md: |
-            Eres un revisor de codigo experimentado. Al revisar:
+          claude_args: |
+            --model claude-sonnet-4-6
+            --max-turns 5
+            --append-system-prompt "Eres un revisor de codigo experimentado. Al revisar:
 
             ## Reglas
             1. Revisa seguridad, rendimiento y legibilidad
@@ -133,7 +133,7 @@ jobs:
             - **Problemas Criticos** (deben corregirse antes de merge)
             - **Mejoras Importantes** (deberian corregirse)
             - **Sugerencias** (nice to have)
-            - **Aspectos Positivos** (que se hizo bien)
+            - **Aspectos Positivos** (que se hizo bien)"
 ```
 
 ### Paso 2: Hacer commit y push del workflow

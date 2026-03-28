@@ -30,8 +30,6 @@ mi-proyecto/
 
 ### Protección de credenciales en subprocesos
 
-> **Novedad v3.0**
-
 La variable de entorno `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB=1` elimina automáticamente las credenciales y tokens del entorno de los subprocesos que Claude Code lanza. Esto previene la filtración accidental de secrets a través de comandos ejecutados por Claude.
 
 ```bash

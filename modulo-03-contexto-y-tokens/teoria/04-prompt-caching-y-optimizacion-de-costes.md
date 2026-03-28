@@ -38,9 +38,9 @@ Claude Code. Los precios están expresados por millón de tokens (MTok).
 
 | Modelo | Input (por 1M tokens) | Output (por 1M tokens) | Cached input |
 |--------|-----------------------|------------------------|--------------|
-| Claude Opus 4.5 | $15.00 | $75.00 | $1.50 (90% ahorro) |
-| Claude Sonnet 4.5 | $3.00 | $15.00 | $0.30 (90% ahorro) |
-| Claude Haiku 4.5 | $0.80 | $4.00 | $0.08 (90% ahorro) |
+| Claude Opus 4.6 | $5.00 | $25.00 | $0.50 (90% ahorro) |
+| Claude Sonnet 4.6 | $3.00 | $15.00 | $0.30 (90% ahorro) |
+| Claude Haiku 4.5 | $1.00 | $5.00 | $0.10 (90% ahorro) |
 
 > Los precios son aproximados y pueden variar. Consulta siempre los precios
 > actualizados en https://www.anthropic.com/pricing antes de planificar un

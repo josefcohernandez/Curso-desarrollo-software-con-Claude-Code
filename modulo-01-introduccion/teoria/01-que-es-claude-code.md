@@ -203,9 +203,9 @@ Claude Code puede utilizar diferentes modelos de la familia Claude, cada uno opt
 - **Coste:** El más caro
 - **Pensamiento adaptativo:** Opus 4.6 incluye "adaptive thinking" -- puede dedicar más o menos tiempo a razonar según la complejidad del problema
 
-### Sonnet 4.5 (Desarrollo diario)
+### Sonnet 4.6 (Desarrollo diario)
 
-- **Identificador:** `claude-sonnet-4-5-20241022` (la versión puede variar)
+- **Identificador:** `claude-sonnet-4-6` (la versión puede variar)
 - **Fortalezas:** Excelente equilibrio entre calidad y velocidad
 - **Ideal para:** Trabajo de desarrollo diario, implementación de features, corrección de bugs, tests
 - **Velocidad:** Rápido
@@ -214,7 +214,7 @@ Claude Code puede utilizar diferentes modelos de la familia Claude, cada uno opt
 
 ### Haiku 4.5 (Rápido y económico)
 
-- **Identificador:** `claude-haiku-4-5-20241022` (la versión puede variar)
+- **Identificador:** `claude-haiku-4-5-20251001` (la versión puede variar)
 - **Fortalezas:** Muy rápido, coste bajo
 - **Ideal para:** Tareas simples, autocompletado, preguntas rápidas, operaciones en lote
 - **Velocidad:** El más rápido
@@ -230,7 +230,7 @@ En la CLI puedes cambiar el modelo de varias formas:
 claude --model claude-opus-4-6
 
 # Dentro de una sesión, usar el comando /model
-/model opus 4.6
+/model opus
 
 # Modo rápido (fast mode) dentro de una sesión
 /fast
@@ -242,9 +242,9 @@ claude --model claude-opus-4-6
 |-------|-------------------|
 | Diseñar arquitectura de un sistema | Opus 4.6 |
 | Debugging de un problema difícil | Opus 4.6 |
-| Implementar una feature | Sonnet 4.5 |
-| Corregir un bug sencillo | Sonnet 4.5 |
-| Escribir tests | Sonnet 4.5 |
+| Implementar una feature | Sonnet 4.6 |
+| Corregir un bug sencillo | Sonnet 4.6 |
+| Escribir tests | Sonnet 4.6 |
 | Preguntas rápidas sobre sintaxis | Haiku 4.5 |
 | Generar boilerplate | Haiku 4.5 |
 | Procesar muchos archivos en lote | Haiku 4.5 |

@@ -1,12 +1,12 @@
 # Comparativa de Costes: Modelos y Escenarios
 
-## Precios por Modelo (febrero 2026)
+## Precios por Modelo
 
 | Modelo | Input (1M tokens) | Output (1M tokens) | Cache read (90% off) |
 |--------|-------------------|--------------------|--------------------|
-| **Haiku 4.5** | $0.80 | $4.00 | $0.08 |
-| **Sonnet 4.5** | $3.00 | $15.00 | $0.30 |
-| **Opus 4.6** | $15.00 | $75.00 | $1.50 |
+| **Haiku 4.5** | $1.00 | $5.00 | $0.10 |
+| **Sonnet 4.6** | $3.00 | $15.00 | $0.30 |
+| **Opus 4.6** | $5.00 | $25.00 | $0.50 |
 
 ---
 

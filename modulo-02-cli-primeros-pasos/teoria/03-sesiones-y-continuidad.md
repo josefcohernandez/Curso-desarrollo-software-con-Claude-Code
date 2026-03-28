@@ -47,9 +47,6 @@ Claude Code guarda el historial de tus sesiones. Puedes retomarlas:
 # Continuar la última sesión
 claude --resume
 
-# Listar sesiones recientes
-claude sessions list
-
 # Continuar sesión específica por ID
 claude --resume abc123def
 ```

@@ -67,10 +67,10 @@ Al mantener el contexto limpio, Claude genera mejores respuestas y tú gastas me
 
 ```
 # Sonnet: $3/$15 por millón tokens (desarrollo diario)
-# Opus:  $15/$75 por millón tokens (planificación, debug complejo)
+# Opus:  $5/$25 por millón tokens (planificación, debug complejo)
 ```
 
-**Ahorro**: 70-80% en coste para tareas rutinarias.
+**Ahorro**: 30-40% en coste para tareas rutinarias usando Sonnet en vez de Opus.
 
 ### 5. `/compact` con instrucción de foco
 

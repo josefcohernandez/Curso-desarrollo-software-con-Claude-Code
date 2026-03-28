@@ -22,7 +22,7 @@ Opus decide automáticamente cuánto "pensar" basándose en la complejidad.
 
 ### Adaptive Thinking (reemplaza Extended Thinking)
 
-> **Cambio v3.0:** En Opus 4.6, el parámetro `thinking: {type: "enabled"}` y `budget_tokens` están **deprecados**. Se sustituyen por **adaptive thinking**, que decide automáticamente cuándo y cuánto razonar.
+> **Cambio v3.0:** En Opus 4.6, **adaptive thinking** es el nuevo comportamiento por defecto: el modelo decide automáticamente cuándo y cuánto razonar. Los parámetros `thinking: {type: "enabled"}` y `budget_tokens` siguen siendo funcionales pero ya no son necesarios. Para revertir al comportamiento anterior, configura `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1`.
 
 Con adaptive thinking, no necesitas activar ni desactivar el razonamiento profundo manualmente. Opus ajusta dinámicamente la profundidad de su razonamiento basándose en la complejidad detectada.
 
@@ -45,9 +45,9 @@ Extended thinking sigue siendo útil para:
 
 | Modelo | Coste (in/out) | Usar para | No usar para |
 |--------|---------------|-----------|-------------|
-| **Haiku 4.5** | $0.80/$4 | Commit messages, formateo, tareas triviales | Cualquier cosa que requiera razonamiento |
+| **Haiku 4.5** | $1/$5 | Commit messages, formateo, tareas triviales | Cualquier cosa que requiera razonamiento |
 | **Sonnet 4.6** | $3/$15 | Desarrollo diario, features, tests, refactoring | Decisiones arquitectónicas complejas |
-| **Opus 4.6** | $15/$75 | Planificación, debug complejo, arquitectura | Tareas rutinarias (5x más caro que Sonnet) |
+| **Opus 4.6** | $5/$25 | Planificación, debug complejo, arquitectura | Tareas rutinarias (~1.7x más caro que Sonnet) |
 
 > **Nota v3.0:** Opus 4.6 ahora soporta hasta **128K tokens de salida** (duplicado desde 64K). Sonnet 4.6 alcanza **1M de contexto** en beta con 64K tokens de salida.
 
@@ -83,10 +83,10 @@ la ejecución es mecánica.
 
 | Enfoque | Planificación | Ejecución | Coste típico feature |
 |---------|--------------|-----------|---------------------|
-| Todo Opus | Opus ($15/$75) | Opus ($15/$75) | $2-5 |
+| Todo Opus | Opus ($5/$25) | Opus ($5/$25) | $1-3 |
 | Todo Sonnet | Sonnet ($3/$15) | Sonnet ($3/$15) | $0.50-1.50 |
-| **opusplan** | Opus ($15/$75) | Sonnet ($3/$15) | **$0.80-2.00** |
-| Haiku | Haiku ($0.80/$4) | Haiku ($0.80/$4) | $0.10-0.30 |
+| **opusplan** | Opus ($5/$25) | Sonnet ($3/$15) | **$0.60-1.50** |
+| Haiku | Haiku ($1/$5) | Haiku ($1/$5) | $0.10-0.30 |
 
 opusplan ofrece la **calidad de Opus en planificación** con el **coste de Sonnet en ejecución**.
 
@@ -166,6 +166,6 @@ cobertura exhaustiva.
 ```
 90% del trabajo → Sonnet ($3/$15)
 Planificación   → Opus o opusplan
-Tareas triviales → Haiku ($0.80/$4)
+Tareas triviales → Haiku ($1/$5)
 Debug complejo  → Opus con Extended Thinking
 ```

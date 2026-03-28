@@ -74,9 +74,9 @@ claude --resume                 # Continuar sesion
 
 | Modelo | Uso | Coste (input/output por 1M tokens) |
 |--------|-----|-------------------------------------|
-| **Haiku** | Tareas simples | $0.80 / $4 |
+| **Haiku** | Tareas simples | $1 / $5 |
 | **Sonnet** | Desarrollo diario | $3 / $15 |
-| **Opus** | Planificacion, debugging complejo | $15 / $75 |
+| **Opus** | Planificacion, debugging complejo | $5 / $25 |
 
 ## Recetas Comunes
 

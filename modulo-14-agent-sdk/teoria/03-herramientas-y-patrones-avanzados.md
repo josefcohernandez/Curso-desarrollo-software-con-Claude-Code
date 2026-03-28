@@ -278,8 +278,8 @@ async def buscar_en_github(repo: str, consulta: str) -> None:
         options=ClaudeAgentOptions(
             mcp_servers={
                 "github": {
-                    "url": "https://api.githubcopilot.com/mcp/",
-                    "transport": "http",
+                    "command": "npx",
+                    "args": ["-y", "@modelcontextprotocol/server-github"],
                 }
             },
         ),

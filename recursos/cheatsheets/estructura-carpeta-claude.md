@@ -138,16 +138,35 @@ Es el fichero principal de configuracion del proyecto. Se comparte con el equipo
 }
 ```
 
-**Eventos de hooks disponibles:**
+**Eventos de hooks disponibles (25 eventos):**
 
 | Evento | Cuando se ejecuta |
 |--------|-------------------|
 | `PreToolUse` | Antes de que Claude use una herramienta |
 | `PostToolUse` | Despues de que Claude use una herramienta |
+| `PostToolUseFailure` | Cuando una herramienta falla |
 | `Notification` | Cuando Claude genera una notificacion |
 | `Stop` | Cuando Claude termina su turno |
+| `StopFailure` | Cuando Claude falla al detenerse |
 | `SubagentStart` | Cuando un subagente inicia |
 | `SubagentStop` | Cuando un subagente termina |
+| `SessionStart` | Al iniciar o reanudar una sesion |
+| `SessionEnd` | Al finalizar una sesion |
+| `UserPromptSubmit` | Cuando el usuario envia un prompt |
+| `PermissionRequest` | Cuando Claude solicita un permiso |
+| `InstructionsLoaded` | Cuando se cargan las instrucciones (CLAUDE.md) |
+| `TaskCreated` | Cuando se crea una tarea |
+| `TaskCompleted` | Cuando se completa una tarea |
+| `TeammateIdle` | Cuando un teammate de Agent Teams queda inactivo |
+| `FileChanged` | Cuando un fichero cambia |
+| `CwdChanged` | Cuando cambia el directorio de trabajo |
+| `ConfigChange` | Cuando cambia la configuracion |
+| `PreCompact` | Antes de compactar el contexto |
+| `PostCompact` | Despues de compactar el contexto |
+| `WorktreeCreate` | Cuando se crea un worktree |
+| `WorktreeRemove` | Cuando se elimina un worktree |
+| `Elicitation` | Cuando Claude solicita informacion al usuario |
+| `ElicitationResult` | Cuando el usuario responde a una elicitacion |
 
 ---
 

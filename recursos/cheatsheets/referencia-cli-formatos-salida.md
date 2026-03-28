@@ -11,14 +11,8 @@ Indice: [referencia-cli-indice.md](./referencia-cli-indice.md)
 Los formatos de salida estructurados requieren el **modo print** (`-p` / `--print`). En el modo interactivo, la salida siempre es texto formateado para el terminal.
 
 ```bash
-# Uso con --output-config (forma actual recomendada)
-claude -p "query" --output-config format=<formato>
-
-# Uso con --output-format (DEPRECADO desde v2.1.81, mantiene compatibilidad)
 claude -p "query" --output-format <formato>
 ```
-
-> **Nota de migracion:** El flag `--output-format` esta deprecado. El reemplazo es `--output-config format=<formato>`. Ambas formas funcionan en la version actual pero se recomienda usar `--output-config` en scripts nuevos. El campo equivalente en settings es `output_config.format`.
 
 ---
 
@@ -66,7 +60,7 @@ Al finalizar la ejecucion completa, emite un unico objeto JSON a stdout con la r
 ### Sintaxis
 
 ```bash
-claude -p "query" --output-config format=json
+claude -p "query" --output-format json
 ```
 
 ### Estructura del objeto JSON de salida
@@ -139,7 +133,7 @@ Emite objetos JSON separados por lineas (formato NDJSON / JSON Lines) conforme C
 ### Sintaxis
 
 ```bash
-claude -p "query" --output-config format=stream-json
+claude -p "query" --output-format stream-json
 ```
 
 ### Tipos de eventos en el stream
@@ -459,5 +453,5 @@ Lista los agentes configurados, agrupados por origen (proyecto, usuario global, 
 ## Ver tambien
 
 - [Modos de ejecucion](./referencia-cli-modos-ejecucion.md) — El modo print (`-p`) es el que habilita estos formatos
-- [Flags de arranque](./referencia-cli-flags-arranque.md) — Todos los flags relacionados con output: `--output-config` (reemplazo de `--output-format` deprecado), `--json-schema`, `--include-partial-messages`, `--input-format`
+- [Flags de arranque](./referencia-cli-flags-arranque.md) — Todos los flags relacionados con output: `--output-format`, `--json-schema`, `--include-partial-messages`, `--input-format`
 - [github-actions-claude-code.md](./github-actions-claude-code.md) — Uso de formatos de salida en CI/CD

@@ -8,23 +8,15 @@ GitHub Actions es la plataforma de CI/CD nativa de GitHub. Anthropic ofrece una 
 
 ---
 
-## Setup Rápido con `/install-github-app`
+## Setup Rápido
 
-La forma más rápida de configurar GitHub Actions con Claude Code es desde la terminal:
+La forma más rápida de configurar GitHub Actions con Claude Code es:
 
-```bash
-# Dentro de una sesión de Claude Code
-/install-github-app
-```
-
-Este comando guía interactivamente a través de:
-1. Instalar la GitHub App de Claude en tu repositorio
-2. Configurar el secreto `ANTHROPIC_API_KEY`
-3. Crear el workflow YAML necesario
+1. Instala la [GitHub App de Claude](https://github.com/apps/claude) en tu repositorio
+2. Configura el secreto `ANTHROPIC_API_KEY` en los settings del repositorio (Settings > Secrets and variables > Actions)
+3. Crea el workflow YAML necesario (ver sección siguiente)
 
 **Requisitos:** Debes ser administrador del repositorio.
-
-Si prefieres configuración manual o usas Bedrock/Vertex AI, sigue los pasos de la sección siguiente.
 
 ---
 
@@ -127,11 +119,11 @@ En la versión v1.0 GA, la configuración se simplifica. Los parámetros princip
 - uses: anthropics/claude-code-action@v1
   with:
     anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-    claude_args: "--model claude-sonnet-4-5-20250929"
+    claude_args: "--model claude-sonnet-4-6"
 ```
 
 Modelos disponibles:
-- `claude-sonnet-4-5-20250929` - Rápido y económico, ideal para revisiones de código
+- `claude-sonnet-4-6` - Rápido y económico, ideal para revisiones de código
 - `claude-opus-4-6` - El más potente, para tareas complejas de razonamiento
 
 ### Instrucciones personalizadas
@@ -157,7 +149,7 @@ Claude respeta automáticamente el `CLAUDE.md` de tu repositorio. Simplemente cr
     anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
     claude_args: |
       --append-system-prompt "Eres un revisor de código senior. Responde en español. Enfócate en seguridad y rendimiento."
-      --model claude-sonnet-4-5-20250929
+      --model claude-sonnet-4-6
 ```
 
 ### Usar skills del proyecto en workflows
@@ -180,7 +172,7 @@ Esto permite mantener las instrucciones de revisión centralizadas en `.claude/s
 - uses: anthropics/claude-code-action@v1
   with:
     anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-    claude_args: "--max-turns 5 --model claude-sonnet-4-5-20250929"
+    claude_args: "--max-turns 5 --model claude-sonnet-4-6"
 ```
 
 ### Filtrar por archivos modificados
@@ -275,7 +267,7 @@ steps:
   - uses: anthropics/claude-code-action@v1
     with:
       use_bedrock: "true"
-      claude_args: "--model us.anthropic.claude-sonnet-4-5-20250929-v1:0 --max-turns 10"
+      claude_args: "--model us.anthropic.claude-sonnet-4-6-v1:0 --max-turns 10"
 ```
 
 Configuración necesaria:
@@ -338,7 +330,7 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          claude_md: |
+          prompt: |
             Este PR ha sido marcado para revisión.
             Realiza una revisión exhaustiva.
 ```
@@ -363,7 +355,7 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          claude_md: |
+          prompt: |
             Enfócate EXCLUSIVAMENTE en seguridad:
             - OWASP Top 10
             - Validación de inputs
@@ -381,7 +373,7 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          claude_md: |
+          prompt: |
             Enfócate EXCLUSIVAMENTE en rendimiento:
             - Complejidad algorítmica (Big O)
             - Uso de memoria
@@ -408,7 +400,7 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          claude_md: |
+          prompt: |
             Analiza este issue y:
             1. Clasifica su tipo: bug, feature, question, documentation
             2. Estima su prioridad: critical, high, medium, low
@@ -509,7 +501,7 @@ Si tienes workflows con `@beta`, estos son los cambios necesarios para migrar a 
     anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
     custom_instructions: "Responde en español"
     max_turns: "10"
-    model: "claude-sonnet-4-5-20250929"
+    model: "claude-sonnet-4-6"
 
 # DESPUÉS (v1.0 GA)
 - uses: anthropics/claude-code-action@v1
@@ -519,7 +511,7 @@ Si tienes workflows con `@beta`, estos son los cambios necesarios para migrar a 
     claude_args: |
       --append-system-prompt "Responde en español"
       --max-turns 10
-      --model claude-sonnet-4-5-20250929
+      --model claude-sonnet-4-6
 ```
 
 ---
@@ -529,7 +521,7 @@ Si tienes workflows con `@beta`, estos son los cambios necesarios para migrar a 
 | Concepto | Detalle |
 |----------|---------|
 | Acción oficial | `anthropics/claude-code-action@v1` |
-| Setup rápido | `/install-github-app` desde Claude Code |
+| Setup rápido | Instalar GitHub App de Claude + configurar secreto + crear workflow |
 | Secreto necesario | `ANTHROPIC_API_KEY` (API directa) |
 | Triggers principales | `pull_request`, `issue_comment`, `issues`, `schedule` |
 | Menciones | `@claude` en comentarios de PRs e issues |

@@ -79,7 +79,7 @@ Al completar este modulo, seras capaz de:
 | **Modo no interactivo** | Ejecucion de Claude Code sin sesion interactiva, ideal para scripts y CI |
 | **Flag `-p`** | Activa el modo "pipe" / no interactivo |
 | **`claude-code-action@v1`** | Accion oficial de GitHub (version GA) para integrar Claude Code en workflows |
-| **`/install-github-app`** | Comando de Claude Code para setup rapido de GitHub Actions |
+| **`/install-github-app`** | Comando de Claude Code para setup guiado de GitHub Actions (si está disponible) |
 | **`prompt`** | Parametro de la accion para instrucciones o invocacion de skills (`/review`) |
 | **`claude_args`** | Parametro unificado para pasar flags CLI (modelo, turnos, etc.) |
 | **`--output-format`** | Controla el formato de salida: `text`, `json`, `stream-json` |

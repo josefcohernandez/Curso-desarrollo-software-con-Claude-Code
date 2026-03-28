@@ -65,7 +65,7 @@ Configuración personal del desarrollador **para este proyecto**.
     "allow": ["Bash(npm test:*)", "Write(src/**)"]
   },
   "env": {
-    "CLAUDE_MODEL": "claude-sonnet-4-20250514"
+    "ANTHROPIC_MODEL": "claude-sonnet-4-6"
   }
 }
 ```
@@ -118,7 +118,7 @@ Configuración personal global (aplica a todos los proyectos):
     "allow": ["Read", "Glob", "Grep"]
   },
   "env": {
-    "CLAUDE_MODEL": "claude-sonnet-4-20250514"
+    "ANTHROPIC_MODEL": "claude-sonnet-4-6"
   }
 }
 ```

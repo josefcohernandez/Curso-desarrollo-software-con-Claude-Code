@@ -90,9 +90,9 @@ Permiten declarar explicitamente las capacidades del modelo configurado, necesar
 
 | Variable | Descripcion |
 |----------|-------------|
-| `ANTHROPIC_DEFAULT_OPUS_MODEL_SUPPORTS` | Capacidades del modelo Opus por defecto. Permite sobreescribir la deteccion automatica de features para el modelo Opus configurado |
-| `ANTHROPIC_DEFAULT_SONNET_MODEL_SUPPORTS` | Capacidades del modelo Sonnet por defecto. Idem para el modelo Sonnet configurado |
-| `ANTHROPIC_DEFAULT_HAIKU_MODEL_SUPPORTS` | Capacidades del modelo Haiku por defecto. Idem para el modelo Haiku configurado |
+| `ANTHROPIC_DEFAULT_OPUS_MODEL_SUPPORTED_CAPABILITIES` | Capacidades del modelo Opus por defecto. Permite sobreescribir la deteccion automatica de features para el modelo Opus configurado |
+| `ANTHROPIC_DEFAULT_SONNET_MODEL_SUPPORTED_CAPABILITIES` | Capacidades del modelo Sonnet por defecto. Idem para el modelo Sonnet configurado |
+| `ANTHROPIC_DEFAULT_HAIKU_MODEL_SUPPORTED_CAPABILITIES` | Capacidades del modelo Haiku por defecto. Idem para el modelo Haiku configurado |
 
 ### Ejemplo: configuracion completa con Bedrock
 
@@ -132,12 +132,23 @@ claude
 
 ---
 
+## Proveedor: Microsoft Azure AI Foundry
+
+| Variable | Valores | Defecto | Descripcion |
+|----------|---------|---------|-------------|
+| `CLAUDE_CODE_USE_FOUNDRY` | `1` | — | Activa la integracion con Microsoft Azure AI Foundry |
+| `ANTHROPIC_FOUNDRY_API_KEY` | string | — | API key de Azure AI Foundry |
+| `ANTHROPIC_FOUNDRY_BASE_URL` | URL | — | URL base del recurso de Azure AI Foundry |
+| `ANTHROPIC_FOUNDRY_RESOURCE` | string | — | Nombre del recurso de Azure AI Foundry |
+
+---
+
 ## Modelo y razonamiento
 
 | Variable | Valores | Defecto | Descripcion |
 |----------|---------|---------|-------------|
 | `ANTHROPIC_MODEL` | nombre de modelo | — | Modelo por defecto para la sesion. Acepta alias (`sonnet`, `opus`) o nombre completo (`claude-sonnet-4-6`). Equivalente a `--model` |
-| `ANTHROPIC_SMALL_FAST_MODEL` | nombre de modelo | Haiku | Modelo usado para tareas rapidas y subagentes ligeros |
+| `ANTHROPIC_SMALL_FAST_MODEL` | nombre de modelo | Haiku | **[DEPRECATED]** Modelo usado para tareas rapidas y subagentes ligeros |
 | `MAX_THINKING_TOKENS` | numero | — | Limita el numero de tokens de razonamiento interno (extended thinking). Util para controlar costes cuando el extended thinking esta activo |
 | `DISABLE_PROMPT_CACHING` | `1` | — | Desactiva el prompt caching. Util en regiones de Bedrock donde el caching no esta disponible |
 
@@ -149,12 +160,12 @@ claude
 |----------|---------|---------|-------------|
 | `BASH_DEFAULT_TIMEOUT_MS` | numero (ms) | `120000` (2 min) | Timeout por defecto para comandos bash. Aumentar para scripts de larga duracion |
 | `BASH_MAX_TIMEOUT_MS` | numero (ms) | `600000` (10 min) | Timeout maximo permitido para comandos bash. Claude no puede superar este limite aunque el usuario lo pida |
-| `BASH_MAX_OUTPUT_CHARS` | numero | `200000` | Limite de caracteres en la salida de un comando bash antes de truncar |
+| `BASH_MAX_OUTPUT_LENGTH` | numero | `200000` | Limite de caracteres en la salida de un comando bash antes de truncar |
 | `CLAUDE_CODE_SHELL` | path | `/bin/bash` | Shell a usar para ejecutar comandos bash |
 | `CLAUDE_CODE_TMPDIR` | path | directorio temporal del sistema | Directorio temporal para ficheros de trabajo de Claude Code |
 | `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS` | `1` | — | Desactiva toda la funcionalidad de tareas en segundo plano |
 | `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` | `1` | — | Elimina las credenciales del entorno antes de lanzar subprocesos desde Claude Code. Impide que comandos bash ejecutados por Claude hereden `ANTHROPIC_API_KEY` y otras variables sensibles. Recomendado en entornos de produccion (v2.1.81+) |
-| `CLAUDE_STREAM_IDLE_TIMEOUT_MS` | numero (ms) | — | Timeout del watchdog de streaming idle. Controla cuanto tiempo espera Claude Code antes de considerar una conexion de streaming como inactiva y cancelarla. Util para ajustar la tolerancia a pausas largas en respuestas de streaming (v2.1.84+) |
+| `CLAUDE_STREAM_IDLE_TIMEOUT_MS` | numero (ms) | `90000` (90s) | Timeout del watchdog de streaming idle. Controla cuanto tiempo espera Claude Code antes de considerar una conexion de streaming como inactiva y cancelarla |
 
 ### Ejemplo: ajuste de timeouts para CI
 
@@ -162,7 +173,7 @@ claude
 # En un entorno CI con tests de integracion lentos
 export BASH_DEFAULT_TIMEOUT_MS=300000   # 5 minutos
 export BASH_MAX_TIMEOUT_MS=1800000      # 30 minutos
-export BASH_MAX_OUTPUT_CHARS=500000     # Mas output para logs detallados
+export BASH_MAX_OUTPUT_LENGTH=500000     # Mas output para logs detallados
 ```
 
 ---
@@ -193,8 +204,7 @@ export BASH_MAX_OUTPUT_CHARS=500000     # Mas output para logs detallados
 |----------|---------|---------|-------------|
 | `CLAUDE_CODE_ENABLE_TELEMETRY` | `1` | — | Activa la telemetria de OpenTelemetry. Requiere configurar las variables `OTEL_*` correspondientes |
 | `DISABLE_TELEMETRY` | `1` | — | Desactiva el envio de telemetria a Anthropic |
-| `DISABLE_NONESSENTIAL_TRAFFIC` | `1` | — | Desactiva todo el trafico no esencial: telemetria, sugerencias de prompts, actualizaciones de estado en segundo plano |
-| `CLAUDE_CODE_DEBUG` | `1` | — | Activa logs de depuracion detallados. Equivalente a `--debug` |
+| `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` | `1` | — | Desactiva todo el trafico no esencial: telemetria, sugerencias de prompts, actualizaciones de estado en segundo plano |
 
 ### Variables de OpenTelemetry
 
@@ -217,7 +227,6 @@ export OTEL_SERVICE_NAME="claude-code-mi-equipo"
 
 | Variable | Valores | Defecto | Descripcion |
 |----------|---------|---------|-------------|
-| `CLAUDE_CODE_STATUS_LINE` | template string | — | Personaliza la linea de estado del terminal. Ver [/statusline](https://code.claude.com/docs/en/statusline) para la sintaxis del template |
 | `CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION` | `true` / `false` | `true` | Activa o desactiva las sugerencias de prompts que aparecen en gris. Desactivar ahorra tokens cuando la cache esta fria |
 
 ---
@@ -248,7 +257,7 @@ claude
 ```bash
 export ANTHROPIC_API_KEY="sk-ant-api03-..."
 export ANTHROPIC_MODEL="claude-sonnet-4-6"
-export DISABLE_NONESSENTIAL_TRAFFIC=1
+export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
 claude
 ```
 
@@ -269,7 +278,7 @@ claude
 
 ```bash
 export ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY}"  # Desde secreto del CI
-export DISABLE_NONESSENTIAL_TRAFFIC=1
+export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
 export BASH_DEFAULT_TIMEOUT_MS=60000
 export MAX_THINKING_TOKENS=4000
 claude -p "ejecuta los tests y reporta fallos" \

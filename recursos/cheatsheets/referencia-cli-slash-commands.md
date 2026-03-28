@@ -39,9 +39,9 @@ Los slash commands se invocan escribiendo `/` seguido del nombre del comando en 
 | Comando | Sintaxis | Descripcion | Notas |
 |---------|----------|-------------|-------|
 | `/model` | `/model [modelo]` | Selecciona o cambia el modelo de IA. Con flechas izquierda/derecha, ajusta el nivel de esfuerzo para modelos que lo soportan. El cambio es inmediato | — |
-| `/effort` | `/effort [low\|medium\|high\|max\|auto]` | Establece el nivel de esfuerzo del modelo. `low`, `medium`, `high` persisten entre sesiones. `max` solo para la sesion actual (requiere Opus 4.6). `auto` resetea al defecto del modelo | Sin argumento muestra el nivel actual |
+| `/effort` | `/effort [low\|medium\|high\|max]` | Establece el nivel de esfuerzo del modelo. `low`, `medium`, `high` persisten entre sesiones. `max` solo para la sesion actual (requiere Opus 4.6) | Sin argumento muestra el nivel actual |
 | `/fast` | `/fast [on\|off]` | Activa o desactiva el modo rapido | — |
-| `/loop` | `/loop [on\|off]` | Activa o desactiva el modo de bucle agentivo, en el que Claude repite turnos hasta completar la tarea sin esperar confirmacion del usuario | Solo disponible en sesiones interactivas |
+| `/loop` | `/loop [intervalo] <prompt>` | Skill que ejecuta un prompt repetidamente en un intervalo (ej: `/loop 5m comprueba si el deploy ha terminado`). El intervalo por defecto es 10 minutos | Es una skill bundled, no un comando built-in |
 
 ### Configuracion e informacion
 
@@ -115,6 +115,7 @@ Los slash commands se invocan escribiendo `/` seguido del nombre del comando en 
 | `/desktop` | `/desktop` | Continua la sesion actual en la app de escritorio de Claude Code | Solo macOS y Windows. Alias: `/app` |
 | `/mobile` | `/mobile` | Muestra codigo QR para descargar la app movil de Claude | Alias: `/ios`, `/android` |
 | `/voice` | `/voice` | Activa el modo push-to-talk para dictado por voz. Mantener la barra espaciadora para hablar, soltarla para enviar. Soporta 20 idiomas | Requiere cuenta Claude.ai. Configurable en `/config`. Ver [atajos de teclado](./referencia-cli-atajos-teclado.md) para el atajo Space |
+| `/schedule` | `/schedule [descripcion]` | Crea, actualiza, lista o ejecuta tareas programadas en la nube (Cloud scheduled tasks) | — |
 
 ### Sesiones remotas
 
@@ -222,6 +223,8 @@ Claude Code incluye algunas skills de serie que aparecen en el menu `/`:
 | `/simplify` | Simplifica el codigo seleccionado |
 | `/batch` | Procesa multiples elementos en lote |
 | `/debug` | Inicia un flujo de depuracion guiado |
+| `/claude-api` | Carga material de referencia del Claude API/SDK para construir aplicaciones con la API de Anthropic |
+| `/loop` | Ejecuta un prompt repetidamente en un intervalo (ej: `/loop 5m comprueba el deploy`) |
 
 ### Crear skills personalizadas
 

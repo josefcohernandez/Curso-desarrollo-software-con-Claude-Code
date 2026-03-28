@@ -309,7 +309,7 @@ Controlan qué acciones puede realizar Claude de forma autónoma.
 
 | Flag | Descripción | Ejemplo |
 |------|-------------|---------|
-| `--permission-mode` | Modo de permisos: `default`, `auto-accept`, `plan`, `delegate` | `claude --permission-mode plan` |
+| `--permission-mode` | Modo de permisos: `default`, `acceptEdits`, `plan`, `bypassPermissions` | `claude --permission-mode plan` |
 | `--allowedTools` | Lista de herramientas permitidas sin pedir confirmación | `claude --allowedTools "Read,Grep,Glob"` |
 | `--disallowedTools` | Lista de herramientas bloqueadas | `claude --disallowedTools "Bash"` |
 | `--dangerously-skip-permissions` | Omite TODAS las confirmaciones de permisos (PELIGROSO) | Solo para CI/CD controlado |
@@ -319,9 +319,9 @@ Controlan qué acciones puede realizar Claude de forma autónoma.
 | Modo | Comportamiento | Uso recomendado |
 |------|---------------|-----------------|
 | `default` | Pide confirmación para acciones destructivas | Uso diario normal |
-| `auto-accept` | Acepta todo automáticamente | Tareas de confianza, scripts supervisados |
+| `acceptEdits` | Acepta ediciones automáticamente, pregunta para Bash | Tareas de confianza, scripts supervisados |
 | `plan` | Solo planifica, no ejecuta cambios | Revisión de código, planificación |
-| `delegate` | Delega decisiones al modelo orquestador | Agentes multi-modelo |
+| `bypassPermissions` | Omite todos los permisos (solo en entornos aislados) | CI/CD, entornos sandboxed |
 
 **Ejemplo con herramientas permitidas:**
 ```bash
@@ -395,13 +395,13 @@ Para casos de uso especializados y configuraciones avanzadas.
 
 | Flag | Descripción | Ejemplo |
 |------|-------------|---------|
-| `--agents` | Habilita modo multi-agente con equipos | `claude --agents "architect,developer,reviewer"` |
+| `--agents` | Define subagentes personalizados dinámicamente vía JSON. Usa los mismos campos que el frontmatter de subagentes, más un campo `prompt` | `claude --agents '{"reviewer":{"description":"Revisa código","prompt":"Eres un revisor"}}'` |
 | `--mcp-config` | Carga configuración MCP desde archivo JSON | `claude --mcp-config ./mcp-servers.json` |
-| `--tools` | Especifica herramientas adicionales a cargar | `claude --tools "custom-tool"` |
+| `--tools` | Restringe qué herramientas integradas puede usar Claude. `""` para desactivar todas, `"default"` para todas, o nombres separados por coma | `claude --tools "Bash,Edit,Read"` |
 | `--add-dir` | Añade directorios adicionales al contexto | `claude --add-dir ../shared-lib --add-dir ../common` |
-| `--chrome` | Habilita la integración con el navegador Chrome. Permite a Claude Code interactuar con páginas web abiertas en Chrome para testing de UI, screenshots automáticos, inspección del DOM, etc. | `claude --chrome` |
-| `--remote` | Conecta con una instancia remota de Claude Code | `claude --remote` |
-| `--teleport` | Habilita teleport para desarrollo remoto | `claude --teleport` |
+| `--chrome` | Habilita la integración con el navegador Chrome para automatización web | `claude --chrome` |
+| `--remote` | Crea una nueva sesión web en claude.ai con la descripción de tarea indicada | `claude --remote "Arregla el bug de login"` |
+| `--teleport` | Reanuda una sesión web en el terminal local | `claude --teleport` |
 
 **Ejemplo: Múltiples directorios**
 ```bash

@@ -114,7 +114,7 @@ Si tu equipo usa Figma para el diseño, puedes conectar Claude Code a Figma via 
 - Variantes y estados de los componentes
 
 ```bash
-claude mcp add --transport http figma https://mcp.figma.com/mcp
+claude mcp add figma -- npx -y figma-developer-mcp --figma-api-key=$FIGMA_API_KEY
 ```
 
 Con el MCP de Figma, el prompt cambia de referenciar una imagen a referenciar un componente directamente:

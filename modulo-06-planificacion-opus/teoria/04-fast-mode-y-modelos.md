@@ -18,7 +18,7 @@ Fast Mode no es un modelo distinto. Es una optimización de velocidad sobre el m
 - No reduce la calidad en tareas de complejidad baja o media
 - No es equivalente a usar Haiku (que sí es un modelo diferente)
 
-> **Nota v3.0 — Pricing de Fast Mode:** Fast Mode tiene un coste de $30/$150 por MTok (input/output), el doble del modo estándar de Opus. El incremento se justifica por la infraestructura de generación acelerada. Es un research preview disponible en planes Max/Team/Enterprise.
+> **Nota v3.0 — Pricing de Fast Mode:** Fast Mode tiene un coste de $30/$150 por MTok (input/output), 6x el precio estándar de Opus ($5/$25). El incremento se justifica por la infraestructura de generación acelerada. Es un research preview disponible en planes Max/Team/Enterprise.
 
 **Activar Fast Mode en el CLI:**
 
@@ -37,7 +37,7 @@ Como se introdujo en el Capítulo 1, Claude Code ofrece tres modelos. Aquí prof
 | Modelo | Model ID | Contexto | Fortaleza principal |
 |--------|----------|----------|---------------------|
 | Claude Opus 4.6 | `claude-opus-4-6` | 1M tokens | Razonamiento profundo, tareas complejas |
-| Claude Sonnet 4.6 | `claude-sonnet-4-6` | 200K tokens | Equilibrio calidad/velocidad |
+| Claude Sonnet 4.6 | `claude-sonnet-4-6` | 1M tokens | Equilibrio calidad/velocidad |
 | Claude Haiku 4.5 | `claude-haiku-4-5-20251001` | 200K tokens | Velocidad, tareas simples |
 
 Para especificar el modelo en el CLI:
@@ -59,8 +59,8 @@ La variable de entorno `CLAUDE_CODE_EFFORT_LEVEL` controla cuánto razonamiento 
 | Valor | Comportamiento | Tokens de razonamiento |
 |-------|---------------|----------------------|
 | `low` | Respuesta rápida, razonamiento mínimo | Pocos |
-| `medium` | Balance entre velocidad y profundidad | Moderados |
-| `high` | Máximo razonamiento antes de responder (default) | Muchos |
+| `medium` | Balance entre velocidad y profundidad (default) | Moderados |
+| `high` | Máximo razonamiento antes de responder | Muchos |
 
 ```bash
 # Configurar para la sesión actual

@@ -16,7 +16,7 @@ Este apartado cubre la instalación de Claude Code, la configuración de la aute
 | **Cuenta** | Pro, Max, Teams, Enterprise o Console | El plan gratuito de Claude.ai no incluye Claude Code |
 
 > [!IMPORTANT]
-> **Node.js ya no es necesario**. Desde 2026, la instalación nativa es el método recomendado. No requiere Node.js, npm ni ninguna dependencia externa. La instalación vía npm está oficialmente deprecada.
+> **Node.js ya no es necesario**. La instalación nativa es el método recomendado. No requiere Node.js, npm ni ninguna dependencia externa. La instalación vía npm sigue siendo válida como alternativa.
 
 ---
 
@@ -222,7 +222,7 @@ claude update
 | Variable | Propósito | Ejemplo |
 |----------|----------|---------|
 | `ANTHROPIC_API_KEY` | API key | `sk-ant-xxx` |
-| `CLAUDE_MODEL` | Modelo por defecto | `claude-sonnet-4-6-20250514` |
+| `ANTHROPIC_MODEL` | Modelo por defecto | `claude-sonnet-4-6` |
 | `HTTP_PROXY` | Proxy corporativo | `http://proxy:8080` |
 | `CLAUDE_CODE_USE_BEDROCK` | Usar Bedrock | `1` |
 | `DISABLE_AUTOUPDATER` | Desactivar auto-actualización | `1` |

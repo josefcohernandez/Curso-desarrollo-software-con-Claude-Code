@@ -6,6 +6,9 @@
 > **Nivel:** Experto (Bloque 4)
 > **Prerequisitos:** Modulos 07 (MCP), 08 (Hooks), 09 (Subagentes y Skills)
 
+> [!WARNING]
+> **Estado del ecosistema de plugins:** El sistema de plugins de Claude Code está en fase temprana de desarrollo. Algunas funcionalidades descritas en este módulo (como el marketplace público, el comando `/plugin install` o la estructura exacta de `plugin.json`) pueden no estar disponibles en tu versión o funcionar de forma diferente a lo documentado aquí. El flag `--plugin-dir` para cargar plugins locales sí está disponible. Consulta la documentación oficial de tu versión para confirmar la disponibilidad de cada feature.
+
 ---
 
 ## Objetivos de Aprendizaje

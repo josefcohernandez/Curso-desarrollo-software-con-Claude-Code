@@ -114,16 +114,6 @@ claude --bare -p "Genera un commit message para estos cambios" < diff.txt
 
 ## Formatos de Salida: `--output-format`
 
-> **Nota de deprecación v3.0:** El flag `--output-format` está **deprecado** y será eliminado en una versión futura. Usa `--output-config format=<formato>` en su lugar:
->
-> ```bash
-> # Antes (deprecado)
-> claude -p "consulta" --output-format json
->
-> # Ahora (recomendado)
-> claude -p "consulta" --output-config format=json
-> ```
-
 Claude Code soporta tres formatos de salida para adaptarse a diferentes necesidades:
 
 ### Texto plano (por defecto)

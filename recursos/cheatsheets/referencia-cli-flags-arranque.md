@@ -34,7 +34,7 @@ Indice: [referencia-cli-indice.md](./referencia-cli-indice.md)
 | Flag | Alias | Tipo | Descripcion | Ejemplo |
 |------|-------|------|-------------|---------|
 | `--model` | — | string | Modelo para la sesion. Acepta alias (`sonnet`, `opus`) o nombre completo | `claude --model claude-opus-4-6` |
-| `--effort` | — | string | Nivel de esfuerzo: `low`, `medium`, `high`, `max` (Opus 4.6 solo), `auto`. No persiste en settings | `claude --effort high` |
+| `--effort` | — | string | Nivel de esfuerzo: `low`, `medium`, `high`, `max` (Opus 4.6 solo). No persiste en settings | `claude --effort high` |
 | `--fallback-model` | — | string | **Solo print.** Modelo de fallback si el principal esta sobrecargado | `claude -p --fallback-model sonnet "query"` |
 
 ### Herramientas y permisos
@@ -92,18 +92,17 @@ Indice: [referencia-cli-indice.md](./referencia-cli-indice.md)
 | `--init` | — | boolean | Ejecuta hooks de inicializacion e inicia el modo interactivo | `claude --init` |
 | `--init-only` | — | boolean | Ejecuta hooks de inicializacion y sale (sin sesion interactiva) | `claude --init-only` |
 | `--maintenance` | — | boolean | Ejecuta hooks de mantenimiento y sale | `claude --maintenance` |
-| `--bare` | — | boolean | **Solo print.** Salta hooks, LSP y sincronizacion de plugins al arrancar. Reduce la latencia de inicio en llamadas scripteadas. Combinado habitualmente con `-p` | `claude -p --bare "query"` |
+| `--bare` | — | boolean | **Solo print.** Salta auto-discovery de hooks, skills, plugins, servidores MCP, auto memory y CLAUDE.md al arrancar. Reduce la latencia de inicio en llamadas scripteadas. Combinado habitualmente con `-p` | `claude -p --bare "query"` |
 
 ### Output y formato (modo print)
 
 | Flag | Alias | Tipo | Descripcion | Ejemplo |
 |------|-------|------|-------------|---------|
 | `--print` | `-p` | boolean | Modo no interactivo: emite la respuesta y sale | `claude -p "query"` |
-| `--output-format` | — | string | **Solo print. DEPRECADO** — usar `--output-config format=<formato>` en su lugar. Formato de salida: `text` (defecto), `json`, `stream-json` | `claude -p "query" --output-format json` |
-| `--output-config` | — | string | **Solo print.** Reemplazo de `--output-format`. Acepta pares `clave=valor` separados por espacios. Ejemplo de uso equivalente al anterior flag | `claude -p "query" --output-config format=json` |
+| `--output-format` | — | string | **Solo print.** Formato de salida: `text` (defecto), `json`, `stream-json` | `claude -p "query" --output-format json` |
 | `--input-format` | — | string | **Solo print.** Formato de entrada: `text` (defecto), `stream-json` | `claude -p --input-format stream-json` |
 | `--json-schema` | — | JSON string | **Solo print.** Valida el output contra un JSON Schema una vez que el agente completa su workflow | `claude -p --json-schema '{"type":"object",...}' "query"` |
-| `--include-partial-messages` | — | boolean | **Solo print.** Incluye eventos de streaming parciales (requiere formato `stream-json`) | `claude -p --output-config format=stream-json --include-partial-messages "query"` |
+| `--include-partial-messages` | — | boolean | **Solo print.** Incluye eventos de streaming parciales (requiere formato `stream-json`) | `claude -p --output-format stream-json --include-partial-messages "query"` |
 | `--max-turns` | — | number | **Solo print.** Limita el numero de turnos agentivos. Sale con error al alcanzar el limite | `claude -p --max-turns 3 "query"` |
 | `--max-budget-usd` | — | float | **Solo print.** Tope de gasto en dolares antes de detener la ejecucion | `claude -p --max-budget-usd 5.00 "query"` |
 | `--verbose` | — | boolean | Activa logging detallado, muestra el output completo turno a turno | `claude --verbose` |
@@ -133,6 +132,9 @@ Indice: [referencia-cli-indice.md](./referencia-cli-indice.md)
 | `--betas` | — | string[] | Cabeceras beta a incluir en las peticiones API (solo usuarios con API key) | `claude --betas interleaved-thinking` |
 | `--debug` | — | string | Activa modo debug con filtrado opcional de categorias (ej: `"api,hooks"` o `"!statsig,!file"`) | `claude --debug "api,mcp"` |
 | `--version` | `-v` | boolean | Muestra la version instalada de Claude Code | `claude -v` |
+| `--enable-auto-mode` | — | boolean | Desbloquea Auto Mode en el ciclo de `Shift+Tab`. Requiere plan Team y Claude Sonnet 4.6 o Opus 4.6 | `claude --enable-auto-mode` |
+| `--tmux` | — | string | Crea una sesion tmux para el worktree. Requiere `--worktree`. Usa paneles nativos de iTerm2 si esta disponible; pasar `--tmux=classic` para tmux tradicional | `claude -w feature --tmux` |
+| `--dangerously-load-development-channels` | — | boolean | Habilita canales no incluidos en la allowlist aprobada para desarrollo local | `claude --dangerously-load-development-channels` |
 
 ---
 
@@ -144,7 +146,7 @@ Indice: [referencia-cli-indice.md](./referencia-cli-indice.md)
 claude -p "ejecuta los tests y reporta fallos" \
   --max-turns 5 \
   --max-budget-usd 1.00 \
-  --output-config format=json
+  --output-format json
 ```
 
 ### Revision de codigo con model especifico
@@ -177,7 +179,7 @@ claude "implementa el sistema de notificaciones" \
 
 ```bash
 claude -p "analiza el proyecto y genera un informe de dependencias" \
-  --output-config format=json \
+  --output-format json \
   --no-session-persistence \
   --max-turns 10 \
   > informe-dependencias.json

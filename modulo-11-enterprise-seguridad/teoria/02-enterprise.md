@@ -7,7 +7,9 @@ Las políticas gestionadas permiten a los administradores de la organización de
 ### Ubicación del archivo de políticas
 
 ```
-/etc/claude-code/settings.json    # Linux/macOS
+/etc/claude-code/managed-settings.json                    # Linux/WSL
+/Library/Application Support/ClaudeCode/managed-settings.json  # macOS
+C:\Program Files\ClaudeCode\managed-settings.json          # Windows
 ```
 
 > **Importante**: Este archivo requiere permisos de administrador para ser creado o modificado. Los usuarios normales no pueden alterarlo.

@@ -12,7 +12,7 @@ La forma mas sencilla es desde la terminal de Claude Code:
 /install-github-app
 ```
 
-Esto configura automaticamente la GitHub App y los secretos necesarios.
+Esto guía la configuración de la GitHub App y los secretos necesarios. Si el comando no está disponible en tu versión, sigue el setup manual.
 
 ### Setup manual
 

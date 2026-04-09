@@ -28,6 +28,20 @@ Al ejecutar este comando Claude Code muestra una URL. Abrirla en el navegador ab
 - Iniciar una tarea larga (refactoring de módulo entero, migración de base de datos) y dejar que corra en la nube mientras tu máquina está apagada
 - Compartir la sesión con un compañero para revisar el trabajo en tiempo real
 
+### Nombres de sesión Remote Control con hostname (v2.1.92)
+
+Los nombres de sesión de Remote Control ahora usan el **hostname de la máquina como prefijo** por defecto (ej: `myhost-graceful-unicorn`). Esto facilita identificar desde qué máquina se originó cada sesión en entornos donde múltiples desarrolladores usan Remote Control simultáneamente.
+
+Para sobreescribir el prefijo por defecto:
+
+```bash
+claude --remote-control --remote-control-session-name-prefix "mi-prefijo"
+```
+
+### Filtrado del picker de `--resume` (v2.1.90)
+
+El picker de sesiones de `--resume` ya no muestra sesiones creadas por `claude -p` (headless) ni por invocaciones del SDK. Solo muestra sesiones interactivas, lo que reduce el ruido al buscar una sesión para reanudar.
+
 ### El flag `--teleport`
 
 `--teleport` va en la dirección contraria: reanuda en tu terminal local una sesión que está corriendo en la infraestructura web. Trae el contexto completo de vuelta a tu máquina, con acceso a tu filesystem, herramientas locales y variables de entorno.

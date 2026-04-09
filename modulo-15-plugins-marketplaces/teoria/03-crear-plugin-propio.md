@@ -175,6 +175,38 @@ Recuerda que el manifest `.claude-plugin/plugin.json` solo contiene los cuatro c
 
 ---
 
+## Ejecutables en `bin/` (v2.1.91)
+
+Los plugins pueden distribuir **ejecutables** bajo un directorio `bin/` en la raíz del plugin. Los ejecutables incluidos en `bin/` se registran automáticamente y pueden invocarse como comandos bare desde la herramienta Bash, sin necesidad de especificar la ruta completa.
+
+```
+mi-plugin/
+├── .claude-plugin/
+│   └── plugin.json
+├── bin/
+│   ├── mi-linter         # Ejecutable personalizado
+│   └── mi-formatter      # Otro ejecutable
+├── skills/
+│   └── ...
+└── README.md
+```
+
+Con esta estructura, Claude Code puede ejecutar `mi-linter` directamente en Bash como si fuera un comando del sistema:
+
+```bash
+mi-linter --check src/
+```
+
+**Casos de uso:**
+
+- Herramientas de linting o formateo personalizadas del equipo
+- Scripts de deploy empaquetados con el plugin
+- CLIs internas que complementan las capacidades del plugin
+
+> **Importante:** Los ejecutables deben tener permisos de ejecución (`chmod +x`). Verifica los permisos antes de publicar el plugin.
+
+---
+
 ## Probar el Plugin Localmente
 
 Antes de publicar, carga el plugin desde la ruta local para verificar que funciona correctamente:

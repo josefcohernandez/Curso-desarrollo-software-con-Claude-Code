@@ -173,6 +173,34 @@ De esta forma puedes evaluar el comportamiento del plugin en un entorno controla
 
 ---
 
+## Setting `disableSkillShellExecution` (v2.1.91)
+
+El setting `disableSkillShellExecution` permite desactivar la ejecución inline de shell en skills, slash commands personalizados y comandos de plugins. Cuando está activo, los bloques de código shell dentro de skills y commands se muestran como referencia pero **no pueden ejecutarse** directamente.
+
+```json
+{
+  "disableSkillShellExecution": true
+}
+```
+
+**Caso de uso enterprise:** En organizaciones donde los plugins provienen de fuentes externas, este setting añade una capa de seguridad al impedir que un plugin malicioso ejecute comandos shell arbitrarios a través de skills o commands. Los administradores pueden activarlo en las managed settings para aplicarlo a toda la organización.
+
+> **Nota:** Este setting afecta a skills, slash commands personalizados y comandos de plugins. No afecta a la herramienta Bash integrada de Claude Code, que se controla por separado con el sistema de permisos.
+
+---
+
+## Variable `CLAUDE_CODE_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE` (v2.1.90)
+
+Cuando Claude Code actualiza los plugins del marketplace (vía `git pull`), si la operación falla (por ejemplo, sin conexión a internet), por defecto descarta la cache local del marketplace. La variable de entorno `CLAUDE_CODE_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE` mantiene la cache existente cuando el fetch falla:
+
+```bash
+export CLAUDE_CODE_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE=1
+```
+
+Útil en entornos con conectividad intermitente o en máquinas que operan offline frecuentemente.
+
+---
+
 ## Errores Comunes
 
 **Confundir `strictKnownMarketplaces` con una lista de permisos.** Esta política solo controla de dónde se pueden instalar plugins, no qué permisos tienen. Un plugin del marketplace aprobado sigue teniendo los permisos que declara en su manifest.

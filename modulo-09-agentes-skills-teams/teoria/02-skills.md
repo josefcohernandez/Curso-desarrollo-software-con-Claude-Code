@@ -204,6 +204,10 @@ effort: "low"  # Para skills de consulta rápida
 
 Este campo también se aplica a los **commands** personalizados definidos con frontmatter. Es útil para skills de consulta o referencia donde no se necesita razonamiento extenso.
 
+### disableSkillShellExecution (v2.1.91)
+
+El setting `disableSkillShellExecution` (configurado en `settings.json`, no en el frontmatter) desactiva la ejecución inline de bloques de código shell dentro de skills y commands personalizados. Cuando está activo, los bloques `bash` del skill se muestran como referencia pero no se ejecutan directamente. Ver [Módulo 15](../../modulo-15-plugins-marketplaces/teoria/04-marketplaces-y-gestion-enterprise.md) para detalles sobre su uso en entornos enterprise.
+
 ### disable-model-invocation (opcional)
 
 Controla si Claude procesa las instrucciones o simplemente las devuelve como texto:

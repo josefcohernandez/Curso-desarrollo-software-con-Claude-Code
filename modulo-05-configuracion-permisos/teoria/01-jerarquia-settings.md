@@ -218,6 +218,12 @@ Con `additionalDirectories` en `.claude/settings.json` del directorio `frontend/
 
 ---
 
+## Validación de valores en settings.json
+
+Desde v2.1.89, Claude Code valida los valores de ciertas claves de configuración al arrancar. En particular, `cleanupPeriodDays: 0` ahora produce un **error de validación** y Claude Code no arranca. El valor mínimo es `1`. Esto previene la desactivación accidental de la limpieza automática de sesiones.
+
+---
+
 ## Resolución de Conflictos
 
 ```

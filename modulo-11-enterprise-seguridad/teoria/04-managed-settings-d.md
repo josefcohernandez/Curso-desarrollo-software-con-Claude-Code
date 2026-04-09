@@ -215,6 +215,28 @@ Los plugins bloqueados por la política de la organización (definida en `manage
 
 ---
 
+## Política fail-closed: `forceRemoteSettingsRefresh` (v2.1.92)
+
+El setting `forceRemoteSettingsRefresh` es una política de seguridad que **bloquea el arranque** de Claude Code hasta que las managed settings remotas se obtengan frescas del servidor. Si el fetch falla (sin conexión, timeout, error del servidor), Claude Code **sale con error** en lugar de continuar con settings cacheadas o sin políticas.
+
+```json
+{
+  "forceRemoteSettingsRefresh": true
+}
+```
+
+**Caso de uso**: Entornos enterprise con políticas de seguridad estrictas donde es preferible que Claude Code no funcione a que funcione sin las políticas actualizadas. Garantiza que ningún desarrollador pueda operar con políticas obsoletas o sin políticas aplicadas.
+
+| Escenario | Sin `forceRemoteSettingsRefresh` | Con `forceRemoteSettingsRefresh` |
+|-----------|--------------------------------|----------------------------------|
+| Servidor de políticas disponible | Carga políticas frescas | Carga políticas frescas |
+| Servidor de políticas caído | Usa cache o arranca sin políticas | **No arranca** (fail-closed) |
+| Sin conexión a red | Usa cache o arranca sin políticas | **No arranca** (fail-closed) |
+
+Este setting se define en las managed settings del sistema (no en las del proyecto o usuario) y no puede ser sobreescrito por niveles inferiores de la jerarquía.
+
+---
+
 ## Puntos clave
 
 - `managed-settings.d/` permite distribuir políticas de Claude Code en fragmentos modulares

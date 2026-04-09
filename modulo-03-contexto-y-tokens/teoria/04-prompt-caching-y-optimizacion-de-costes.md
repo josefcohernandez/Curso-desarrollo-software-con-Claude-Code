@@ -29,6 +29,10 @@ parte inicial del contexto no cambie entre turnos.
 **Impacto práctico**: en una sesión larga de 30 mensajes, el coste real puede ser
 un 60-80% inferior al coste nominal calculado sin caché.
 
+> **Hint de cache expirada (v2.1.92):** Cuando regresas a una sesión tras un periodo de inactividad y el prompt cache ha expirado, Claude Code muestra un **hint en el footer** indicando aproximadamente cuántos tokens enviará el siguiente turno sin beneficio de cache. Esto te permite decidir si continuar (aceptando el coste completo del primer turno) o hacer `/compact` antes para reducir el tamaño del contexto.
+
+> **Thinking summaries desactivados por defecto (v2.1.89):** Las thinking summaries (resúmenes del razonamiento interno) ya no se generan automáticamente en sesiones interactivas. Esto reduce el overhead de tokens en cada turno. En sesiones headless (`-p`) el comportamiento no cambia.
+
 ---
 
 ## Coste por modelo

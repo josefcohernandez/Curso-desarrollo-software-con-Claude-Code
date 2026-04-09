@@ -552,6 +552,85 @@ echo "Worktree creado: $WORKTREE_PATH" >> ~/.claude/worktrees.log
 
 Se disparan durante el flujo de **MCP Elicitation** (ver [Modulo 07](../../modulo-07-mcp/teoria/05-mcp-elicitation.md)). `Elicitation` intercepta la solicitud de input del servidor MCP; `ElicitationResult` intercepta la respuesta del usuario.
 
+### PermissionDenied (v2.1.89)
+
+Se dispara **cuando el clasificador de Auto Mode deniega una acción**. Permite reaccionar a denegaciones automáticas: registrar el evento, reintentar la acción con ajustes, o notificar al usuario.
+
+```json
+{
+  "hooks": {
+    "PermissionDenied": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/scripts/on-permission-denied.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+El hook puede devolver `{"retry": true}` en stdout para indicar a Claude Code que reintente la acción denegada. Esto es útil cuando el hook ajusta permisos o configuración antes del reintento:
+
+```bash
+#!/bin/bash
+# on-permission-denied.sh
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty')
+REASON=$(echo "$INPUT" | jq -r '.reason // empty')
+
+echo "$(date): PermissionDenied - $TOOL_NAME: $REASON" >> ~/.claude/denied.log
+
+# Reintentar si es un comando git conocido y seguro
+if echo "$TOOL_NAME" | grep -q "Bash" && echo "$REASON" | grep -q "git"; then
+  echo '{"retry": true}'
+  exit 0
+fi
+
+exit 0
+```
+
+> **Nota:** El evento `PermissionDenied` solo se dispara en sesiones con Auto Mode activo. En el modo de permisos normal, las denegaciones se gestionan por el propio diálogo de permisos.
+
+---
+
+## Decisión "defer" en PreToolUse (v2.1.89)
+
+En sesiones headless (`-p`), los hooks `PreToolUse` ahora pueden devolver la decisión `"defer"` para **pausar la ejecución** de un tool call sin bloquearla ni permitirla. La sesión se detiene en ese punto y puede reanudarse manualmente con `-p --resume`.
+
+```bash
+#!/bin/bash
+# Hook PreToolUse que difiere operaciones destructivas en headless
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+
+if echo "$COMMAND" | grep -qE "(rm -rf|DROP TABLE|docker rmi)"; then
+  echo '{"decision": "defer", "reason": "Operación destructiva detectada. Requiere aprobación manual."}'
+  exit 0
+fi
+
+exit 0
+```
+
+Cuando un hook devuelve `"defer"`, la sesión headless se pausa. Para reanudarla:
+
+```bash
+claude -p --resume <session-id>
+```
+
+Esto es útil en pipelines CI/CD donde ciertas operaciones necesitan aprobación humana antes de continuar.
+
+---
+
+## Hook output superior a 50K caracteres (v2.1.89)
+
+Cuando un hook de tipo `command` produce una salida superior a **50.000 caracteres**, Claude Code guarda el output completo en un fichero temporal en disco y lo reemplaza en la sesión con la **ruta al fichero más un preview** de las primeras líneas. Esto evita que hooks con output masivo (logs, dumps de datos) saturen la ventana de contexto.
+
+El comportamiento es automático y no requiere configuración. El fichero temporal se limpia al cerrar la sesión.
+
 ---
 
 ## Errores comunes

@@ -44,6 +44,8 @@ Al iniciar, Claude Code:
 
 Los slash commands son acciones integradas que no consumen tokens de la API.
 
+> **Tip:** El comando `/powerup` (v2.1.90) ofrece **lecciones interactivas con demos animadas** de las funcionalidades de Claude Code. Es una forma rápida de descubrir features que quizás no conocías. Ejecuta `/powerup` desde el prompt interactivo para explorar las lecciones disponibles.
+
 ### Comandos de Sesión
 
 | Comando | Descripción |

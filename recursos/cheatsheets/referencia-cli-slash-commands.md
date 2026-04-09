@@ -41,6 +41,7 @@ Los slash commands se invocan escribiendo `/` seguido del nombre del comando en 
 | `/model` | `/model [modelo]` | Selecciona o cambia el modelo de IA. Con flechas izquierda/derecha, ajusta el nivel de esfuerzo para modelos que lo soportan. El cambio es inmediato | — |
 | `/effort` | `/effort [low\|medium\|high\|max]` | Establece el nivel de esfuerzo del modelo. `low`, `medium`, `high` persisten entre sesiones. `max` solo para la sesion actual (requiere Opus 4.6) | Sin argumento muestra el nivel actual |
 | `/fast` | `/fast [on\|off]` | Activa o desactiva el modo rapido | — |
+| `/powerup` | `/powerup` | Lecciones interactivas con demos animadas de features de Claude Code. Ideal para descubrir funcionalidades (v2.1.90) | — |
 | `/loop` | `/loop [intervalo] <prompt>` | Skill que ejecuta un prompt repetidamente en un intervalo (ej: `/loop 5m comprueba si el deploy ha terminado`). El intervalo por defecto es 10 minutos | Es una skill bundled, no un comando built-in |
 
 ### Configuracion e informacion
@@ -50,7 +51,7 @@ Los slash commands se invocan escribiendo `/` seguido del nombre del comando en 
 | `/config` | `/config` | Abre la interfaz de Settings para ajustar tema, modelo, estilo de output, duracion de turno y otras preferencias. Incluye toggle "Show turn duration" para mostrar cuánto tarda cada respuesta (v2.1.79+) | Alias: `/settings` |
 | `/status` | `/status` | Abre la interfaz de Settings (pestana Status) mostrando version, modelo, cuenta y conectividad | — |
 | `/context` | `/context` | Visualiza el uso actual del contexto como una cuadricula de colores. Muestra sugerencias de optimizacion | — |
-| `/cost` | `/cost` | Muestra estadisticas de uso de tokens. Ver [guia de seguimiento de costes](https://code.claude.com/docs/en/costs) | — |
+| `/cost` | `/cost` | Muestra estadisticas de uso de tokens con desglose por modelo y cache-hit para usuarios de subscription (v2.1.92). Ver [guia de seguimiento de costes](https://code.claude.com/docs/en/costs) | — |
 | `/usage` | `/usage` | Muestra los limites del plan y el estado de los rate limits | — |
 | `/stats` | `/stats` | Visualiza el uso diario, historial de sesiones, rachas y preferencias de modelos | — |
 | `/insights` | `/insights` | Genera un informe analizando tus sesiones de Claude Code: areas del proyecto, patrones, puntos de friccion | — |
@@ -141,7 +142,7 @@ Los slash commands se invocan escribiendo `/` seguido del nombre del comando en 
 
 | Comando | Sintaxis | Descripcion | Notas |
 |---------|----------|-------------|-------|
-| `/vim` | `/vim` | Alterna entre los modos de edicion Vim y Normal | Se puede configurar de forma permanente en `/config` |
+| `/vim` | `/vim` | **[ELIMINADO en v2.1.92]** Alternaba entre modos Vim y Normal. Ahora se configura en `/config` → Editor mode | Deprecado: usar `/config` |
 
 ### Informacion del sistema
 
@@ -151,7 +152,7 @@ Los slash commands se invocan escribiendo `/` seguido del nombre del comando en 
 | `/keybindings` | `/keybindings` | Abre o crea el fichero de configuracion de keybindings | — |
 | `/terminal-setup` | `/terminal-setup` | Configura keybindings del terminal para Shift+Enter y otros atajos | Solo visible en terminales que lo necesitan |
 | `/statusline` | `/statusline` | Configura la linea de estado de Claude Code. Sin argumentos, auto-configura desde el prompt del shell. Los scripts de statusline reciben el campo `rate_limits` con información sobre límites de uso actuales (v2.1.80+) | — |
-| `/release-notes` | `/release-notes` | Ver el changelog completo, con la version mas reciente mas proxima al prompt | — |
+| `/release-notes` | `/release-notes` | Abre un selector interactivo de versiones para navegar el changelog (v2.1.92). Antes mostraba el changelog completo | — |
 
 ### Autenticacion
 

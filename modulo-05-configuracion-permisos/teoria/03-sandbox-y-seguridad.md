@@ -139,6 +139,12 @@ Esto es especialmente útil en entornos enterprise y CI/CD donde el sandbox es u
 
 ---
 
+## Directorios protegidos en modo acceptEdits (v2.1.90)
+
+El modo `acceptEdits` protege ciertos directorios de escritura automática para evitar modificaciones accidentales a configuraciones críticas. Desde v2.1.90, el directorio `.husky` (hooks de Git gestionados por Husky) se añade a la lista de directorios protegidos, junto con `.git`, `.claude` y otros.
+
+---
+
 ## Limitaciones del Sandbox
 
 - **Rendimiento**: Ligero overhead al ejecutar comandos en entorno aislado

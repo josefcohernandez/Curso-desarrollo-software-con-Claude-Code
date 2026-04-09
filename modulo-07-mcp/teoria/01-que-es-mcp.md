@@ -97,6 +97,38 @@ MCP es para integraciones que no se pueden hacer con shell commands.
 
 ---
 
+## Override de tamaño de resultados MCP (v2.1.91)
+
+Por defecto, los resultados de herramientas MCP se truncan cuando superan el límite de tokens configurado (`MAX_MCP_OUTPUT_TOKENS`). Desde v2.1.91, los servidores MCP pueden declarar un override vía la anotación `_meta["anthropic/maxResultSizeChars"]` para permitir resultados de hasta **500.000 caracteres** sin truncación.
+
+Esto es útil para herramientas que devuelven schemas de base de datos completos, documentos largos o resultados de búsqueda extensos donde el truncado perdería información crítica.
+
+```json
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "... schema completo de 200K caracteres ...",
+      "_meta": {
+        "anthropic/maxResultSizeChars": 500000
+      }
+    }
+  ]
+}
+```
+
+> **Nota:** Este override lo declara el **servidor MCP**, no el cliente. Si estás desarrollando un servidor MCP propio y necesitas devolver resultados grandes, añade la anotación `_meta` al contenido de la respuesta.
+
+### Conexión MCP no bloqueante en modo headless (v2.1.89)
+
+La variable de entorno `MCP_CONNECTION_NONBLOCKING=true` hace que el modo `-p` (headless) **no espere** a que todos los servidores MCP conecten antes de empezar a procesar. Esto es útil en pipelines CI/CD donde un servidor MCP lento o no disponible no debe bloquear la ejecución:
+
+```bash
+MCP_CONNECTION_NONBLOCKING=true claude -p "analiza el código" --max-turns 5
+```
+
+---
+
 ## Cuándo Usar MCP
 
 | Escenario | ¿MCP recomendado? |

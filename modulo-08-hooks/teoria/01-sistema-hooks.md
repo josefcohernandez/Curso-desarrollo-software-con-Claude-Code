@@ -7,7 +7,7 @@ eventos especificos en Claude Code. Son como "triggers" o "callbacks".
 
 ---
 
-## Los 25 Eventos
+## Los 26 Eventos
 
 ### Tabla completa de eventos
 
@@ -37,6 +37,7 @@ eventos especificos en Claude Code. Son como "triggers" o "callbacks".
 | **PostCompact** | Despues de compactacion | No |
 | **Elicitation** | Servidor MCP solicita input | Si |
 | **ElicitationResult** | Usuario responde a elicitation | Si |
+| **PermissionDenied** | Auto mode deniega una acción | Sí |
 | **SessionEnd** | Sesion termina | No |
 
 ---

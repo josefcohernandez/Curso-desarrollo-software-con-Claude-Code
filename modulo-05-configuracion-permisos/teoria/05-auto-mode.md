@@ -251,6 +251,25 @@ Auto Mode es potente, pero hay contextos donde la confirmación manual es la opc
 
 ---
 
+## Visibilidad de acciones denegadas (v2.1.89)
+
+Cuando Auto Mode deniega una acción, Claude Code muestra una **notificación** al usuario y registra la acción en la pestaña **"Recent"** del comando `/permissions`. Desde esa pestaña, el usuario puede:
+
+- Ver el historial de acciones denegadas recientes
+- Entender por qué el clasificador bloqueó cada acción
+- **Reintentar la acción pulsando `r`** si considera que el bloqueo fue incorrecto
+
+```bash
+# Ver acciones denegadas recientemente
+/permissions
+# → Navegar a la pestaña "Recent"
+# → Seleccionar una acción y pulsar 'r' para reintentar
+```
+
+Además, existe un nuevo hook `PermissionDenied` (ver [Módulo 08](../../modulo-08-hooks/teoria/04-hooks-agent-y-eventos-avanzados.md)) que permite reaccionar programáticamente a las denegaciones del clasificador.
+
+---
+
 ## Errores comunes
 
 **Activar Auto Mode en proyectos sin permisos configurados**: Si el fichero `.claude/settings.json` no tiene reglas `deny` para operaciones destructivas, Auto Mode tiene más margen de maniobra del necesario. Configura siempre los permisos del proyecto antes de activar Auto Mode (ver [01-jerarquia-settings.md](01-jerarquia-settings.md) y [02-sistema-permisos.md](02-sistema-permisos.md)).

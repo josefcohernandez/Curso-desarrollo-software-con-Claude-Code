@@ -276,10 +276,22 @@ claude_tutorial/
 | 0.2 | Marzo 2026 | Claude Code 2.1.x | +M13 Multimodalidad, +M14 Agent SDK. Actualizados M04-M10 |
 | 0.3 | Marzo 2026 | Claude Code 2.1.x | +M15 Plugins/Marketplaces. Proyecto final movido a M16 |
 | 1.0 | Marzo 2026 | Claude Code 2.1.70+ | Revisión, corrección de errores, licencia, referencia CLI exhaustiva |
-| 2.0 | 25 marzo 2026 | Claude Code 2.1.83 | Auto Mode, MCP Elicitation, Computer Use, Compaction API, 9 nuevos hooks, managed-settings.d/, 128K output tokens |
-| 2.1 | 26 marzo 2026 | Claude Code 2.1.84 | PowerShell tool, TaskCreated hook, paths: en skills, MCP 2KB cap |
+| 3.0 | 25 marzo 2026 | Claude Code 2.1.83 | Auto Mode, MCP Elicitation, Computer Use, Compaction API, 9 nuevos hooks, managed-settings.d/, 128K output tokens |
+| 3.1 | 26 marzo 2026 | Claude Code 2.1.84 | PowerShell tool, TaskCreated hook, paths: en skills, MCP 2KB cap |
+| 3.2 | 27 marzo 2026 | Claude Code 2.1.85 | Conditional hooks con campo `if`, PreToolUse headless, MCP OAuth RFC 9728, OTEL env vars |
+| 3.3 | 28 marzo 2026 | Claude Code 2.1.86 | Header X-Claude-Code-Session-Id, skill descriptions 250 chars, 18 correcciones verificadas |
+| 3.4 | 29 marzo 2026 | Claude Code 2.1.87 | Consolidación deuda técnica: `allowRead` sandbox, `${CLAUDE_PLUGIN_DATA}`, `effort` frontmatter |
+| 3.5 | 7 abril 2026 | Claude Code 2.1.92 | Hook PermissionDenied, defer en PreToolUse, MCP maxResultSizeChars, /powerup, forceRemoteSettingsRefresh, plugin bin/, 2 deprecaciones |
 
-### Novedades v2.0 (25 marzo 2026)
+### Novedades v3.5 (7 abril 2026)
+
+**Features cubiertas (v2.1.89-v2.1.92):** Hook `PermissionDenied` y decisión `"defer"` en `PreToolUse` (M08), Auto Mode `/permissions` → Recent + retry (M05), MCP `maxResultSizeChars` override 500K (M07), `disableSkillShellExecution` (M09/M15), plugins con `bin/` ejecutables (M15), `forceRemoteSettingsRefresh` fail-closed (M11), asistente Bedrock interactivo (M11), `/powerup` lecciones interactivas (M02)
+
+**Deprecaciones:** `/tag` eliminado, `/vim` movido a `/config` → Editor mode
+
+**Nuevas env vars/flags:** `CLAUDE_CODE_NO_FLICKER`, `MCP_CONNECTION_NONBLOCKING`, `CLAUDE_CODE_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE`, `--remote-control-session-name-prefix`
+
+### Novedades v3.0 (25 marzo 2026)
 
 **Nuevos ficheros de teoría:** Auto Mode (M05), Compaction API (M03), MCP Elicitation (M07), managed-settings.d/ (M11), Voice y Computer Use (M13)
 

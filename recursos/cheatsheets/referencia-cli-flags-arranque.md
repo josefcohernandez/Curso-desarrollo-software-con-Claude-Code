@@ -123,6 +123,7 @@ Indice: [referencia-cli-indice.md](./referencia-cli-indice.md)
 |------|-------|------|-------------|---------|
 | `--remote` | — | string | Crea una nueva sesion web en claude.ai con la descripcion de tarea indicada | `claude --remote "Arregla el bug de login"` |
 | `--remote-control` | `--rc` | string | Inicia sesion interactiva con Remote Control habilitado para control desde claude.ai o la app | `claude --remote-control "Mi Proyecto"` |
+| `--remote-control-session-name-prefix` | — | string | Sobreescribe el prefijo del nombre de sesión Remote Control (por defecto usa el hostname de la máquina, ej: `myhost-graceful-unicorn`) (v2.1.92) | `claude --rc "Proyecto" --remote-control-session-name-prefix "ci-build"` |
 | `--teleport` | — | boolean | Reanuda una sesion web en el terminal local | `claude --teleport` |
 
 ### API y desarrollo

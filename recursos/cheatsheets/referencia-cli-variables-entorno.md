@@ -184,6 +184,7 @@ export BASH_MAX_OUTPUT_LENGTH=500000     # Mas output para logs detallados
 | Variable | Valores | Defecto | Descripcion |
 |----------|---------|---------|-------------|
 | `MCP_TIMEOUT` | numero (ms) | `30000` | Timeout para operaciones de servidores MCP |
+| `MCP_CONNECTION_NONBLOCKING` | `true` | — | En modo `-p` (headless), omite la espera de conexión de servidores MCP al arrancar. Útil en CI/CD donde un MCP lento no debe bloquear la ejecución (v2.1.89) |
 | `MAX_MCP_OUTPUT_TOKENS` | numero | — | Limite de tokens en la respuesta de una herramienta MCP |
 | `CLAUDE_CODE_MCP_SERVER_NAME` | string (auto) | — | Inyectada automaticamente en scripts `headersHelper` con el nombre del servidor MCP que solicita cabeceras. Permite que un solo script sirva a multiples servidores (v2.1.85+) |
 | `CLAUDE_CODE_MCP_SERVER_URL` | URL (auto) | — | Inyectada automaticamente en scripts `headersHelper` con la URL del servidor MCP. Complementa a `CLAUDE_CODE_MCP_SERVER_NAME` (v2.1.85+) |
@@ -224,6 +225,14 @@ export OTEL_SERVICE_NAME="claude-code-mi-equipo"
 
 ---
 
+## Renderizado
+
+| Variable | Valores | Defecto | Descripcion |
+|----------|---------|---------|-------------|
+| `CLAUDE_CODE_NO_FLICKER` | `1` | — | Activa el modo de rendering sin parpadeo (alt-screen). Útil en terminales donde el redibujado rápido causa parpadeo visual (v2.1.89) |
+
+---
+
 ## Interfaz de usuario
 
 | Variable | Valores | Defecto | Descripcion |
@@ -237,6 +246,7 @@ export OTEL_SERVICE_NAME="claude-code-mi-equipo"
 | Variable | Valores | Defecto | Descripcion |
 |----------|---------|---------|-------------|
 | `CLAUDE_CODE_PLUGIN_SEED_DIR` | path(s) | — | Directorio(s) adicionales donde buscar plugins locales. Soporta múltiples directorios separados por `:` en Linux/macOS o `;` en Windows. Útil para equipos que mantienen plugins en un directorio compartido fuera del proyecto (v2.1.79+) |
+| `CLAUDE_CODE_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE` | `1` | — | Mantiene la cache local del marketplace cuando `git pull` falla. Útil en entornos con conectividad intermitente o que operan offline frecuentemente (v2.1.90) |
 
 ---
 

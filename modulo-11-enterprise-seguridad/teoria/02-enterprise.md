@@ -258,6 +258,17 @@ export ANTHROPIC_MODEL=claude-sonnet-4@20250514
 - Soporte para VPC Service Controls
 - Facturación unificada con GCP
 
+### Asistente interactivo de configuración de Bedrock (v2.1.92)
+
+Desde v2.1.92, al seleccionar **"3rd-party platform"** en la pantalla de login de Claude Code, se inicia un asistente interactivo que guía paso a paso la configuración de AWS Bedrock:
+
+1. **Autenticación AWS**: Verifica credenciales existentes o guía la configuración de `AWS_PROFILE`, access keys o SSO
+2. **Selección de región**: Muestra las regiones con modelos Claude disponibles y permite seleccionar
+3. **Verificación de credenciales**: Prueba la conexión con Bedrock y confirma que las credenciales tienen los permisos necesarios
+4. **Model pinning**: Permite anclar versiones específicas de modelo para garantizar consistencia en el equipo
+
+El asistente reduce significativamente la fricción de onboarding en organizaciones que usan Bedrock, eliminando la necesidad de configurar manualmente las variables de entorno.
+
 ### Comparativa de backends
 
 | Aspecto | API directa | AWS Bedrock | Google Vertex AI |
@@ -525,3 +536,5 @@ Auto Mode permite que Claude Code tome decisiones de permisos automáticamente u
 | Auto Mode | Permisos automáticos con IA de seguridad | Team (research preview) |
 | `managed-settings.d/` | Fragmentos de políticas drop-in | Enterprise |
 | `X-Claude-Code-Session-Id` | Header de sesión para observabilidad en proxies | Todos (v2.1.86) |
+| `forceRemoteSettingsRefresh` | Arranque fail-closed sin políticas frescas | Enterprise (v2.1.92) |
+| Asistente Bedrock interactivo | Configuración guiada de AWS Bedrock | Todos (v2.1.92) |

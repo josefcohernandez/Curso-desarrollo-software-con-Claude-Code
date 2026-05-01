@@ -1,6 +1,6 @@
 # 04 - Aislamiento con Worktrees y Comunicación entre Agentes
 
-Claude Code ofrece mecanismos avanzados para que los agentes trabajen en paralelo de forma segura y se comuniquen entre sí de manera eficiente. Este capítulo cubre el aislamiento mediante git worktrees, la comunicación dirigida entre agentes con `SendMessage`, los background agents con notificación automática, y las herramientas de gestión de tareas.
+Claude Code ofrece mecanismos avanzados para que los agentes trabajen en paralelo de forma segura y se comuniquen entre sí de manera eficiente. Este capítulo cubre la variable `CLAUDE_CODE_FORK_SUBAGENT`, el aislamiento mediante git worktrees, la comunicación dirigida entre agentes con `SendMessage`, los background agents con notificación automática, y las herramientas de gestión de tareas.
 
 ---
 

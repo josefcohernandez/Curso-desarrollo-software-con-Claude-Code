@@ -33,6 +33,8 @@ mi-plugin/
 ├── hooks/
 │   └── hooks.json       # Configuración de hooks del plugin
 ├── commands/             # Comandos personalizados (opcional)
+├── themes/
+│   └── mi-tema.json     # Tema de interfaz (opcional, v2.1.118+)
 └── README.md            # Documentación para usuarios del plugin
 ```
 
@@ -237,6 +239,66 @@ Recuerda que el manifest `.claude-plugin/plugin.json` solo contiene los cuatro c
 
 ---
 
+## Temas Personalizados en Plugins (v2.1.118)
+
+Los plugins pueden distribuir **temas de interfaz** junto con sus otros componentes. Un tema define la paleta de colores de la interfaz de Claude Code y se activa con el comando `/theme`.
+
+### Estructura
+
+Para incluir un tema en un plugin, añade un directorio `themes/` en la raíz del plugin con uno o más ficheros JSON, uno por tema:
+
+```
+mi-plugin/
+├── .claude-plugin/
+│   └── plugin.json
+├── themes/
+│   └── mi-tema-oscuro.json   # Definición del tema
+├── skills/
+│   └── ...
+└── README.md
+```
+
+### Formato del fichero de tema
+
+Cada fichero JSON dentro de `themes/` define los colores de los elementos de la interfaz. Claude Code instala automáticamente los temas del plugin en `~/.claude/themes/` al cargar el plugin.
+
+```json
+{
+  "name": "mi-tema-oscuro",
+  "colors": {
+    "background": "#1a1b26",
+    "foreground": "#c0caf5",
+    "primary": "#7aa2f7",
+    "secondary": "#bb9af7",
+    "success": "#9ece6a",
+    "warning": "#e0af68",
+    "error": "#f7768e",
+    "border": "#3b4261"
+  }
+}
+```
+
+El campo `name` dentro del JSON debe coincidir con el nombre del fichero (sin extensión). Este nombre es el que el usuario verá al ejecutar `/theme`.
+
+### Activar el tema
+
+Una vez instalado el plugin, el usuario activa el tema desde el comando interactivo `/theme`:
+
+```bash
+# Dentro de una sesión de Claude Code
+/theme
+```
+
+El comando `/theme` lista todos los temas disponibles (incluidos los distribuidos por plugins instalados) y permite seleccionar el activo. El tema queda guardado como preferencia del usuario.
+
+### Cuándo distribuir un tema con un plugin
+
+Los temas son especialmente útiles en plugins de equipo o enterprise que quieren unificar la experiencia visual entre todos los miembros. Por ejemplo, un plugin de deploy puede incluir un tema con colores que refuercen el contexto del entorno (colores más cálidos para producción, más fríos para desarrollo).
+
+> **Nota:** Esta funcionalidad requiere Claude Code v2.1.118 o superior. En versiones anteriores, el directorio `themes/` se ignora silenciosamente.
+
+---
+
 ## Ejecutables en `bin/` (v2.1.91)
 
 Los plugins pueden distribuir **ejecutables** bajo un directorio `bin/` en la raíz del plugin. Los ejecutables incluidos en `bin/` se registran automáticamente y pueden invocarse como comandos bare desde la herramienta Bash, sin necesidad de especificar la ruta completa.
@@ -328,13 +390,50 @@ El versionado sigue semántica SemVer (`MAYOR.MENOR.PARCHE`):
 
 | Tipo de cambio | Versión |
 |----------------|---------|
-| Nuevo campo en `configuration` (con default) | MENOR |
 | Nuevo skill o hook añadido | MENOR |
+| Nuevo tema distribuido con el plugin | MENOR |
 | Cambio incompatible en la interfaz de un skill | MAYOR |
 | Corrección de un hook que fallaba | PARCHE |
 | Cambio en el comportamiento de un hook (no es bug) | MENOR o MAYOR |
 
-Para publicar una nueva versión, incrementa `version` en `.claude-plugin/plugin.json` y sube los cambios al repositorio. Luego, publica la nueva versión a través del formulario web en platform.claude.com.
+### `claude plugin tag`: crear tags de release (v2.1.118)
+
+El comando `claude plugin tag` crea un git tag de release para el plugin con validación de versión semántica integrada. Valida que la versión sigue el formato SemVer correcto antes de crear el tag, evitando publicar versiones con formatos inválidos:
+
+```bash
+# Crear un tag de release para la versión 1.2.0
+claude plugin tag v1.2.0
+```
+
+El comando realiza estas operaciones:
+
+1. Valida que `v1.2.0` es una versión semántica válida (formato `vMAYOR.MENOR.PARCHE`)
+2. Verifica que `version` en `.claude-plugin/plugin.json` coincide con la versión indicada
+3. Crea el git tag `v1.2.0` en el repositorio
+4. Muestra confirmación con los pasos siguientes para publicar la versión
+
+Ejemplo de flujo de publicación de una nueva versión:
+
+```bash
+# 1. Actualizar la versión en el manifest
+# Editar .claude-plugin/plugin.json: "version": "1.2.0"
+
+# 2. Commitear los cambios
+git add .claude-plugin/plugin.json
+git commit -m "chore: bump version to 1.2.0"
+
+# 3. Crear el tag con validación de versión semántica
+claude plugin tag v1.2.0
+
+# 4. Subir el tag al repositorio remoto
+git push origin v1.2.0
+
+# 5. Publicar la nueva versión a través del formulario web en platform.claude.com
+```
+
+> **Nota:** Este comando requiere Claude Code v2.1.118 o superior. En versiones anteriores, usa `git tag v1.2.0` directamente, sin la validación de versión semántica.
+
+Para publicar la nueva versión una vez creado el tag, accede al formulario web en platform.claude.com.
 
 Los usuarios pueden reinstalar para obtener la última versión:
 
@@ -362,5 +461,7 @@ claude plugin install deploy-safe@claude-plugins-official
 - El manifest solo declara la identidad del plugin; los componentes se descubren automáticamente por estructura de directorios
 - Los skills se colocan en `skills/<nombre-skill>/SKILL.md`, los hooks en `hooks/hooks.json`, los agentes en `agents/`
 - Los servidores MCP se descubren automáticamente, no se declaran en el manifest
+- Los plugins pueden distribuir temas de interfaz en el directorio `themes/` (ficheros JSON); el usuario los activa con `/theme` (v2.1.118+)
+- `claude plugin tag v1.2.0` crea un git tag de release con validación de versión semántica integrada (v2.1.118+)
 - El ciclo de desarrollo local es: crear estructura -> probar con `claude --plugin-dir ./mi-plugin` -> iterar
 - La publicación se hace a través del formulario web en platform.claude.com (no existe comando CLI para publicar)

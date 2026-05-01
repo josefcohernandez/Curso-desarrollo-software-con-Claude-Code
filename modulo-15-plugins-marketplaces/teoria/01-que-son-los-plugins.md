@@ -140,11 +140,27 @@ claude plugin list
 # Explorar marketplace y plugins (interfaz interactiva con pestañas)
 /plugin
 
+# Eliminar dependencias auto-instaladas que ya no son necesarias (v2.1.121)
+claude plugin prune
+
 # Desinstalar
 claude plugin remove deploy-safe
 ```
 
 La interfaz interactiva `/plugin` ofrece pestañas para navegar: **Discover** (explorar plugins disponibles), **Installed** (ver los instalados), **Marketplaces** (gestionar fuentes) y **Errors** (diagnosticar problemas).
+
+#### `claude plugin prune`: limpiar dependencias huérfanas
+
+Al instalar plugins, Claude Code puede auto-instalar dependencias que el plugin requiere. Si posteriormente desinstallas el plugin, esas dependencias pueden quedar huérfanas (instaladas pero sin ningún plugin que las use). El comando `claude plugin prune` las elimina automáticamente:
+
+```bash
+# Elimina todas las dependencias auto-instaladas sin plugin que las requiera
+claude plugin prune
+```
+
+El comportamiento es análogo al `npm prune` del ecosistema Node.js: recorre las dependencias instaladas y elimina las que ya no tienen ningún plugin activo que las declare como requisito. Útil tras desinstalar varios plugins o después de una limpieza periódica del entorno.
+
+> **Nota:** Este comando solo elimina dependencias auto-instaladas. Los plugins instalados explícitamente con `claude plugin install` no se ven afectados.
 
 ---
 
@@ -166,4 +182,5 @@ La interfaz interactiva `/plugin` ofrece pestañas para navegar: **Discover** (e
 - Los componentes se descubren automáticamente por la estructura de directorios; no se declaran en el manifest
 - Los plugins se instalan a nivel de usuario con `claude plugin install`. Para plugins de proyecto, se incluyen en el repositorio
 - El ciclo de vida es: instalar → usar → actualizar → desinstalar
+- `claude plugin prune` elimina dependencias auto-instaladas que ya no tienen ningún plugin que las requiera
 - Para desarrollo local se usa `claude --plugin-dir ./ruta`

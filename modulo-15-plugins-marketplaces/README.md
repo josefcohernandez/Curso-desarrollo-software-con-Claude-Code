@@ -70,7 +70,10 @@ Al terminar este módulo serás capaz de:
 | `.claude-plugin/plugin.json` | Manifest del plugin: nombre, versión, autor y descripción. Los componentes se descubren automáticamente por estructura de directorios |
 | `/plugin` | Comando interactivo con pestañas (`Discover`, `Installed`, `Marketplaces`, `Errors`) para explorar y gestionar plugins |
 | `claude plugin install` | Comando CLI para instalar plugins: `claude plugin install <nombre>@<marketplace>` |
+| `claude plugin prune` | Elimina dependencias auto-instaladas que ya no tienen ningún plugin que las requiera (v2.1.121) |
+| `claude plugin tag` | Crea un git tag de release del plugin con validación de versión semántica: `claude plugin tag v1.2.0` (v2.1.118) |
 | `claude --plugin-dir` | Flag para cargar un plugin local durante desarrollo o testing |
+| `themes/` | Directorio dentro de un plugin para distribuir temas de interfaz JSON; el usuario los activa con `/theme` (v2.1.118) |
 | Marketplace privado | Repositorio de plugins de una organización, configurable con `extraKnownMarketplaces` en settings |
 | `strictKnownMarketplaces` | Configuración enterprise que limita las instalaciones a marketplaces aprobados |
 | `blockedMarketplaces` | Configuración enterprise para bloquear fuentes de plugins específicas |

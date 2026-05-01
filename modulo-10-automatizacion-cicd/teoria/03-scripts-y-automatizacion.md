@@ -276,6 +276,169 @@ Lista todo organizado por archivo." \
 
 ---
 
+## `claude ultrareview`: Revisión Profunda en CI/Scripts
+
+A partir de la versión 2.1.120, Claude Code incluye el subcomando `ultrareview` que permite ejecutar el comando `/ultrareview` de forma completamente no-interactiva desde pipelines de CI o scripts. Es la forma recomendada de incorporar revisiones exhaustivas de código en flujos automatizados.
+
+> **Nota:** Si no conoces `/ultrareview` como herramienta interactiva, consúltalo en el [Módulo 6 — Plan Mode y Workflows](../../modulo-06-planificacion-opus/teoria/). Este apartado se centra exclusivamente en su uso automatizado.
+
+### Sintaxis
+
+```bash
+claude ultrareview [target] [flags]
+```
+
+El parámetro `target` acepta tres formas:
+
+| Forma | Ejemplo | Cuándo usarlo |
+|-------|---------|---------------|
+| Número de PR | `42` | En GitHub Actions, cuando tienes el número de PR |
+| Nombre de rama | `feature/login` | Para revisar todos los cambios de una rama respecto a `main` |
+| Rango de commits | `abc123..HEAD` | Para revisar un conjunto exacto de commits |
+
+El flag `--json` produce una salida estructurada (JSON) que los scripts pueden parsear directamente.
+
+### Ejemplo básico en línea de comandos
+
+```bash
+# Revisar los cambios de la rama actual respecto a main
+claude ultrareview main..HEAD
+
+# Revisar una rama concreta
+claude ultrareview feature/nueva-api
+
+# Revisar y obtener salida JSON
+claude ultrareview main..HEAD --json > revision.json
+```
+
+### Integración en GitHub Actions
+
+El caso de uso más habitual es revisar un PR automáticamente al abrirse. El número del PR está disponible en el contexto del evento de GitHub:
+
+```yaml
+# .github/workflows/ultra-review.yml
+name: Ultra Review en PR
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  ultrareview:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Instalar Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Ultra Review
+        run: claude ultrareview ${{ github.event.pull_request.number }} --json > review.json
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Publicar resultado como comentario
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const review = JSON.parse(fs.readFileSync('review.json', 'utf8'));
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: review.summary
+            });
+```
+
+### Integración en un pre-merge hook
+
+Puedes bloquear merges si la revisión detecta problemas críticos:
+
+```bash
+#!/bin/bash
+# scripts/pre-merge-ultrareview.sh
+# Ejecutar antes de hacer merge a main
+
+RAMA_ORIGEN="${1:?Uso: $0 <rama-origen>}"
+
+echo "Ejecutando Ultra Review de $RAMA_ORIGEN..."
+
+resultado=$(claude ultrareview "main..$RAMA_ORIGEN" --json)
+estado=$(echo "$resultado" | python3 -c "import sys,json; print(json.load(sys.stdin).get('status','ok'))")
+
+if [ "$estado" = "critical" ]; then
+    echo ""
+    echo "== MERGE BLOQUEADO: problemas críticos detectados =="
+    echo "$resultado" | python3 -m json.tool
+    exit 1
+fi
+
+echo "Ultra Review completado. Puedes hacer el merge."
+exit 0
+```
+
+### Consumir la salida JSON en un script Python
+
+El flag `--json` produce un objeto con los campos `status`, `summary`, `issues` y `metrics`:
+
+```python
+import subprocess
+import json
+
+def ultrareview_rama(rama: str) -> dict:
+    """Ejecuta claude ultrareview y devuelve el resultado parseado."""
+    resultado = subprocess.run(
+        ["claude", "ultrareview", rama, "--json"],
+        capture_output=True,
+        text=True,
+        check=True,
+        env={"ANTHROPIC_API_KEY": os.environ["ANTHROPIC_API_KEY"]}
+    )
+    return json.loads(resultado.stdout)
+
+# Ejemplo de uso
+revision = ultrareview_rama("feature/nueva-api")
+print(f"Estado: {revision['status']}")
+print(f"Problemas encontrados: {len(revision['issues'])}")
+
+for issue in revision["issues"]:
+    print(f"  [{issue['severity']}] {issue['file']}:{issue['line']} — {issue['message']}")
+```
+
+### Diferencias con `claude -p` para revisiones
+
+| Aspecto | `claude -p "revisa..."` | `claude ultrareview` |
+|---------|------------------------|----------------------|
+| Profundidad | Configurable | Siempre máxima (equivalente a `/ultrareview`) |
+| Formato de salida | Texto libre | Estructurado con `--json` |
+| Target | Manual en el prompt | Nativo: PR, rama, rango |
+| Integración CI | General | Optimizado para revisiones de PR |
+| Disponible desde | Siempre | v2.1.120+ |
+
+### Control de costes
+
+`ultrareview` realiza un análisis más profundo que una revisión ordinaria, lo que implica un mayor consumo de tokens. Combínalo con `--max-budget-usd` para acotar el gasto:
+
+```bash
+claude ultrareview $PR_NUMBER --json --max-budget-usd 0.50
+```
+
+Guía de referencia por tipo de PR:
+
+| Tamaño del PR | `--max-budget-usd` recomendado |
+|---------------|-------------------------------|
+| Pequeño (<200 líneas) | `0.20` |
+| Mediano (200-800 líneas) | `0.50` |
+| Grande (>800 líneas) | `1.00` |
+
+---
+
 ## Integración con Otros Sistemas CI/CD
 
 ### Jenkins
@@ -596,6 +759,7 @@ claude -p "Compara la estructura y patrones de estos dos proyectos. Identifica i
 | Git hooks | Scripts Bash + Claude `-p` | `--max-turns 1`, `--max-budget-usd 0.05` |
 | Batch processing | Bucles Bash + Claude `-p` | `--max-turns 3`, `--output-format json` |
 | Cron jobs | Cron + scripts Bash | `--max-budget-usd`, `--output-format text` |
+| Revisión exhaustiva en CI | `claude ultrareview [target]` | `--json`, `--max-budget-usd` |
 | Jenkins / GitLab / CircleCI | Pipeline config + Claude | `--dangerously-skip-permissions` |
 | Sesiones remotas | `claude --remote` | N/A |
 | Background | `nohup claude -p ... &` | `--output-format json` |

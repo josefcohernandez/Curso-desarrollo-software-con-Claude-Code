@@ -250,6 +250,95 @@ Se dispara **después de que una herramienta falla** (exit code distinto de cero
 }
 ```
 
+> **Novedad v3.7 (v2.1.119):** Los eventos `PostToolUse` y `PostToolUseFailure` incluyen ahora el campo `duration_ms` en el JSON de entrada, con el tiempo en milisegundos que tardó en ejecutarse la herramienta. Ver la sección "Campo `duration_ms`" en [01-sistema-hooks.md](01-sistema-hooks.md) para ejemplos de uso.
+
+### Reemplazar el output de cualquier herramienta con `updatedToolOutput`
+
+> **Novedad v3.7 (v2.1.121)**
+
+Un hook `PostToolUse` puede devolver el campo `hookSpecificOutput.updatedToolOutput` en su respuesta JSON para **reemplazar el output** que Claude recibe de la herramienta, antes de que lo procese. Esto permite filtrar, transformar o enriquecer la respuesta de cualquier herramienta de forma transparente.
+
+Hasta v2.1.121, este mecanismo solo funcionaba cuando el `PostToolUse` se disparaba sobre herramientas MCP. Ahora funciona para **cualquier herramienta**: `Bash`, `Read`, `Write`, `Edit`, herramientas MCP, y cualquier otra.
+
+#### Estructura de la respuesta del hook
+
+```bash
+#!/bin/bash
+# El hook devuelve el output modificado como JSON en stdout
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty')
+ORIGINAL_OUTPUT=$(echo "$INPUT" | jq -r '.tool_response // empty')
+
+# Transformar el output antes de que Claude lo procese
+FILTERED_OUTPUT=$(echo "$ORIGINAL_OUTPUT" | grep -v "^DEBUG:")
+
+echo "{\"hookSpecificOutput\": {\"updatedToolOutput\": $(echo "$FILTERED_OUTPUT" | jq -Rs .)}}"
+exit 0
+```
+
+#### Ejemplo: filtrar líneas de debug del output de Bash
+
+En proyectos donde los comandos emiten muchas líneas de debug que no son relevantes para Claude, un hook puede eliminarlas antes de que entren en el contexto:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/scripts/filter-debug-output.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+```bash
+#!/bin/bash
+# filter-debug-output.sh
+# Elimina líneas de debug del output de comandos bash antes de que Claude las procese
+
+INPUT=$(cat)
+ORIGINAL=$(echo "$INPUT" | jq -r '.tool_response // empty')
+
+# Filtrar líneas que empiecen por [DEBUG] o [TRACE]
+CLEAN=$(echo "$ORIGINAL" | grep -vE "^\[(DEBUG|TRACE)\]")
+
+# Devolver el output filtrado
+echo "{\"hookSpecificOutput\": {\"updatedToolOutput\": $(echo "$CLEAN" | jq -Rs .)}}"
+exit 0
+```
+
+#### Ejemplo: enriquecer el output de Read con metadatos
+
+```bash
+#!/bin/bash
+# enrich-read-output.sh
+# Añade información de contexto al output de la herramienta Read
+
+INPUT=$(cat)
+FILEPATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+ORIGINAL=$(echo "$INPUT" | jq -r '.tool_response // empty')
+
+if [ -n "$FILEPATH" ] && [ -f "$FILEPATH" ]; then
+  LINES=$(wc -l < "$FILEPATH")
+  LAST_MODIFIED=$(date -r "$FILEPATH" +%Y-%m-%dT%H:%M:%S 2>/dev/null || echo "desconocido")
+  HEADER="[Metadatos: $LINES líneas, última modificación: $LAST_MODIFIED]"
+  ENRICHED="${HEADER}"$'\n'"${ORIGINAL}"
+  echo "{\"hookSpecificOutput\": {\"updatedToolOutput\": $(echo "$ENRICHED" | jq -Rs .)}}"
+else
+  # Sin fichero o sin path, no modificar el output
+  exit 0
+fi
+```
+
+> **Nota:** Si el hook termina con exit 0 y no produce JSON en stdout (o no incluye `hookSpecificOutput.updatedToolOutput`), el output original de la herramienta llega a Claude sin modificaciones. Solo cuando el campo está presente en la respuesta del hook se sustituye el output.
+
 ### StopFailure
 
 Se dispara **cuando ocurre un error de API durante la respuesta de Claude**. Útil para logging, reintentos o notificación de fallos.
@@ -408,6 +497,8 @@ En este ejemplo, cada vez que el skill escribe un fichero, se ejecuta automátic
 - Los hooks definidos en un skill solo se activan **mientras ese skill está ejecutándose**
 - Los hooks globales (en `settings.json`) se activan en **todas las sesiones**
 - Si ambos aplican a la misma herramienta, **se ejecutan ambos** (no se cancelan)
+
+> **Novedad v3.7 (v2.1.116):** Los hooks definidos en el campo `hooks:` del frontmatter de un agente ahora se disparan correctamente cuando ese agente se invoca desde el hilo principal mediante `--agent <nombre>`. Antes de esta versión, los hooks del frontmatter solo se activaban en subagentes lanzados de forma interna; con sesiones `--agent` se ignoraban. Si tus agentes definen hooks en el frontmatter, ya no es necesario duplicarlos en `settings.json` para que funcionen en sesiones invocadas con `--agent`.
 
 ---
 
@@ -689,9 +780,12 @@ El comportamiento es automático y no requiere configuración. El fichero tempor
 ## Resumen
 
 - Los hooks de tipo `agent` lanzan subagentes completos como respuesta a eventos; son los más potentes, pero también los más costosos en tokens
+- El nuevo tipo `mcp_tool` (v3.7) permite invocar herramientas de servidores MCP directamente desde un hook, sin script shell intermediario
 - Los eventos avanzados (`SessionStart`, `SessionEnd`, `UserPromptSubmit`, `PermissionRequest`, `PostToolUseFailure`, `StopFailure`, `SubagentStart`, `TeammateIdle`, `TaskCompleted`, `Notification`) cubren todo el ciclo de vida de la sesión
 - Los **nuevos eventos v3.0** (`PostCompact`, `CwdChanged`, `FileChanged`, `InstructionsLoaded`, `ConfigChange`, `WorktreeCreate`, `WorktreeRemove`, `Elicitation`, `ElicitationResult`) amplían la cobertura a compactación, filesystem, configuración, worktrees y MCP Elicitation
-- Los hooks pueden definirse en el frontmatter YAML de skills y subagentes, con alcance limitado a su ejecución
+- `PostToolUse` y `PostToolUseFailure` incluyen ahora el campo `duration_ms` (v3.7) con el tiempo de ejecución de la herramienta en milisegundos
+- `hookSpecificOutput.updatedToolOutput` en `PostToolUse` permite reemplazar el output de **cualquier herramienta** antes de que Claude lo procese (v3.7); ya no es exclusivo de herramientas MCP
+- Los hooks pueden definirse en el frontmatter YAML de skills y subagentes, con alcance limitado a su ejecución; desde v3.7 también se disparan correctamente en sesiones `--agent <nombre>`
 - El parámetro `"async": true` permite ejecutar hooks en background para operaciones largas sin bloquear la sesión
 - `"timeout"` limita el tiempo máximo de ejecución de un hook async
 - Solo **exit 2** bloquea operaciones; exit 1 u otros códigos no-zero no bloquean

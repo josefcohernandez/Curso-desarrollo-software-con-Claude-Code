@@ -278,6 +278,136 @@ initialPrompt: "Revisa las tareas pendientes en TaskList, el git log de las últ
 
 Esto es útil para agentes que siempre ejecutan la misma tarea inicial, como auditorías periódicas o reportes de estado.
 
+### `tools:`, `disallowedTools:` y `maxTurns` en frontmatter
+
+Los agentes personalizados pueden restringir el conjunto de herramientas disponibles y limitar el número de turnos que pueden realizar en una sesión.
+
+**`tools:`** — lista de herramientas que el agente puede usar. Si se especifica, el agente solo tiene acceso a esas herramientas.
+
+**`disallowedTools:`** — lista de herramientas que el agente no puede usar bajo ninguna circunstancia. Complementario a `tools:`: si defines `tools:`, `disallowedTools:` actúa como lista de exclusión adicional.
+
+**`maxTurns:`** — número máximo de turnos que el agente puede realizar en una sesión. Útil para acotar el coste de agentes que ejecutan tareas largas o para evitar bucles indefinidos.
+
+```markdown
+---
+name: security-auditor
+description: "Auditor de seguridad de solo lectura. Analiza código en busca de vulnerabilidades."
+tools:
+  - Read
+  - Glob
+  - Grep
+disallowedTools:
+  - Bash
+  - Write
+maxTurns: 20
+---
+
+# Security Auditor
+
+Eres un auditor de seguridad. Analiza el código en busca de:
+- Inyección SQL
+- XSS y CSRF
+- Secretos hardcodeados
+- Dependencias con vulnerabilidades conocidas
+
+No modifiques ningún archivo. Solo lee y reporta hallazgos.
+```
+
+En este ejemplo:
+- `tools:` limita el agente a herramientas de lectura, impidiendo que escriba o ejecute comandos.
+- `disallowedTools:` refuerza la restricción explícitamente sobre `Bash` y `Write`.
+- `maxTurns: 20` garantiza que la auditoría no se prolongue más de 20 turnos, controlando el coste.
+
+> **Nota (v2.1.119):** Cuando ejecutas `claude --print --agent <nombre>`, las restricciones definidas en `tools:` y `disallowedTools:` del frontmatter se aplican correctamente. El flag `--print` respeta las restricciones del agente tal como lo hace una sesión interactiva.
+
+### `permissionMode` en frontmatter
+
+El frontmatter de un agente puede declarar `permissionMode` para definir el nivel de permisos con el que opera cuando se lanza con `--agent`:
+
+```markdown
+---
+name: safe-refactor
+description: "Refactoriza código con permisos mínimos. Solo escribe en src/."
+permissionMode: restricted
+tools:
+  - Read
+  - Write
+  - Glob
+  - Grep
+---
+
+# Safe Refactor
+
+Aplica refactorizaciones conservadoras. Solo modifica archivos dentro de src/.
+No ejecutes comandos de shell ni instales dependencias.
+```
+
+> **Nota (v2.1.119):** Cuando invocas un agente con `claude --agent <nombre>`, el valor de `permissionMode` definido en el frontmatter se aplica automáticamente. No es necesario pasarlo como argumento en la línea de comandos.
+
+### `hooks:` en frontmatter
+
+> **Novedad v2.1.116**
+
+El frontmatter de un agente puede incluir una sección `hooks:` para definir hooks que se disparan durante la ejecución de ese agente específico. Estos hooks funcionan igual que los hooks de sesión estándar (ver [Módulo 08](../../modulo-08-hooks/README.md)), pero solo están activos mientras el agente está en ejecución con `--agent`.
+
+```markdown
+---
+name: deploy-agent
+description: "Gestiona despliegues a staging y producción."
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: "echo '[deploy-agent] Ejecutando: $CLAUDE_TOOL_INPUT' >> /tmp/deploy-audit.log"
+  PostToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: "echo '[deploy-agent] Resultado de bash registrado' >> /tmp/deploy-audit.log"
+---
+
+# Deploy Agent
+
+Gestiona el ciclo de despliegue completo: build, tests, push a staging y verificación.
+```
+
+Esto permite crear agentes con auditoría integrada, notificaciones específicas o validaciones adicionales sin afectar a la configuración de hooks del resto de la sesión.
+
+### `mcpServers` en frontmatter
+
+> **Novedad v2.1.117**
+
+Los agentes personalizados pueden declarar servidores MCP adicionales en su frontmatter con la clave `mcpServers`. Cuando el agente se lanza con `--agent <nombre>`, estos servidores se cargan junto con los configurados globalmente en la sesión.
+
+```markdown
+---
+name: db-analyst
+description: "Analiza y consulta la base de datos de producción de forma segura."
+mcpServers:
+  postgres-readonly:
+    command: "npx"
+    args: ["-y", "@modelcontextprotocol/server-postgres"]
+    env:
+      POSTGRES_CONNECTION_STRING: "postgresql://readonly_user:pass@db.example.com/prod"
+  data-viz:
+    command: "node"
+    args: ["/home/user/.mcp/data-viz-server/index.js"]
+---
+
+# DB Analyst
+
+Consulta la base de datos de producción para análisis y reportes.
+Usa únicamente el servidor postgres-readonly: no ejecutes escrituras.
+```
+
+Los servidores declarados en `mcpServers` se cargan en el hilo principal de la sesión junto con los que ya estuvieran configurados globalmente. Si el mismo nombre de servidor está definido tanto en el frontmatter como en la configuración global, tiene prioridad la configuración global.
+
+**Casos de uso habituales:**
+- Agentes que necesitan acceso a una base de datos o API específica sin exponer esas conexiones al resto de la sesión
+- Agentes de análisis que requieren herramientas especializadas (visualización de datos, conexión a servicios externos)
+- Equipos que distribuyen agentes con sus dependencias MCP empaquetadas
+
 ### Formato del Archivo de Agente
 
 ```markdown
@@ -308,6 +438,10 @@ Hay varias formas de lanzar un agente personalizado:
 ```bash
 # Desde la línea de comandos con --agent
 claude --agent code-reviewer
+
+# En modo no-interactivo (--print)
+# Las restricciones de tools: y disallowedTools: del frontmatter se aplican (v2.1.119)
+claude --print --agent code-reviewer "Revisa los últimos cambios en src/auth/"
 
 # Interactivamente con /agent
 > /agent code-reviewer "Revisa los últimos cambios en src/auth/"
@@ -401,6 +535,13 @@ Paso 3: Presentar el plan al usuario en el contexto principal
 | Modelo | haiku (barato), sonnet (equilibrado), opus (potente) |
 | Agentes custom | `.claude/agents/nombre.md` con frontmatter YAML |
 | `initialPrompt` | Prompt automático al lanzar un agente (v3.0) |
+| `tools:` | Lista de herramientas permitidas en el agente |
+| `disallowedTools:` | Lista de herramientas prohibidas en el agente |
+| `maxTurns:` | Número máximo de turnos por sesión del agente |
+| `permissionMode:` | Nivel de permisos aplicado al invocar con `--agent` (v2.1.119) |
+| `hooks:` | Hooks que se disparan durante la ejecución del agente (v2.1.116) |
+| `mcpServers:` | Servidores MCP adicionales cargados al lanzar el agente (v2.1.117) |
+| `--print` + `--agent` | Respeta `tools:` y `disallowedTools:` del frontmatter (v2.1.119) |
 | Paralelismo | Múltiples subagentes simultáneos para tareas independientes |
 
 > **Deprecaciones v3.0:**

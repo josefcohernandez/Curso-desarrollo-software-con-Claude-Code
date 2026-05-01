@@ -18,7 +18,7 @@ Al completar este módulo, serás capaz de:
 4. **Crear workflows avanzados**: revisión por rutas críticas, tareas programadas con cron y triaje automático de issues.
 5. **Programar tareas recurrentes** con `CronCreate` / `CronList` / `CronDelete` y el skill `/loop`.
 6. **Reutilizar skills** de `.claude/skills/` tanto en la terminal como en GitHub Actions.
-7. **Crear scripts de automatización** para tareas repetitivas de desarrollo.
+7. **Crear scripts de automatización** para tareas repetitivas de desarrollo, incluyendo `claude ultrareview` para revisiones exhaustivas en CI.
 8. **Integrar Claude Code** en pipelines de CI/CD existentes (Jenkins, GitLab CI, etc.).
 9. **Controlar costes y límites** con `--max-turns` y `--max-budget-usd`.
 10. **Generar salida estructurada** con `--output-format json` y `--json-schema`.
@@ -90,6 +90,7 @@ Al completar este módulo, serás capaz de:
 | **Skills en CI** | Reutilizar skills de `.claude/skills/` en workflows de GitHub Actions |
 | **`CronCreate`** | Herramienta nativa para programar tareas recurrentes desde la sesión de Claude Code |
 | **`/loop`** | Skill para ejecutar un comando periódicamente durante una sesión activa |
+| **`claude ultrareview`** | Subcomando CLI (v2.1.120+) para ejecutar `/ultrareview` de forma no-interactiva en CI/scripts |
 
 ---
 

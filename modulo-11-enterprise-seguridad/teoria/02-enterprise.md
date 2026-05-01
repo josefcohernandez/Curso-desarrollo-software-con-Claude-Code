@@ -235,6 +235,29 @@ Para organizaciones que usan Amazon Bedrock powered by Mantle, activar también:
 export CLAUDE_CODE_USE_MANTLE=1
 ```
 
+#### Tier de servicio de Bedrock: `ANTHROPIC_BEDROCK_SERVICE_TIER` (v2.1.122)
+
+Las organizaciones con acuerdos de nivel de servicio en Amazon Bedrock pueden controlar el tier de servicio que se solicita en cada petición mediante la variable de entorno `ANTHROPIC_BEDROCK_SERVICE_TIER`. Su valor se envía como cabecera HTTP `X-Amzn-Bedrock-Service-Tier` en cada llamada a la API.
+
+| Valor | Comportamiento |
+|-------|---------------|
+| `default` | Tier estándar de Bedrock (comportamiento por defecto si no se configura) |
+| `flex` | Tier flexible, con mayor elasticidad en capacidad pero sin garantías de latencia |
+| `priority` | Tier priority, reserva capacidad dedicada; disponible con acuerdos específicos de AWS |
+
+```bash
+# Tier estándar (equivale a no definir la variable)
+export ANTHROPIC_BEDROCK_SERVICE_TIER=default
+
+# Tier flexible
+export ANTHROPIC_BEDROCK_SERVICE_TIER=flex
+
+# Tier priority (requiere acuerdo de servicio priority con AWS)
+export ANTHROPIC_BEDROCK_SERVICE_TIER=priority
+```
+
+> **Nota**: El tier `priority` solo tiene efecto si tu cuenta AWS tiene un acuerdo de servicio priority con Amazon Bedrock. Si se configura sin ese acuerdo, Bedrock ignorará la cabecera y usará el tier disponible.
+
 **Ventajas de Bedrock**:
 - Los datos no salen de tu cuenta de AWS
 - Cumplimiento con políticas de residencia de datos (EU, APAC, etc.)
@@ -274,6 +297,27 @@ Desde v2.1.98, al seleccionar **"3rd-party platform"** en la pantalla de login d
 4. **Verificación de credenciales y permisos**: Prueba la conexión con Vertex AI y confirma que la cuenta tiene los permisos IAM necesarios (`aiplatform.endpoints.predict`)
 
 El asistente genera y exporta automáticamente las variables `CLOUD_ML_REGION` y `ANTHROPIC_VERTEX_PROJECT_ID` una vez completada la verificación, eliminando la configuración manual de entorno.
+
+#### Autenticación con certificados X.509 via mTLS ADC en Vertex AI (v2.1.121)
+
+Desde v2.1.121, Claude Code soporta autenticación mediante certificados X.509 via mTLS Application Default Credentials (ADC) cuando se usa el backend de Vertex AI. Este mecanismo es el estándar en entornos enterprise con infraestructura de certificados gestionada (PKI corporativa):
+
+```bash
+# Vertex AI con mTLS ADC: las credenciales se obtienen automáticamente
+# del certificado X.509 configurado en el Application Default Credentials
+export CLAUDE_CODE_USE_VERTEX=1
+export CLOUD_ML_REGION=europe-west1
+export ANTHROPIC_VERTEX_PROJECT_ID=mi-proyecto-gcp
+
+# Las credenciales mTLS se gestionan a través de gcloud o del agente
+# de certificados del sistema (workload certificate provider)
+# No es necesario ejecutar gcloud auth application-default login
+# si el entorno ya dispone de mTLS ADC configurado
+```
+
+**Cuándo es útil**: En organizaciones donde los equipos de seguridad gestionan una PKI interna y distribuyen certificados de cliente a las máquinas de los desarrolladores o a los nodos de CI/CD. En lugar de gestionar credenciales de usuario o service account keys, la autenticación se basa en el certificado de la máquina, lo que reduce la superficie de ataque y simplifica la rotación de credenciales.
+
+> **Prerequisito**: Requiere que el entorno tenga configurado un proveedor de certificados de carga de trabajo (workload certificate provider) compatible con la especificación ADC de Google. Consulta la documentación de [Workload Identity Federation with X.509 certificates](https://cloud.google.com/iam/docs/workload-identity-federation-with-x509-certificates) para los detalles de configuración.
 
 ### Asistente interactivo de configuración de Bedrock (v2.1.92)
 
@@ -362,6 +406,36 @@ export OTEL_LOG_TOOL_DETAILS=1
 ```
 
 > **Nota de migración**: Si usabas `CLAUDE_CODE_OTEL_LOG_TOOL_DETAILS=1`, migra a `OTEL_LOG_TOOL_DETAILS=1`. Ambas variables funcionan en v2.1.101, pero la variante `CLAUDE_CODE_` quedará eliminada en versiones futuras.
+
+### Evento OTEL `claude_code.skill_activated`: atributo `invocation_trigger` (v2.1.126)
+
+El evento OpenTelemetry `claude_code.skill_activated`, que se emite cada vez que se activa un skill (comando personalizado), incluye desde v2.1.126 el atributo `invocation_trigger`. Este atributo permite distinguir cómo fue invocado el skill:
+
+| Valor de `invocation_trigger` | Significado |
+|-------------------------------|-------------|
+| `"user-slash"` | El usuario invocó el skill escribiendo `/nombre` en la sesión interactiva |
+| `"claude-proactive"` | Claude decidió invocar el skill de forma autónoma, sin instrucción directa del usuario |
+| `"nested-skill"` | El skill fue invocado desde dentro de otro skill en ejecución |
+
+**Utilidad en observabilidad enterprise**:
+
+- **Diferenciar uso interactivo del uso agentivo**: Si la mayoría de invocaciones tienen `invocation_trigger=claude-proactive`, los skills están siendo usados en flujos autónomos, lo que ayuda a calibrar la confianza en esos flujos.
+- **Detectar bucles de skills**: Un número elevado de eventos con `invocation_trigger=nested-skill` puede indicar recursión no intencionada entre skills.
+- **Auditoría de autoría de acciones**: En entornos con auditoría estricta, es posible distinguir qué acciones fueron iniciadas por el usuario y cuáles fueron tomadas autónomamente por Claude.
+
+```bash
+# Ejemplo de evento OTEL con el nuevo atributo (pseudocódigo de traza):
+# {
+#   "name": "claude_code.skill_activated",
+#   "attributes": {
+#     "skill.name": "review-pr",
+#     "invocation_trigger": "user-slash",
+#     "session.id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+#   }
+# }
+```
+
+Para recibir este atributo en tus trazas, asegúrate de tener OTEL configurado y activado. No requiere variables adicionales: el atributo se incluye automáticamente en el evento `claude_code.skill_activated` desde v2.1.126.
 
 ### Propagación de contexto W3C TraceContext (v2.1.98)
 
@@ -622,3 +696,7 @@ Auto Mode permite que Claude Code tome decisiones de permisos automáticamente u
 | `TRACEPARENT` W3C | Propagación de traza en subprocesos Bash | Todos (v2.1.98) |
 | OS CA certificate store | Confianza automática en CAs corporativas | Todos (v2.1.101) |
 | `CLAUDE_CODE_CERT_STORE=bundled` | Revertir a certificados bundled únicamente | Todos (v2.1.101) |
+| `ANTHROPIC_BEDROCK_SERVICE_TIER` | Tier de servicio de Bedrock (`default`/`flex`/`priority`) | Todos (v2.1.122) |
+| `wslInheritsWindowsSettings` | Herencia de managed settings de Windows en WSL | Enterprise (v2.1.118) |
+| Vertex AI mTLS X.509 ADC | Autenticación con certificados en Vertex AI | Todos (v2.1.121) |
+| `invocation_trigger` en OTEL `skill_activated` | Origen de la invocación de skills en trazas | Todos (v2.1.126) |

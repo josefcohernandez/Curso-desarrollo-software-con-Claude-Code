@@ -4,6 +4,52 @@ Claude Code ofrece mecanismos avanzados para que los agentes trabajen en paralel
 
 ---
 
+## `CLAUDE_CODE_FORK_SUBAGENT`: subagentes fork en worktree
+
+> **Disponible desde v2.1.117 (sesiones interactivas) y v2.1.121 (sesiones no-interactivas)**
+
+La variable de entorno `CLAUDE_CODE_FORK_SUBAGENT=1` habilita el modo de subagentes fork con aislamiento en worktree para todos los subagentes de la sesión, sin necesidad de especificar `isolation: "worktree"` en cada Task call.
+
+```bash
+# Habilitar subagentes fork en la sesión actual
+export CLAUDE_CODE_FORK_SUBAGENT=1
+claude
+
+# O directamente en el comando de lanzamiento
+CLAUDE_CODE_FORK_SUBAGENT=1 claude --print "Refactoriza el módulo de pagos"
+```
+
+### Ámbito de aplicación
+
+| Versión | Dónde aplica |
+|---------|-------------|
+| v2.1.117 | Sesiones interactivas y builds externas interactivas |
+| v2.1.121 | Sesiones no-interactivas: SDK y flag `--print` (`-p`) |
+
+Desde v2.1.121, la variable funciona también en pipelines de CI/CD y scripts que usen `claude --print` o el Agent SDK. Esto permite habilitar el aislamiento en worktree de forma global en entornos de automatización sin modificar cada invocación individual.
+
+### Diferencia con `isolation: "worktree"` por Task
+
+| Mecanismo | Ámbito | Cuándo usarlo |
+|-----------|--------|---------------|
+| `isolation: "worktree"` en Task | Solo el subagente que lo declara | Aislamiento selectivo por tarea |
+| `CLAUDE_CODE_FORK_SUBAGENT=1` | Todos los subagentes de la sesión | Aislamiento global de la sesión |
+
+**Cuándo usar `CLAUDE_CODE_FORK_SUBAGENT=1`:**
+- En pipelines de CI/CD donde todos los subagentes deben trabajar en worktrees aislados
+- Al lanzar sesiones con `--print` en scripts de automatización
+- En entornos donde el repositorio principal no debe tocarse bajo ninguna circunstancia
+- Para garantizar que experimentos paralelos nunca se interfieran entre sí
+
+```bash
+# Ejemplo: pipeline de CI que ejecuta análisis paralelos sin tocar el repo principal
+CLAUDE_CODE_FORK_SUBAGENT=1 claude --print \
+  "Analiza el rendimiento del módulo de pagos y el módulo de usuarios en paralelo.
+   Para cada uno, lanza un subagente que ejecute los benchmarks y reporte resultados."
+```
+
+---
+
 ## Aislamiento con Git Worktrees para subagentes
 
 ### El problema del trabajo experimental

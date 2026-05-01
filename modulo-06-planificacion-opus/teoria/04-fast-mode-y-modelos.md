@@ -34,16 +34,18 @@ Fast Mode no es un modelo distinto. Es una optimización de velocidad sobre el m
 
 Como se introdujo en el Capítulo 1, Claude Code ofrece tres modelos. Aquí profundizamos en la estrategia táctica de selección:
 
-| Modelo | Model ID | Contexto | Fortaleza principal |
-|--------|----------|----------|---------------------|
-| Claude Opus 4.6 | `claude-opus-4-6` | 1M tokens | Razonamiento profundo, tareas complejas |
-| Claude Sonnet 4.6 | `claude-sonnet-4-6` | 1M tokens | Equilibrio calidad/velocidad |
-| Claude Haiku 4.5 | `claude-haiku-4-5-20251001` | 200K tokens | Velocidad, tareas simples |
+| Modelo | Model ID | Contexto | Fortaleza principal | Disponibilidad |
+|--------|----------|----------|---------------------|----------------|
+| Claude Opus 4.7 | `claude-opus-4-7` | 1M tokens | Razonamiento profundo + nivel `xhigh` | Planes Max (claude.ai) |
+| Claude Opus 4.6 | `claude-opus-4-6` | 1M tokens | Razonamiento profundo, tareas complejas | API, Bedrock, Vertex, Team, Enterprise |
+| Claude Sonnet 4.6 | `claude-sonnet-4-6` | 1M tokens | Equilibrio calidad/velocidad | Todos los planes |
+| Claude Haiku 4.5 | `claude-haiku-4-5-20251001` | 200K tokens | Velocidad, tareas simples | Todos los planes |
 
 Para especificar el modelo en el CLI:
 
 ```bash
 # Iniciar sesión con un modelo específico
+claude --model claude-opus-4-7      # Opus 4.7 (planes Max)
 claude --model claude-opus-4-6
 claude --model claude-sonnet-4-6
 claude --model claude-haiku-4-5-20251001
@@ -51,6 +53,10 @@ claude --model claude-haiku-4-5-20251001
 # Cambiar modelo en una sesión activa
 /model claude-sonnet-4-6
 ```
+
+> **Aviso v2.1.108:** Cambiar de modelo durante una conversación activa con `/model`
+> hace que el siguiente turno **retenga el historial completo sin prompt cache**.
+> Para evitar el coste adicional, cambia de modelo al inicio de una sesión limpia.
 
 ### Effort Level (nivel de esfuerzo)
 
@@ -61,9 +67,12 @@ La variable de entorno `CLAUDE_CODE_EFFORT_LEVEL` controla cuánto razonamiento 
 | `low` | Respuesta rápida, razonamiento mínimo | Pocos | Todos los modelos |
 | `medium` | Balance entre velocidad y profundidad | Moderados | Todos los modelos |
 | `high` | Razonamiento profundo antes de responder **(default)** | Muchos | Todos los modelos |
-| `max` | Máximo razonamiento posible, sin límites | Máximos | **Solo Opus 4.6** |
+| `xhigh` | Thinking de máxima profundidad (entre `high` y `max`) | Muy muchos | **Solo Opus 4.7** |
+| `max` | Máximo razonamiento posible, sin límites | Máximos | **Solo Opus 4.6 y 4.7** |
 
-> **Nota:** Desde v2.1.94, el nivel de esfuerzo por defecto es **high** para usuarios de API key, Bedrock, Vertex, Team y Enterprise. High proporciona razonamiento profundo adecuado para la mayoría de tareas de programación. Puedes reducirlo a `medium` o `low` para tareas simples donde priorices velocidad.
+> **Nota v2.1.117:** El nivel de esfuerzo por defecto es **high** para todos los planes
+> (Pro, Max, API key, Bedrock, Vertex, Team, Enterprise). Hasta v2.1.117, los planes
+> Pro/Max tenían `medium` como default.
 
 ```bash
 # Configurar para la sesión actual
@@ -81,16 +90,25 @@ claude
 **Formas de cambiar el nivel de esfuerzo durante una sesión:**
 
 ```bash
-# Slash command (dentro de una sesión interactiva)
+# Slash command interactivo (sin argumentos): abre un slider con flechas + Enter
+/effort
+
+# Slash command directo (dentro de una sesión interactiva)
 /effort low
 /effort medium
 /effort high
-/effort max          # Solo Opus 4.6
+/effort xhigh        # Solo Opus 4.7
+/effort max          # Solo Opus 4.6 y 4.7
 
 # Flag CLI (al iniciar sesión)
 claude --effort high
-claude --effort max  # Solo Opus 4.6
+claude --effort xhigh   # Solo Opus 4.7
+claude --effort max     # Solo Opus 4.6 y 4.7
 ```
+
+> **Novedad v2.1.111:** `/effort` sin argumentos abre un **slider interactivo**.
+> Navega entre los niveles con las teclas de flecha y confirma con Enter.
+> El slider muestra solo los niveles disponibles para el modelo activo en la sesión.
 
 **Activar high effort para un solo turno con "ultrathink":**
 
@@ -112,14 +130,16 @@ Esta tabla resume la combinación óptima según el tipo de tarea:
 |-------|--------|-----------|--------------|
 | Renombrar variable o función | Haiku | - | `low` |
 | Implementar una feature nueva | Sonnet | No | `medium` |
-| Depurar un bug complejo | Opus | No | `high` |
+| Depurar un bug complejo | Opus 4.6/4.7 | No | `high` |
 | Generar boilerplate o scaffolding | Sonnet | Sí | `low` |
-| Revisión de seguridad | Opus | No | `high` |
+| Revisión de seguridad | Opus 4.6/4.7 | No | `high` |
 | Exploración inicial de codebase | Haiku / Sonnet | Sí | `low` |
-| Refactoring de módulo complejo | Opus | No | `high` |
+| Refactoring de módulo complejo | Opus 4.6/4.7 | No | `high` |
 | Escribir tests unitarios simples | Sonnet | Sí | `medium` |
-| Diseño de arquitectura | Opus | No | `high` |
+| Diseño de arquitectura | Opus 4.6/4.7 | No | `high` |
 | Formateo y lint de código | Haiku | Sí | `low` |
+| Problema de concurrencia o seguridad crítica | Opus 4.7 | No | `xhigh` |
+| Análisis arquitectónico profundo | Opus 4.7 | No | `xhigh` o `max` |
 
 ### Combinando Fast Mode y Effort Level
 
@@ -172,10 +192,12 @@ claude --model claude-haiku-4-5-20251001
 
 - Fast Mode es una optimización de velocidad sobre Opus 4.6, no un cambio de modelo
 - Se activa con `/fast` en la sesión activa
-- Los modelos actuales son Opus 4.6 (1M tokens), Sonnet 4.6 y Haiku 4.5
-- `CLAUDE_CODE_EFFORT_LEVEL` (low/medium/high/max) controla la profundidad de razonamiento; el default es **high** (desde v2.1.94)
-- Usa `/effort` o `--effort` para cambiar el nivel durante o al iniciar una sesión
+- Los modelos actuales son Opus 4.7 (planes Max), Opus 4.6 (API/Bedrock/Vertex), Sonnet 4.6 y Haiku 4.5
+- `CLAUDE_CODE_EFFORT_LEVEL` (low/medium/high/xhigh/max) controla la profundidad de razonamiento; el default es **high** para todos los planes desde v2.1.117
+- `/effort` sin argumentos abre un slider interactivo (novedad v2.1.111)
+- El nivel `xhigh` solo está disponible para Opus 4.7 (planes Max)
+- El nivel `max` está disponible para Opus 4.6 y 4.7
+- Cambiar de modelo a mitad de conversación con `/model` invalida el prompt cache
 - Incluye "ultrathink" en un prompt para activar high effort en un solo turno
-- El nivel `max` solo está disponible para Opus 4.6
 - La tabla de decisión combina modelo + Fast Mode + esfuerzo según el tipo de tarea
-- Para tareas críticas: Opus, sin Fast Mode, esfuerzo high o max
+- Para tareas críticas: Opus 4.7, sin Fast Mode, esfuerzo `xhigh` o `max`

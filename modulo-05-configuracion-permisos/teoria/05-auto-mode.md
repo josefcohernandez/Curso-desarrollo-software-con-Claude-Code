@@ -75,7 +75,7 @@ claude --permission-mode auto
 claude -p "refactoriza el modulo de pagos eliminando codigo duplicado" --permission-mode auto
 ```
 
-> El flag `--enable-auto-mode` que aparecía en versiones anteriores ha quedado obsoleto desde v2.1.111. Auto Mode está disponible directamente mediante `--permission-mode auto` sin necesidad de ningún flag adicional de habilitación.
+> **Flag obsoleto desde v2.1.111**: El flag `--enable-auto-mode` que aparecía en documentación y ejemplos anteriores ha sido eliminado. No tiene efecto si se incluye. Auto Mode se activa exclusivamente con `--permission-mode auto`, igual que cualquier otro modo de permisos.
 
 ### Activacion en settings.json
 
@@ -120,6 +120,31 @@ El comportamiento del clasificador de seguridad se puede ajustar mediante las si
 - `autoMode.environment`: Describe el entorno de trabajo para que el clasificador ajuste su nivel de cautela.
 - `autoMode.allow`: Acciones que el clasificador debe permitir sin analisis adicional.
 - `autoMode.soft_deny`: Acciones que el clasificador debe tratar con cautela extra (puede bloquearlas o pedir confirmacion).
+
+### `"$defaults"` en los arrays del clasificador (v2.1.118)
+
+Cuando defines una lista en `autoMode.allow`, `autoMode.soft_deny` o `autoMode.environment`, tu lista **reemplaza** completamente la lista built-in del clasificador. Si quieres **ampliar** la lista built-in en lugar de sustituirla, incluye el elemento especial `"$defaults"` en tu array:
+
+```json
+{
+  "autoMode": {
+    "allow": [
+      "$defaults",
+      "Edit(src/**)",
+      "Bash(npm test*)"
+    ],
+    "soft_deny": [
+      "$defaults",
+      "Bash(git push*)",
+      "Write(.env*)"
+    ]
+  }
+}
+```
+
+Con `"$defaults"` en la primera posición, el clasificador parte de sus reglas predeterminadas y añade las tuyas encima. Sin `"$defaults"`, solo aplica las reglas que tú defines y descarta las built-in.
+
+**Cuándo omitir `"$defaults"`**: Si tienes un entorno muy controlado donde sabes exactamente qué debe y no debe permitirse, omitir `"$defaults"` te da control total sobre el clasificador. Si no estás seguro, incluirlo es la opción más segura porque conserva la cobertura de seguridad por defecto.
 
 ### Desactivacion durante una sesion activa
 

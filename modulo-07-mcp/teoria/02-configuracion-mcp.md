@@ -206,6 +206,14 @@ claude --verbose
 2. Verificar `/mcp` en sesión interactiva
 3. Reiniciar Claude Code (a veces necesario tras cambiar config)
 
+### Reintentos automáticos en errores transitorios (v2.1.121)
+
+Cuando un servidor MCP falla al arrancar (error de red, proceso que tarda en inicializarse, dependencia no disponible en ese instante), Claude Code realiza **hasta 3 reintentos automáticos** antes de marcar el servidor como no disponible. El reintento tiene un intervalo de espera creciente entre intentos.
+
+Esto reduce los falsos negativos en entornos con servicios que tardan en estar listos, como contenedores Docker con tiempos de arranque variables o servidores que dependen de una base de datos que aún está inicializándose. No requiere configuración adicional: el comportamiento es automático desde v2.1.121.
+
+> Si el servidor sigue sin conectar tras los 3 reintentos, aparecerá en `/mcp` con estado de error. En ese caso, verifica los logs con `claude --verbose`.
+
 ### Timeout de conexión
 
 ```json

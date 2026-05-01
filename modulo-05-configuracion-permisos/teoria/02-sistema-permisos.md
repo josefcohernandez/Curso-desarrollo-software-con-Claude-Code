@@ -227,11 +227,41 @@ Ejemplo:
 
 ---
 
+## Skill `/less-permission-prompts` (v2.1.111)
+
+Claude Code incluye por defecto el skill `/less-permission-prompts`. Su función es analizar las transcripts de sesiones anteriores para detectar los patrones de herramientas que el usuario ha aprobado repetidamente y proponer una allowlist priorizada lista para añadir a `settings.json`.
+
+```bash
+# Dentro de una sesión interactiva
+/less-permission-prompts
+```
+
+Claude Code examina el historial de confirmaciones y genera una lista ordenada por frecuencia. Las herramientas que has aprobado más veces aparecen primero:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm test*)",
+      "Bash(npm run lint*)",
+      "Edit(src/**)",
+      "Bash(git diff*)",
+      "Bash(git status)"
+    ]
+  }
+}
+```
+
+Puedes copiar esta lista directamente a tu `.claude/settings.json` o a `~/.claude/settings.json` según si el permiso aplica al proyecto o a tu uso global. Esto reduce la fricción de configurar permisos desde cero y garantiza que la allowlist refleja tu uso real, no una lista genérica.
+
+---
+
 ## Ver y Modificar Permisos
 
 ```bash
 # En sesión interactiva
 /permissions              # Ver permisos actuales
+/less-permission-prompts  # Analizar historial y proponer allowlist
 
 # Desde CLI
 claude config list        # Ver toda la config

@@ -44,6 +44,19 @@ claude --remote-control --remote-control-session-name-prefix "mi-prefijo"
 
 El picker de sesiones de `--resume` ya no muestra sesiones creadas por `claude -p` (headless) ni por invocaciones del SDK. Solo muestra sesiones interactivas, lo que reduce el ruido al buscar una sesión para reanudar.
 
+### Reanudar sesiones desde una URL de PR (v2.1.122)
+
+Cuando estás en el picker de `--resume`, puedes **pegar directamente la URL de un pull request** (GitHub, GitLab o Bitbucket) para abrir la sesión interactiva que lo creó:
+
+```bash
+claude --resume
+# El picker aparece con la lista de sesiones
+# Pega: https://github.com/mi-org/mi-repo/pull/42
+# Claude Code localiza y abre la sesión que generó ese PR
+```
+
+Esto es especialmente útil cuando necesitas retomar el trabajo de un PR abierto hace días y no recuerdas el nombre de la sesión. En lugar de buscar manualmente en la lista, la URL del PR actúa como identificador directo.
+
 ### El flag `--teleport`
 
 `--teleport` va en la dirección contraria: reanuda en tu terminal local una sesión que está corriendo en la infraestructura web. Trae el contexto completo de vuelta a tu máquina, con acceso a tu filesystem, herramientas locales y variables de entorno.

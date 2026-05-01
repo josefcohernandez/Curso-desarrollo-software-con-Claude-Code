@@ -206,19 +206,24 @@ Además, los **deep links** con el protocolo `claude-cli://` ahora abren directa
 
 ---
 
-## PowerShell Tool para Windows
+## PowerShell como shell primario en Windows
 
-> **Novedad v3.1 (v2.1.84, opt-in preview)**
+> **Actualización v2.1.120 / v2.1.126**
 
-En Windows, Claude Code ahora ofrece una herramienta **PowerShell** como alternativa a Bash. Esto permite ejecutar comandos nativos de PowerShell sin necesidad de WSL:
+A partir de la v2.1.120, **PowerShell es el shell primario de Claude Code en Windows**. Git Bash ya no es un requisito previo para instalar o usar Claude Code en entornos Windows nativos. La v2.1.126 completó este soporte con correcciones adicionales de compatibilidad.
+
+Claude Code puede ejecutar comandos PowerShell directamente, sin necesidad de WSL ni Git Bash:
 
 ```powershell
 # Claude puede ejecutar comandos PowerShell nativos
 Get-ChildItem -Recurse -Filter "*.cs" | Select-Object FullName
 Get-Process | Where-Object { $_.CPU -gt 100 }
+Invoke-RestMethod -Uri "https://api.ejemplo.com/health"
 ```
 
-La herramienta PowerShell es un **opt-in preview**: no esta activada por defecto. Es especialmente util para equipos que trabajan con .NET, Azure o infraestructura Windows.
+Esto es especialmente relevante para equipos que trabajan con .NET, Azure o infraestructura Windows, ya que el entorno nativo del sistema operativo ya no requiere capas de compatibilidad adicionales.
+
+> **Nota para usuarios de WSL2:** si trabajas en WSL2, la experiencia no cambia. El shell sigue siendo Bash dentro del subsistema Linux. El cambio afecta exclusivamente a instalaciones nativas de Windows (PowerShell / CMD).
 
 ---
 
@@ -227,9 +232,10 @@ La herramienta PowerShell es un **opt-in preview**: no esta activada por defecto
 1. **Una tarea = una sesión** (o `/clear` entre tareas)
 2. **Resume solo para continuar** trabajo previo, no para "recordar"
 3. **One-shot para automatización**, interactivo para desarrollo
-4. **Monitoriza `/cost`** regularmente
+4. **Monitoriza `/usage`** regularmente para controlar tokens y coste
 5. **`/compact` si la sesión es larga** y necesitas seguir
 6. **`Esc` para cancelar** si Claude va por mal camino
+7. **`/recap` antes de un `/clear`** si quieres un registro del trabajo realizado
 
 ---
 

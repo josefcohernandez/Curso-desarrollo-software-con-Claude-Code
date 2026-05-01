@@ -61,13 +61,14 @@ Extended thinking sigue siendo útil para:
 
 ## Cuándo Usar Cada Modelo
 
-| Modelo | Coste (in/out) | Usar para | No usar para |
-|--------|---------------|-----------|-------------|
-| **Haiku 4.5** | $1/$5 | Commit messages, formateo, tareas triviales | Cualquier cosa que requiera razonamiento |
-| **Sonnet 4.6** | $3/$15 | Desarrollo diario, features, tests, refactoring | Decisiones arquitectónicas complejas |
-| **Opus 4.6** | $5/$25 | Planificación, debug complejo, arquitectura | Tareas rutinarias (~1.7x más caro que Sonnet) |
+| Modelo | Coste (in/out) | Contexto | Usar para | No usar para |
+|--------|---------------|----------|-----------|-------------|
+| **Haiku 4.5** | $1/$5 | 200K | Commit messages, formateo, tareas triviales | Cualquier cosa que requiera razonamiento |
+| **Sonnet 4.6** | $3/$15 | 1M | Desarrollo diario, features, tests, refactoring | Decisiones arquitectónicas complejas |
+| **Opus 4.6** | $5/$25 | 1M | Planificación, debug complejo, arquitectura (API/Bedrock/Vertex) | Tareas rutinarias |
+| **Opus 4.7** | $5/$25 | 1M | Todo lo de Opus 4.6 + nivel `xhigh` (**planes Max de claude.ai**) | Tareas rutinarias |
 
-> **Nota v3.0:** Opus 4.6 ahora soporta hasta **128K tokens de salida** (duplicado desde 64K). Sonnet 4.6 alcanza **1M de contexto** en beta con 64K tokens de salida.
+> **Nota v3.0:** Opus 4.6 soporta hasta **128K tokens de salida**. Sonnet 4.6 alcanza **1M de contexto** con 64K tokens de salida.
 
 ### Árbol de Decisión
 
@@ -122,6 +123,10 @@ opusplan ofrece la **calidad de Opus en planificación** con el **coste de Sonne
 claude --model opus        # Toda la sesión con Opus
 claude --model opusplan    # Híbrido
 ```
+
+> **Aviso v2.1.108:** Al ejecutar `/model` para cambiar de modelo **durante una conversación activa**, Claude Code muestra una advertencia: el siguiente mensaje **releerá el historial completo** sin poder aprovechar el prompt cache acumulado. Esto puede aumentar significativamente el coste del siguiente turno si la conversación es larga.
+>
+> Estrategia para minimizar el coste: cambia de modelo al inicio de una nueva sesión (`/clear` + `/model`) en lugar de a mitad de conversación.
 
 ### Estrategia por Fase del Día
 
@@ -182,8 +187,13 @@ cobertura exhaustiva.
 ## Resumen
 
 ```
-90% del trabajo → Sonnet ($3/$15)
-Planificación   → Opus o opusplan
+90% del trabajo  → Sonnet ($3/$15)
+Planificación    → Opus (4.6 en API, 4.7 en planes Max) o opusplan
 Tareas triviales → Haiku ($1/$5)
-Debug complejo  → Opus con effort high/max o "ultrathink"
+Debug complejo   → Opus con effort high/xhigh/max o "ultrathink"
+xhigh            → Solo Opus 4.7 (planes Max de claude.ai)
 ```
+
+- El nivel `xhigh` está entre `high` y `max` en profundidad de razonamiento y es exclusivo de Opus 4.7
+- Cambiar de modelo a mitad de conversación invalida el prompt cache: hazlo al inicio de sesión
+- Desde v2.1.117, el default para planes Pro/Max es `high` (antes era `medium`)

@@ -34,7 +34,7 @@ Ejecuta `/terminal-setup` en Claude Code para configurar automáticamente los ke
 | `Ctrl+G` | Todas | Abre el prompt o una respuesta personalizada en el editor de texto por defecto | Modo interactivo |
 | `Ctrl+X Ctrl+E` | Todas | Abre el editor externo configurado en `$EDITOR` para redactar el prompt actual. Al guardar y cerrar, el contenido se inserta en el prompt | Prompt |
 | `Ctrl+L` | Todas | Limpia la pantalla del terminal (conserva el historial de conversación) | Modo interactivo |
-| `Ctrl+O` | Todas | Alterna el output verbose (muestra el uso detallado de herramientas y ejecución). En modo `NO_FLICKER` (v2.1.97), activa una focus view que muestra solo el prompt, resumen de herramientas y respuesta final | Modo interactivo |
+| `Ctrl+O` | Todas | Alterna entre vista normal y transcript detallado (verbose). Ya no activa la focus view; para eso usar el comando `/focus` | Modo interactivo |
 | `Ctrl+R` | Todas | Búsqueda inversa en el historial de comandos (búsqueda interactiva) | Prompt |
 | `Ctrl+B` | Todas | Mueve comandos o agentes en ejecución al segundo plano. **Usuarios de tmux: pulsar dos veces** | Modo interactivo |
 | `Ctrl+T` | Todas | Muestra u oculta la lista de táreas en el área de estado del terminal | Modo interactivo |
@@ -60,7 +60,7 @@ Ejecuta `/terminal-setup` en Claude Code para configurar automáticamente los ke
 | Shift+Tab x2 | **Plan** (`plan`) | Solo propone planes, no ejecuta nada |
 | Shift+Tab x3 | **Normal** (vuelta al inicio) | — |
 
-> **Nota:** Si tienes modos adicionales habilitados (como `auto` con `--enable-auto-mode` o `bypassPermissions`), estos se añaden al ciclo.
+> **Nota:** Si tienes modos adicionales habilitados (como `auto` o `bypassPermissions`), estos se añaden al ciclo. El flag `--enable-auto-mode` fue eliminado en v2.1.111; Auto Mode está disponible directamente según el plan.
 
 ---
 
@@ -113,8 +113,8 @@ Para que `Shift+Enter` funcione en VS Code, Alacritty, Zed o Warp, ejecuta `/ter
 | Atajo | macOS | Linux/Windows | Acción | Contexto |
 |-------|-------|--------------|--------|---------|
 | `Ctrl+K` | Si | Si | Borra desde el cursor hasta el final de la línea (guarda para pegar) | Prompt |
-| `Ctrl+U` | Si | Si | Borra desde el cursor hasta el inicio de la línea (guarda para pegar) | Prompt |
-| `Ctrl+Y` | Si | Si | Pega el texto borrado con Ctrl+K o Ctrl+U | Prompt |
+| `Ctrl+U` | Si | Si | Limpia todo el buffer del prompt (antes solo borraba hasta el inicio de línea). `Ctrl+Y` restaura lo borrado | Prompt |
+| `Ctrl+Y` | Si | Si | Restaura el texto borrado con `Ctrl+K` o `Ctrl+U` | Prompt |
 | `Alt+Y` (tras Ctrl+Y) | Option+Y | `Alt+Y` | Cicla por el historial de textos pegados | Prompt |
 | `Alt+B` | Option+B | `Alt+B` | Mueve el cursor una palabra hacia atrás | Prompt |
 | `Alt+F` | Option+F | `Alt+F` | Mueve el cursor una palabra hacia adelante | Prompt |
@@ -176,13 +176,15 @@ Activa el modo de edición Vim con `/vim` o configuralo permanentemente en `/con
 
 | Comando | Acción | Desde modo |
 |---------|--------|-----------|
-| `Esc` | Entra en modo NORMAL | INSERT |
+| `Esc` | Entra en modo NORMAL | INSERT / VISUAL |
 | `i` | Inserta antes del cursor | NORMAL |
 | `I` | Inserta al inicio de la línea | NORMAL |
 | `a` | Inserta después del cursor | NORMAL |
 | `A` | Inserta al final de la línea | NORMAL |
 | `o` | Abre línea debajo | NORMAL |
 | `O` | Abre línea encima | NORMAL |
+| `v` | Entra en modo VISUAL (selección carácter a carácter) | NORMAL |
+| `V` | Entra en modo VISUAL-LINE (selección de línea completa) | NORMAL |
 
 ### Navegación en modo NORMAL
 
@@ -223,6 +225,18 @@ Activa el modo de edición Vim con `/vim` o configuralo permanentemente en `/con
 | `<<` | Reduce la indentacion |
 | `J` | Une líneas |
 | `.` | Repite el último cambio |
+
+### Operadores en modo VISUAL
+
+En modo VISUAL y VISUAL-LINE, los operadores `d`, `c`, `y` actúan sobre la selección activa:
+
+| Comando | Acción |
+|---------|--------|
+| `d` | Borra la selección |
+| `c` | Cambia la selección (borra e inserta) |
+| `y` | Copia (yank) la selección |
+| `>` | Aumenta la indentación de la selección |
+| `<` | Reduce la indentación de la selección |
 
 ### Objetos de texto en modo NORMAL
 

@@ -365,7 +365,7 @@ Además de los modos de sesión, Claude Code ofrece subcomandos para gestion:
 | Subcomando | Descripción |
 |------------|-------------|
 | `claude update` | Actualizar Claude Code a la última versión |
-| `claude auth login` | Iniciar sesión en la cuenta de Anthropic |
+| `claude auth login` | Iniciar sesión en la cuenta de Anthropic. En WSL2, SSH y containers acepta pegar el código OAuth directamente en la terminal |
 | `claude auth login --console` | Iniciar sesión con API key de Anthropic Console |
 | `claude auth login --sso` | Iniciar sesión con SSO |
 | `claude auth logout` | Cerrar sesión |
@@ -374,6 +374,10 @@ Además de los modos de sesión, Claude Code ofrece subcomandos para gestion:
 | `claude agents` | Listar todos los subagentes configurados |
 | `claude mcp` | Gestionar servidores MCP |
 | `claude remote-control` | Iniciar servidor de Remote Control (sin sesión local) |
+| `claude ultrareview [target]` | Revisión de código multi-agente no-interactiva. Acepta `--json` para salida estructurada. Equivale al slash command `/ultrareview` pero para uso en scripts y CI |
+| `claude project purge [path]` | Elimina todo el estado de Claude Code de un proyecto: transcripts, tasks y configuración local. Flags: `--dry-run` (simula sin borrar), `-y` (confirma sin preguntar), `-i` (interactivo), `--all` (incluye configuración global) |
+| `claude plugin prune` | Elimina dependencias de plugins huérfanas (plugins instalados pero ya no referenciados) |
+| `claude plugin tag <version>` | Crea un git tag de release para el plugin actual con validación de formato SemVer |
 
 ---
 

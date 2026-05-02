@@ -152,6 +152,8 @@ claude
 | `ANTHROPIC_SMALL_FAST_MODEL` | nombre de modelo | Haiku | **[DEPRECATED]** Modelo usado para táreas rápidas y subagentes ligeros |
 | `MAX_THINKING_TOKENS` | número | — | Limita el número de tokens de razonamiento interno (extended thinking). Útil para controlar costes cuando el extended thinking está activo |
 | `DISABLE_PROMPT_CACHING` | `1` | — | Desactiva el prompt caching. Útil en regiónes de Bedrock donde el caching no está disponible |
+| `ENABLE_PROMPT_CACHING_1H` | `1` | — | Activa TTL de caché de 1 hora en lugar del TTL estándar de 5 minutos. Compatible con API key directa, Bedrock, Vertex y Foundry. Útil para sesiones largas con contexto estable |
+| `FORCE_PROMPT_CACHING_5M` | `1` | — | Fuerza el TTL de caché a 5 minutos (TTL estándar). Permite revertir el TTL extendido de `ENABLE_PROMPT_CACHING_1H` sin reiniciar |
 
 ---
 
@@ -198,6 +200,7 @@ export BASH_MAX_OUTPUT_LENGTH=500000     # Mas output para logs detallados
 | Variable | Valores | Defecto | Descripción |
 |----------|---------|---------|-------------|
 | `CLAUDE_CODE_DISABLE_AUTO_MEMORY` | `0` / `1` | `0` | Desactiva la funcionalidad de auto-memory cuando se establece a `1`. Auto-memory escribe automáticamente entradas en CLAUDE.md basándose en la sesión |
+| `CLAUDE_CODE_ENABLE_AWAY_SUMMARY` | `0` / `1` | `1` | Controla el resumen automático de sesión al volver tras una ausencia larga. Establecer a `0` para desactivarlo. El resumen también puede generarse manualmente con `/recap` |
 | `CLAUDE_CODE_TASK_LIST_ID` | string | — | Nombre del directorio en `~/.claude/tasks/` para compartir una lista de táreas entre sesiones. Ejemplo: `CLAUDE_CODE_TASK_LIST_ID=mi-proyecto claude` |
 
 ---
@@ -234,7 +237,8 @@ export OTEL_SERVICE_NAME="claude-code-mi-equipo"
 
 | Variable | Valores | Defecto | Descripción |
 |----------|---------|---------|-------------|
-| `CLAUDE_CODE_NO_FLICKER` | `1` | — | Activa el modo de rendering sin parpadeo (alt-screen). Útil en terminales donde el redibujado rápido causa parpadeo visual. En este modo, `Ctrl+O` alterna una focus view que muestra solo el prompt, resumen de herramientas y respuesta final (v2.1.89, focus view v2.1.97) |
+| `CLAUDE_CODE_NO_FLICKER` | `1` | — | Activa el modo de rendering sin parpadeo (alt-screen). Útil en terminales donde el redibujado rápido causa parpadeo visual (v2.1.89) |
+| `CLAUDE_CODE_HIDE_CWD` | `1` | — | Oculta el directorio de trabajo actual en el logo de inicio de Claude Code. Útil cuando el path es largo o contiene información sensible |
 
 ---
 
@@ -262,6 +266,38 @@ export OTEL_SERVICE_NAME="claude-code-mi-equipo"
 | `CLAUDE_CODE_USE_MANTLE` | `1` | — | Habilita Amazon Bedrock powered by Mantle como backend de inferencia. Requiere configuración Bedrock activa (v2.1.94) |
 | `CLAUDE_CODE_PERFORCE_MODE` | `1` | — | Modo de integración con Perforce: las herramientas Edit, Write y NotebookEdit fallan en ficheros read-only con un hint sugiriendo ejecutar `p4 edit` primero. Útil para equipos que usan Perforce como VCS (v2.1.98) |
 | `CLAUDE_CODE_CERT_STORE` | `bundled` | sistema operativo | Fuente de certificados TLS. Por defecto (desde v2.1.101) usa el certificate store del sistema operativo, lo que permite funcionar con proxies TLS empresariales sin configuración adicional. Establecer a `bundled` para revertir al comportamiento anterior (solo certificados incluidos en Node.js) |
+
+---
+
+## Actualizaciones
+
+| Variable | Valores | Defecto | Descripción |
+|----------|---------|---------|-------------|
+| `DISABLE_UPDATES` | `1` | — | Bloquea **todas** las vías de actualización automática, incluido el comando manual `claude update`. Útil en entornos enterprise donde la versión debe gestionarse de forma centralizada |
+
+---
+
+## Integración con herramientas externas
+
+| Variable | Valores | Defecto | Descripción |
+|----------|---------|---------|-------------|
+| `AI_AGENT` | `1` (auto) | — | Inyectada automáticamente en subprocesos lanzados por Claude Code para que herramientas como `gh` y otras puedan atribuir el tráfico a Claude Code. No es necesario definirla manualmente |
+
+---
+
+## Proveedor: Amazon Bedrock (tier de servicio)
+
+| Variable | Valores | Defecto | Descripción |
+|----------|---------|---------|-------------|
+| `ANTHROPIC_BEDROCK_SERVICE_TIER` | `default` / `flex` / `priority` | `default` | Selecciona el tier de servicio para inferencia en Amazon Bedrock. `flex` para capacidad bajo demanda con posibles delays; `priority` para acceso prioritario con mayor disponibilidad |
+
+---
+
+## Subagentes fork
+
+| Variable | Valores | Defecto | Descripción |
+|----------|---------|---------|-------------|
+| `CLAUDE_CODE_FORK_SUBAGENT` | `1` | — | Habilita subagentes fork en builds externas (no-oficial). Desde v2.1.121, los subagentes fork funcionan tanto en sesiones interactivas como no-interactivas |
 
 ---
 

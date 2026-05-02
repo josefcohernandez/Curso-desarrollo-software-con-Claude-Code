@@ -134,7 +134,7 @@
 | `--betas` | — | string[] | Cabeceras beta a incluir en las peticiones API (solo usuarios con API key) | `claude --betas interleaved-thinking` |
 | `--debug` | — | string | Activa modo debug con filtrado opcional de categorias (ej: `"api,hooks"` o `"!statsig,!file"`) | `claude --debug "api,mcp"` |
 | `--version` | `-v` | boolean | Muestra la versión instalada de Claude Code | `claude -v` |
-| `--enable-auto-mode` | — | boolean | Desbloquea Auto Mode en el ciclo de `Shift+Tab`. Requiere plan Team y Claude Sonnet 4.6 o Opus 4.6 | `claude --enable-auto-mode` |
+| `--enable-auto-mode` | — | boolean | **[ELIMINADO en v2.1.111]** Desbloqueaba Auto Mode en el ciclo de `Shift+Tab`. Auto Mode está disponible directamente si el plan lo soporta, sin necesidad de este flag | — |
 | `--tmux` | — | string | Crea una sesión tmux para el worktree. Requiere `--worktree`. Usa paneles nativos de iTerm2 si está disponible; pasar `--tmux=classic` para tmux tradicional | `claude -w feature --tmux` |
 | `--dangerously-load-development-channels` | — | boolean | Habilita canales no incluidos en la allowlist aprobada para desarrollo local | `claude --dangerously-load-development-channels` |
 

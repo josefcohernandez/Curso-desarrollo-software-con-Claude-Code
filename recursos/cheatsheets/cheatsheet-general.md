@@ -68,7 +68,7 @@
 | **Auto-accept** (`acceptEdits`) | Aprueba ediciones automáticamente; pregunta para Bash | `Shift+Tab` x1 |
 | **Plan** (`plan`) | Solo propone planes, no ejecuta nada | `Shift+Tab` x2 |
 
-> Modos adicionales (`auto`, `bypassPermissions`) se pueden habilitar con `--enable-auto-mode` o `--permission-mode`.
+> Modos adicionales (`auto`, `bypassPermissions`) se pueden habilitar con `--permission-mode` (el flag `--enable-auto-mode` fue eliminado en v2.1.111).
 
 ---
 

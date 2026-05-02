@@ -330,4 +330,4 @@ claude -p "ejecuta suite completa" --dangerously-skip-permissions
 
 Con Auto Mode comprendido, tienes una visión completa del sistema de configuración y permisos de Claude Code: la jerarquía de cinco niveles, los permisos por herramienta, el sandbox, los keybindings y ahora la autonomía controlada de Auto Mode.
 
-El siguiente módulo profundiza en la planificación y los workflows con modelos avanzados: [Módulo 06 - Planificación y Workflows](../../modulo-06-planificacion-opus/README.md).
+El siguiente módulo profundiza en la planificación y los workflows con modelos avanzados: [Módulo 06 - Plan Mode, Opus 4.7 y Workflows](../../modulo-06-planificacion-opus/README.md).

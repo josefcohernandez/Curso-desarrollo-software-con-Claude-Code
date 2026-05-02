@@ -8,6 +8,8 @@ Este curso enseña a equipos de desarrollo a usar **Claude Code** de forma profe
 
 El contenido está basado en la **documentación oficial de Anthropic** (code.claude.com/docs) y en buenas prácticas de equipos que ya utilizan Claude Code en producción.
 
+> **Fuente de verdad del curso:** este README fija la estructura, la navegación y los metadatos visibles de los módulos. El desarrollo detallado por teoría y práctica vive en [`../CURSO_CLAUDE_CODE.md`](../CURSO_CLAUDE_CODE.md).
+
 ### Público objetivo
 
 - Desarrolladores backend, frontend y full stack
@@ -43,7 +45,7 @@ El curso está organizado en **4 bloques progresivos** con **16 módulos**:
 | Módulo | Título | Tiempo | Descripción |
 |--------|--------|--------|-------------|
 | [05](modulo-05-configuracion-permisos/README.md) | Configuración y Permisos | 2h 05min | Jerarquía de settings, permisos, sandbox, keybindings, Auto Mode |
-| [06](modulo-06-planificacion-opus/README.md) | Plan Mode, Opus 4.7 y Workflows | 2h 15min | Plan Mode, Fast Mode, razonamiento adaptativo, workflows eficientes |
+| [06](modulo-06-planificacion-opus/README.md) | Plan Mode, Opus 4.7 y Workflows | 2h 45min | Plan Mode, Fast Mode, razonamiento adaptativo, effort `xhigh`, task budgets y workflows probados |
 
 ### Bloque 3: Avanzado (Módulos 07-10)
 
@@ -70,7 +72,7 @@ El curso está organizado en **4 bloques progresivos** con **16 módulos**:
 |--------|--------|--------|-------------|
 | [16](modulo-16-proyecto-final/enunciado/README.md) | Proyecto Final Integrador | 4-6h | Construir una herramienta CLI completa aplicando todo lo aprendido (M01-M15) |
 
-**Tiempo total estimado: 33-35 horas**
+**Tiempo total estimado: 35-37 horas**
 
 ---
 
@@ -161,10 +163,8 @@ Cada módulo funciona como referencia independiente:
 ## Estructura de carpetas
 
 ```
-claude_tutorial/
-├── README.md                          # Este archivo (índice del curso)
-├── CURSO_CLAUDE_CODE.md               # Temario completo (resumen)
-│
+Curso-desarrollo-software-con-Claude-Code/
+├── README.md                          # Este archivo (fuente de verdad estructural del curso)
 ├── modulo-01-introduccion/            # Qué es Claude Code, metodología
 │   ├── teoria/
 │   ├── ejercicios/
@@ -283,8 +283,8 @@ claude_tutorial/
 | 3.3 | 28 marzo 2026 | Claude Code 2.1.86 | Header X-Claude-Code-Session-Id, skill descriptions 250 chars, 18 correcciones verificadas |
 | 3.4 | 29 marzo 2026 | Claude Code 2.1.87 | Consolidación deuda técnica: `allowRead` sandbox, `${CLAUDE_PLUGIN_DATA}`, `effort` frontmatter |
 | 3.5 | 7 abril 2026 | Claude Code 2.1.92 | Hook PermissionDenied, defer en PreToolUse, MCP maxResultSizeChars, /powerup, forceRemoteSettingsRefresh, plugin bin/, 2 deprecaciones |
-| 3.7 | 24 abril 2026 | Claude Code 2.1.118 | /recap, /tui fullscreen, /focus separado, temas personalizados, xhigh effort, push notifications, auto mode sin flag, /less-permission-prompts, hooks mcp_tool, Skill tool→slash commands, ENABLE_PROMPT_CACHING_1H, plugin tag, /ultrareview, 6 env vars nuevas |
 | 3.6 | 14 abril 2026 | Claude Code 2.1.107 | Effort default high, wizard Vertex AI, Monitor tool, /team-onboarding, OS CA trust, monitors en plugins, PreCompact blocking, 8 env vars nuevas |
+| 3.7 | 24 abril 2026 | Claude Code 2.1.118 + Opus 4.7 | /recap, /tui fullscreen, /focus separado, temas personalizados, xhigh effort, push notifications, auto mode sin flag, /less-permission-prompts, hooks mcp_tool, Skill tool→slash commands, ENABLE_PROMPT_CACHING_1H, plugin tag, /ultrareview, 6 env vars nuevas |
 
 ### Novedades v3.7 (24 abril 2026)
 

@@ -48,12 +48,15 @@ claude
 
 ### Configurar
 
-Actualiza `.claude/settings.json`:
+Actualiza `.claude/settings.json` manteniendo `filesystem` y anadiendo `sqlite`:
 
 ```json
 {
   "mcpServers": {
-    "filesystem": { ... },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/tmp/mcp-test"]
+    },
     "sqlite": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-sqlite", "/tmp/mcp-test/test.db"]

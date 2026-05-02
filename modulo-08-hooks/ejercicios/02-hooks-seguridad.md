@@ -78,9 +78,10 @@ Debería funcionar normalmente.
 
 ---
 
-## Parte 2: Hook de Auditoría (10 min)
+## Parte 2: Hook de Auditoria (10 min)
 
-Crea `scripts/hook-audit.sh`:
+Crea `scripts/hook-security-audit.sh` (puedes partir del script
+de ejemplo incluido en este modulo):
 
 ```bash
 #!/bin/bash
@@ -97,7 +98,7 @@ echo "$(date +%H:%M:%S) | ${TOOL_NAME:-unknown} | ${FILEPATH:-N/A}" >> "$LOG_FIL
 ```
 
 ```bash
-chmod +x scripts/hook-audit.sh
+chmod +x scripts/hook-security-audit.sh
 ```
 
 Añade al settings.json:
@@ -110,7 +111,7 @@ Añade al settings.json:
         "hooks": [
           {
             "type": "command",
-            "command": "./scripts/hook-audit.sh",
+            "command": "./scripts/hook-security-audit.sh",
             "async": true
           }
         ]
@@ -156,12 +157,19 @@ O con notificación de sistema (Linux):
 
 ```json
 {
-  "hooks": [
-    {
-      "type": "command",
-      "command": "notify-send 'Claude Code' 'Tarea completada' 2>/dev/null || true"
-    }
-  ]
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "notify-send 'Claude Code' 'Tarea completada' 2>/dev/null || true",
+            "async": true
+          }
+        ]
+      }
+    ]
+  }
 }
 ```
 
@@ -181,7 +189,7 @@ echo '{"tool_name":"Write","tool_input":{"file_path":"src/app.js"}}' | ./scripts
 echo "Exit: $?"  # Debe ser 0
 
 # Test 3: Auditoría
-echo '{"tool_name":"Write","tool_input":{"file_path":"src/test.js"}}' | ./scripts/hook-audit.sh
+echo '{"tool_name":"Write","tool_input":{"file_path":"src/test.js"}}' | ./scripts/hook-security-audit.sh
 cat ~/.claude/audit/$(date +%Y-%m-%d).log
 ```
 

@@ -16,14 +16,24 @@ Tu equipo quiere automatizar la revisión de código antes de cada commit. El sc
 
 ### Instrucciones
 
-1. **Crea un repositorio de prueba** (o usa uno existente):
+1. **Guarda la ruta del modulo** para poder invocar los scripts de ejemplo
+   desde el repositorio de prueba:
+
+```bash
+MODULO_AUTOMATIZACION="/ruta/al/Curso-desarrollo-software-con-Claude-Code/modulo-10-automatizacion-cicd"
+```
+
+> Los scripts se ejecutan sobre el repositorio Git del directorio actual, asi
+> que puedes lanzarlos desde `/tmp/proyecto-prueba` usando una ruta absoluta.
+
+2. **Crea un repositorio de prueba** (o usa uno existente):
 
 ```bash
 mkdir /tmp/proyecto-prueba && cd /tmp/proyecto-prueba
 git init
 ```
 
-2. **Crea un archivo con código que tenga problemas intencionales:**
+3. **Crea un archivo con código que tenga problemas intencionales:**
 
 ```bash
 cat > app.py << 'EOF'
@@ -49,17 +59,17 @@ EOF
 git add app.py
 ```
 
-3. **Examina el script de revisión de ejemplo** ubicado en:
-   `../workflows/script-review-codigo.sh`
+4. **Examina el script de revision de ejemplo** ubicado en:
+   `"$MODULO_AUTOMATIZACION/workflows/script-review-codigo.sh"`
 
-4. **Ejecuta el script de revisión:**
+5. **Ejecuta el script de revision:**
 
 ```bash
-chmod +x ../workflows/script-review-codigo.sh
-../workflows/script-review-codigo.sh
+chmod +x "$MODULO_AUTOMATIZACION/workflows/script-review-codigo.sh"
+"$MODULO_AUTOMATIZACION/workflows/script-review-codigo.sh"
 ```
 
-5. **Verifica la salida.** El script debería detectar:
+6. **Verifica la salida.** El script deberia detectar:
    - El password hardcodeado (`DB_PASSWORD`)
    - La vulnerabilidad de SQL injection
    - El uso peligroso de `eval()`
@@ -137,14 +147,14 @@ git commit --allow-empty -m "perf: optimize database queries for dashboard"
 git tag v1.0.0 HEAD~10 2>/dev/null || git tag v1.0.0 $(git rev-list --max-parents=0 HEAD)
 ```
 
-2. **Examina el script de notas de versión** ubicado en:
-   `../workflows/script-release-notes.sh`
+2. **Examina el script de notas de version** ubicado en:
+   `"$MODULO_AUTOMATIZACION/workflows/script-release-notes.sh"`
 
 3. **Ejecuta el script:**
 
 ```bash
-chmod +x ../workflows/script-release-notes.sh
-../workflows/script-release-notes.sh v1.1.0
+chmod +x "$MODULO_AUTOMATIZACION/workflows/script-release-notes.sh"
+"$MODULO_AUTOMATIZACION/workflows/script-release-notes.sh" v1.1.0
 ```
 
 4. **Revisa la salida.** Las notas deberían incluir:

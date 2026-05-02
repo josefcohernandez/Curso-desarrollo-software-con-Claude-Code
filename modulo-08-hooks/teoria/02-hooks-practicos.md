@@ -107,7 +107,7 @@ Registrar todas las operaciones de Claude para auditoría:
         "hooks": [
           {
             "type": "command",
-            "command": "/scripts/hook-audit-log.sh",
+            "command": "./scripts/hook-security-audit.sh",
             "async": true
           }
         ]
@@ -117,15 +117,19 @@ Registrar todas las operaciones de Claude para auditoría:
 }
 ```
 
-Script `hook-audit-log.sh`:
+Script `hook-security-audit.sh`:
 
 ```bash
 #!/bin/bash
 INPUT=$(cat)
-TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty')
-FILEPATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // "unknown"')
+FILEPATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // "N/A"')
 
-echo "$(date +%Y-%m-%dT%H:%M:%S) | ${TOOL_NAME} | ${FILEPATH:-N/A}" >> /tmp/claude-audit.log
+LOG_DIR="$HOME/.claude/audit"
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/$(date +%Y-%m-%d).log"
+
+echo "$(date +%H:%M:%S) | ${TOOL_NAME} | ${FILEPATH}" >> "$LOG_FILE"
 ```
 
 ---
@@ -141,7 +145,7 @@ echo "$(date +%Y-%m-%dT%H:%M:%S) | ${TOOL_NAME} | ${FILEPATH:-N/A}" >> /tmp/clau
         "hooks": [
           {
             "type": "command",
-            "command": "/scripts/hook-block-protected.sh"
+            "command": "./scripts/hook-block-protected.sh"
           }
         ]
       },
@@ -150,7 +154,7 @@ echo "$(date +%Y-%m-%dT%H:%M:%S) | ${TOOL_NAME} | ${FILEPATH:-N/A}" >> /tmp/clau
         "hooks": [
           {
             "type": "command",
-            "command": "/scripts/hook-block-protected.sh"
+            "command": "./scripts/hook-block-protected.sh"
           }
         ]
       }

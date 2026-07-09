@@ -52,6 +52,8 @@ Para encontrar lo que buscas:
 - **"Atajo para cambiar de modelo"** → [Atajos de teclado](./referencia-cli-atajos-teclado.md)
 - **"Limitar tokens de pensamiento"** → [Variables de entorno](./referencia-cli-variables-entorno.md)
 - **"Parsear la salida JSON con jq"** → [Formatos de salida](./referencia-cli-formatos-salida.md)
+- **"Ver todas mis sesiones en background"** → [Modos de ejecución: subcomandos de gestión](./referencia-cli-modos-ejecucion.md#subcomandos-de-gestion) (`claude agents`)
+- **"Diagnosticar un problema de configuración aislando CLAUDE.md, plugins y hooks"** → [Modos de ejecución: modo seguro](./referencia-cli-modos-ejecucion.md#modo-seguro---safe-mode) (`--safe-mode`)
 
 ---
 

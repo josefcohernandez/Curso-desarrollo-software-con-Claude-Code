@@ -447,7 +447,103 @@ Ejemplo de salida JSON:
 claude agents
 ```
 
-Lista los agentes configurados, agrupados por origen (proyecto, usuario global, etc.).
+Abre el dashboard de sesiones activas e incluidas en background. Con `--json`, emite un array de objetos con el estado de cada sesión:
+
+```bash
+claude agents --json
+```
+
+```json
+[
+  {
+    "id": "sess_8f3a1c",
+    "name": "feature-auth",
+    "cwd": "/home/dev/proyectos/taskflow-api",
+    "status": "blocked",
+    "background": true,
+    "waitingFor": "permission:Bash(npm run migrate)",
+    "lastActivity": "2026-07-08T10:41:55Z"
+  }
+]
+```
+
+El campo `waitingFor` (v2.1.162) indica explícitamente el motivo de un bloqueo (`permission:...`, una pregunta al usuario, o una dependencia de otro agente) y es `null` cuando la sesión no está bloqueada. Ver [Módulo 16](../../modulo-16-agentes-background-workflows/teoria/01-agent-view.md) para el detalle completo de `claude agents`.
+
+---
+
+## Formato JSON de la línea de estado (`/statusline`)
+
+### Descripción
+
+Los scripts configurados con `/statusline` reciben por stdin un objeto JSON con información de la sesión actual, que usan para renderizar la línea de estado del prompt. Desde v2.1.145, ese payload incluye información del repositorio y del pull request de GitHub cuando Claude Code los detecta en el directorio de trabajo.
+
+### Estructura del objeto JSON recibido
+
+```json
+{
+  "session_id": "550e8400-e29b-41d4-a716-446655440000",
+  "model": "claude-sonnet-4-6",
+  "cwd": "/home/usuario/proyecto",
+  "rate_limits": {
+    "requests_remaining": 42,
+    "resets_at": "2026-07-08T12:00:00Z"
+  },
+  "repository": {
+    "name": "taskflow-api",
+    "branch": "feature/auth",
+    "remote": "github.com/miorg/taskflow-api"
+  },
+  "pull_request": {
+    "number": 123,
+    "state": "open",
+    "url": "https://github.com/miorg/taskflow-api/pull/123"
+  }
+}
+```
+
+| Campo | Descripción | Versión |
+|-------|-------------|---------|
+| `rate_limits` | Información sobre límites de uso actuales | v2.1.80+ |
+| `repository` | Nombre, branch y remote del repositorio detectado en `cwd` | v2.1.145 |
+| `pull_request` | Número, estado y URL del PR asociado al branch actual, si `gh` detecta uno | v2.1.145 |
+
+`repository` y `pull_request` solo aparecen cuando Claude Code detecta un repositorio git (y, en el caso de `pull_request`, un PR asociado al branch actual vía `gh`). Ver [`/statusline`](./referencia-cli-slash-commands.md) para cómo configurar el script.
+
+---
+
+## Salida estructurada de OpenTelemetry (OTEL)
+
+### Descripción
+
+Cuando `CLAUDE_CODE_ENABLE_TELEMETRY=1` (ver [Variables de entorno](./referencia-cli-variables-entorno.md)), Claude Code emite trazas y eventos OTEL con atributos que han ido ampliándose en versiones recientes.
+
+### Atributos de Dynamic Workflows
+
+Desde v2.1.202, las trazas generadas durante la ejecución de un [Dynamic Workflow](./referencia-cli-slash-commands.md) (`/workflows`) incluyen dos atributos adicionales que permiten correlacionar spans con un run concreto:
+
+| Atributo | Descripción |
+|----------|-------------|
+| `workflow.run_id` | Identificador único del run del Dynamic Workflow |
+| `workflow.name` | Nombre del Dynamic Workflow, si se le asignó uno |
+
+```bash
+# Ejemplo de query en un backend OTEL para agrupar spans por workflow.run_id
+# (sintaxis ilustrativa, depende del backend de observabilidad usado)
+```
+
+### Evento `claude_code.assistant_response`
+
+Desde v2.1.193, si `OTEL_LOG_ASSISTANT_RESPONSES=1` está activo, cada respuesta del asistente genera un evento `claude_code.assistant_response` en la traza, con el mismo criterio de privacidad por defecto (desactivado) que `OTEL_LOG_USER_PROMPTS`.
+
+### `OTEL_RESOURCE_ATTRIBUTES` como labels
+
+Desde v2.1.161, el contenido de la variable estándar `OTEL_RESOURCE_ATTRIBUTES` (pares `clave=valor` separados por coma) se propaga como labels/dimensiones en las métricas y trazas emitidas por Claude Code, no solo como metadatos del resource. Esto permite filtrar dashboards por equipo, entorno u otra dimensión organizativa sin instrumentación adicional:
+
+```bash
+export CLAUDE_CODE_ENABLE_TELEMETRY=1
+export OTEL_RESOURCE_ATTRIBUTES="team=backend,env=staging"
+claude -p "ejecuta la suite de integración"
+```
 
 ---
 
@@ -455,4 +551,5 @@ Lista los agentes configurados, agrupados por origen (proyecto, usuario global, 
 
 - [Modos de ejecución](./referencia-cli-modos-ejecucion.md) — El modo print (`-p`) es el que habilita estos formatos
 - [Flags de arranque](./referencia-cli-flags-arranque.md) — Todos los flags relacionados con output: `--output-format`, `--json-schema`, `--include-partial-messages`, `--input-format`
+- [Variables de entorno](./referencia-cli-variables-entorno.md) — Variables `OTEL_*` y `CLAUDE_CODE_ENABLE_TELEMETRY`
 - [github-actions-claude-code.md](./github-actions-claude-code.md) — Uso de formatos de salida en CI/CD

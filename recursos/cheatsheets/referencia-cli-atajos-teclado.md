@@ -75,6 +75,44 @@ Ejecuta `/terminal-setup` en Claude Code para configurar automáticamente los ke
 
 ---
 
+## Selector de modelo (`/model`)
+
+| Atajo | Plataforma | Acción | Contexto |
+|-------|-----------|--------|---------|
+| `d` | Todas | Fija el modelo seleccionado como default persistente (se guarda en settings) | Dentro de `/model` |
+| `s` | Todas | Aplica el modelo seleccionado solo a la sesión actual, sin persistir en settings | Dentro de `/model` |
+
+> Comportamiento final tras la evolución de `/model` entre v2.1.144 y v2.1.153.
+
+---
+
+## Permisos (`/permissions`)
+
+| Atajo | Plataforma | Acción | Contexto |
+|-------|-----------|--------|---------|
+| `r` | Todas | Reintenta (retry) desde la pestaña Recent un comando que fue denegado automáticamente por Auto Mode | Dentro de `/permissions` → Recent |
+
+---
+
+## Dynamic Workflows (`/workflows`)
+
+| Atajo | Plataforma | Acción | Contexto |
+|-------|-----------|--------|---------|
+| `f` | Todas | Filtra por estado (en ejecución, esperando, completado, con error) | Vista de detalle de un agente dentro de `/workflows` (v2.1.186) |
+
+Ver [Módulo 16](../../modulo-16-agentes-background-workflows/README.md) para el detalle de Dynamic Workflows.
+
+---
+
+## Autocompletado de slash commands
+
+| Acción | Plataforma | Resultado | Contexto |
+|--------|-----------|-----------|---------|
+| Clic en un comando del menú de autocompletado | Todas | **Rellena** el comando en el prompt (no lo ejecuta). Pulsa `Enter` para ejecutarlo | Menú `/` abierto (comportamiento desde v2.1.162; antes el clic ejecutaba directamente) |
+| `Enter` sobre un comando resaltado | Todas | Ejecuta el comando inmediatamente | Menú `/` abierto |
+
+---
+
 ## Navegación por historial
 
 | Atajo | Plataforma | Acción | Contexto |

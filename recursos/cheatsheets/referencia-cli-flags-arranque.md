@@ -35,7 +35,7 @@
 |------|-------|------|-------------|---------|
 | `--model` | — | string | Modelo para la sesión. Acepta alias (`sonnet`, `opus`) o nombre completo | `claude --model claude-opus-4-6` |
 | `--effort` | — | string | Nivel de esfuerzo: `low`, `medium`, `high`, `max` (Opus 4.6 solo). No persiste en settings | `claude --effort high` |
-| `--fallback-model` | — | string | **Solo print.** Modelo de fallback si el principal está sobrecargado | `claude -p --fallback-model sonnet "query"` |
+| `--fallback-model` | — | string | Modelo(s) de fallback si el principal está sobrecargado. Acepta hasta 3 modelos separados por coma, probados en orden. Ya no está restringido a `-p`: también aplica a sesiones interactivas (v2.1.166) | `claude --fallback-model sonnet,haiku "query"` |
 
 ### Herramientas y permisos
 
@@ -43,9 +43,10 @@
 |------|-------|------|-------------|---------|
 | `--allowedTools` | — | string[] | Herramientas que se ejecutan sin pedir permiso. Ver [sintaxis de reglas de permisos](https://code.claude.com/docs/en/settings#permission-rule-syntax) | `--allowedTools "Bash(git log *)" "Read"` |
 | `--disallowedTools` | — | string[] | Herramientas que se eliminan del contexto del modelo y no pueden usarse | `--disallowedTools "Bash(rm *)" "Edit"` |
-| `--tools` | — | string | Restringe que herramientas integradas puede usar Claude. `""` para desactivar todas, `"default"` para todas, o nombres separados por coma | `--tools "Bash,Edit,Read"` |
-| `--permission-mode` | — | string | Inicia en el modo de permisos indicado: `default`, `acceptEdits`, `plan`, `bypassPermissions` | `claude --permission-mode plan` |
-| `--dangerously-skip-permissions` | — | boolean | Omite todos los prompts de permisos. **Usar solo en entornos aislados y controlados** | `claude --dangerously-skip-permissions` |
+| `--tools` | — | string | Restringe que herramientas integradas puede usar Claude. `""` para desactivar todas, `"default"` para todas, o nombres separados por coma. En builds nativas, listar explícitamente `Grep` y/o `Glob` habilita las tools de búsqueda dedicadas en lugar de las genéricas equivalentes vía Bash (v2.1.162) | `--tools "Bash,Edit,Read,Grep,Glob"` |
+| `--permission-mode` | — | string | Inicia en el modo de permisos indicado: `manual`, `acceptEdits`, `plan`, `bypassPermissions`. El modo `default` fue renombrado a `manual` en v2.1.200; `default` se sigue aceptando como alias por compatibilidad | `claude --permission-mode plan` |
+| `--dangerously-skip-permissions` | — | boolean | Omite todos los prompts de permisos, incluidos los de escritura en directorios sensibles como `.claude/`, `.git/`, `.vscode/` y ficheros de configuración del shell (`.bashrc`, `.zshrc`, etc.), que antes de v2.1.126 seguían pidiendo confirmación explícita. **Usar solo en entornos aislados y controlados** | `claude --dangerously-skip-permissions` |
+| `--safe-mode` | — | boolean | Arranca con CLAUDE.md, plugins, skills, hooks y servidores MCP deshabilitados. Útil para aislar si un problema viene de la configuración del proyecto/usuario o del propio Claude Code (v2.1.169) | `claude --safe-mode` |
 | `--allow-dangerously-skip-permissions` | — | boolean | Habilita el bypass de permisos como opción sin activarlo inmediatamente. Permite composición con `--permission-mode` | `claude --permission-mode plan --allow-dangerously-skip-permissions` |
 | `--permission-prompt-tool` | — | string | **Solo print.** Herramienta MCP para gestionar prompts de permisos en modo no interactivo | `claude -p --permission-prompt-tool mcp_auth "query"` |
 | `--disable-slash-commands` | — | boolean | Desactiva todas las skills y comandos para esta sesión | `claude --disable-slash-commands` |
@@ -85,6 +86,23 @@
 | `--agents` | — | JSON string | Define subagentes personalizados dinámicamente vía JSON. Usa los mismos campos que el frontmatter de subagentes, más un campo `prompt` | `claude --agents '{"reviewer":{"description":"Revisa código","prompt":"Eres un revisor"}}'` |
 | `--teammate-mode` | — | string | Modo de visualización de compañeros de equipo: `auto` (defecto), `in-process`, o `tmux` | `claude --teammate-mode in-process` |
 
+### Flags del subcomando `claude agents`
+
+El comando `claude agents` (dashboard de sesiones, ver [Modos de ejecución](./referencia-cli-modos-ejecucion.md)) acepta flags propios de consulta y de dispatch (lanzamiento de nuevas sesiones background). Detalle completo en el [Módulo 16](../../modulo-16-agentes-background-workflows/teoria/01-agent-view.md).
+
+| Flag | Tipo | Descripción | Ejemplo | Versión |
+|------|------|-------------|---------|---------|
+| `--cwd` | path | Acota el listado de `claude agents` a las sesiones de un directorio concreto | `claude agents --cwd ~/proyectos/taskflow-api` | v2.1.141 |
+| `--json` | boolean | Salida estructurada de `claude agents` para scripting (ver [formatos de salida](./referencia-cli-formatos-salida.md)) | `claude agents --json` | v2.1.145 |
+| `--add-dir` | path[] | Directorios adicionales accesibles para la sesión lanzada desde el dashboard | `claude agents --add-dir ../shared-lib` | v2.1.143 |
+| `--settings` | path | Fichero de settings alternativo para la sesión lanzada | `claude agents --settings ./settings-migracion.json` | v2.1.143 |
+| `--mcp-config` | path | Configuración de servidores MCP a cargar en la sesión lanzada | `claude agents --mcp-config ./mcp.json` | v2.1.143 |
+| `--plugin-dir` | path | Plugin local a cargar en la sesión lanzada | `claude agents --plugin-dir ./my-plugins` | v2.1.143 |
+| `--permission-mode` | string | Modo de permisos de la sesión lanzada (`manual`, `acceptEdits`, `plan`, `bypassPermissions`) | `claude agents --permission-mode acceptEdits` | v2.1.143 |
+| `--model` | string | Modelo a usar en la sesión lanzada | `claude agents --model opus` | v2.1.143 |
+| `--effort` | string | Nivel de esfuerzo de razonamiento de la sesión lanzada | `claude agents --effort high` | v2.1.143 |
+| `--dangerously-skip-permissions` | boolean | Omite confirmaciones de permisos en la sesión lanzada. Usar con extrema precaución | `claude agents --dangerously-skip-permissions` | v2.1.143 |
+
 ### Inicializacion y mantenimiento
 
 | Flag | Alias | Tipo | Descripción | Ejemplo |
@@ -116,7 +134,8 @@
 | `--no-chrome` | — | boolean | Deshabilita la integración con Chrome para esta sesión | `claude --no-chrome` |
 | `--ide` | — | boolean | Conecta automáticamente al IDE al arrancar si hay exactamente uno disponible | `claude --ide` |
 | `--channels` | — | string[] | Habilita servidores de canal nombrados para enviar mensajes a esta sesión | `claude --channels plugin:fakechat@claude-plugins-official` |
-| `--plugin-dir` | — | string | Carga plugins desde un directorio solo para esta sesión. Repetir el flag para múltiples directorios | `claude --plugin-dir ./my-plugins` |
+| `--plugin-dir` | — | string | Carga plugins desde un directorio solo para esta sesión. Repetir el flag para múltiples directorios. Desde v2.1.128 también acepta la ruta a un archivo `.zip` de plugin | `claude --plugin-dir ./my-plugins` |
+| `--plugin-url` | — | URL | Descarga e instala un plugin desde un archivo `.zip` alojado en una URL, solo para esta sesión | `claude --plugin-url https://ejemplo.com/mi-plugin.zip` |
 
 ### Control remoto
 
@@ -193,7 +212,7 @@ claude -p "analiza el proyecto y genera un informe de dependencias" \
 claude \
   --strict-mcp-config \
   --mcp-config ./empresa-mcp.json \
-  --permission-mode default \
+  --permission-mode manual \
   --setting-sources user,project
 ```
 
@@ -203,7 +222,7 @@ claude \
 
 | Modo | Comportamiento | Caso de uso |
 |------|---------------|-------------|
-| `default` | Pregunta antes de ejecutar acciónes que modifican el sistema | Uso normal diario |
+| `manual` | Pregunta antes de ejecutar acciónes que modifican el sistema. Nombre actual del modo antes llamado `default` (renombrado en v2.1.200; `default` se sigue aceptando como alias) | Uso normal diario |
 | `acceptEdits` | Acepta automáticamente ediciónes de ficheros, pregunta para Bash | Implementación activa |
 | `plan` | Solo propone planes, no ejecuta nada | Revisión de arquitectura, code review |
 | `bypassPermissions` | Totalmente autonomo, no pregunta nada. **Solo para entornos aislados** | Automatización controlada |

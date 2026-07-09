@@ -63,7 +63,7 @@ claude --name "refactor-autenticación"
 
 ### Compatibilidad con otros flags
 
-Compatible con casi todos los flags de arranque. Los flags `--max-turns`, `--max-budget-usd`, `--output-format` y `--fallback-model` son exclusivos del modo print (`-p`).
+Compatible con casi todos los flags de arranque. Los flags `--max-turns`, `--max-budget-usd` y `--output-format` son exclusivos del modo print (`-p`). `--fallback-model` dejó de ser exclusivo de print en v2.1.166: también funciona en sesiones interactivas.
 
 ---
 
@@ -163,7 +163,6 @@ Estos flags solo funcionan con `-p` / `--print`:
 | `--max-turns N` | Máximo de turnos antes de terminar |
 | `--max-budget-usd N` | Tope de gasto en dólares |
 | `--output-format` | Formato de salida: `text`, `json`, `stream-json` |
-| `--fallback-model` | Modelo alternativo si el principal está sobrecargado |
 | `--no-session-persistence` | No guardar la sesión en disco |
 | `--json-schema` | Validar output contra un JSON Schema |
 | `--include-partial-messages` | Incluir eventos de streaming parciales |
@@ -358,6 +357,40 @@ git worktree list
 
 ---
 
+## Modo seguro (`--safe-mode`)
+
+### Descripción
+
+Arranca Claude Code con CLAUDE.md, plugins, skills, hooks y servidores MCP deshabilitados. Es el equivalente en modo de arranque de "iniciar en modo seguro" en un sistema operativo: aísla si un problema viene de la configuración del proyecto/usuario (un hook que falla, un plugin mal configurado, un CLAUDE.md que infla el contexto) o del propio Claude Code.
+
+### Sintaxis
+
+```bash
+claude --safe-mode
+```
+
+También disponible como variable de entorno `CLAUDE_CODE_SAFE_MODE=1` (ver [Variables de entorno](./referencia-cli-variables-entorno.md)).
+
+### Cuando usarlo
+
+- Diagnosticar si un comportamiento extraño viene de la configuración local (`.claude/`, `~/.claude/`) o de Claude Code en sí
+- Aislar qué hook, skill, plugin o servidor MCP está causando un error o una ralentización
+- Como primer paso de troubleshooting antes de reportar un bug
+
+### Ejemplo
+
+```bash
+# Arrancar sin configuración de proyecto/usuario para descartar causas
+claude --safe-mode
+
+# Si el problema desaparece, reactiva la configuración pieza a pieza
+# (por ejemplo con --plugin-dir o --mcp-config específicos) para aislar la causa
+```
+
+Disponible desde v2.1.169.
+
+---
+
 ## Subcomandos de gestion
 
 Además de los modos de sesión, Claude Code ofrece subcomandos para gestion:
@@ -371,11 +404,15 @@ Además de los modos de sesión, Claude Code ofrece subcomandos para gestion:
 | `claude auth logout` | Cerrar sesión |
 | `claude auth status` | Ver estado de autenticación (JSON) |
 | `claude auth status --text` | Ver estado de autenticación (texto legible) |
-| `claude agents` | Listar todos los subagentes configurados |
+| `claude agents` | Abre el dashboard de sesiones activas de Claude Code, incluidas las que corren en segundo plano (Research Preview desde v2.1.139). Acepta `--cwd <path>` (v2.1.141) para acotar por directorio, `--json` (v2.1.145) para salida estructurada con el campo `waitingFor` (v2.1.162), y los flags de dispatch `--add-dir`, `--settings`, `--mcp-config`, `--plugin-dir`, `--permission-mode`, `--model`, `--effort`, `--dangerously-skip-permissions` (v2.1.143) para lanzar nuevas sesiones background. Ver [Módulo 16](../../modulo-16-agentes-background-workflows/teoria/01-agent-view.md) y [Flags de arranque](./referencia-cli-flags-arranque.md) |
 | `claude mcp` | Gestionar servidores MCP |
+| `claude mcp login <nombre>` | Autentica (OAuth) un servidor MCP concreto sin abrir el modo interactivo. Útil en scripts de setup de CI/CD (v2.1.186) |
+| `claude mcp logout <nombre>` | Cierra la sesión OAuth de un servidor MCP concreto (v2.1.186) |
 | `claude remote-control` | Iniciar servidor de Remote Control (sin sesión local) |
 | `claude ultrareview [target]` | Revisión de código multi-agente no-interactiva. Acepta `--json` para salida estructurada. Equivale al slash command `/ultrareview` pero para uso en scripts y CI |
 | `claude project purge [path]` | Elimina todo el estado de Claude Code de un proyecto: transcripts, tasks y configuración local. Flags: `--dry-run` (simula sin borrar), `-y` (confirma sin preguntar), `-i` (interactivo), `--all` (incluye configuración global) |
+| `claude plugin init <nombre>` | Crea el andamiaje (scaffolding) de un plugin nuevo con la estructura de ficheros esperada (`plugin.json`, `commands/`, `skills/`, etc.) (v2.1.157) |
+| `claude plugin details <nombre>` | Muestra los metadatos completos de un plugin instalado: versión, comandos, skills, servidores MCP y hooks que aporta (v2.1.139) |
 | `claude plugin prune` | Elimina dependencias de plugins huérfanas (plugins instalados pero ya no referenciados) |
 | `claude plugin tag <version>` | Crea un git tag de release para el plugin actual con validación de formato SemVer |
 

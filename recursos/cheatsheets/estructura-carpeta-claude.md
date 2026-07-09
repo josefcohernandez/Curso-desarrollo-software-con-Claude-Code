@@ -226,7 +226,7 @@ Cada subagente es un fichero Markdown con frontmatter YAML + un system prompt. C
 | `tools` | No | Herramientas permitidas. Si se omite, hereda todas |
 | `disallowedTools` | No | Herramientas a denegar |
 | `model` | No | `sonnet`, `opus`, `haiku` o `inherit` (por defecto) |
-| `permissionMode` | No | `default`, `acceptEdits`, `dontAsk`, `delegate`, `bypassPermissions`, `plan` |
+| `permissionMode` | No | `manual` (antes `default`), `acceptEdits`, `dontAsk`, `delegate`, `bypassPermissions`, `plan` |
 | `maxTurns` | No | Máximo de turnos del agente |
 | `skills` | No | Skills a precargar en el contexto del agente |
 | `mcpServers` | No | Servidores MCP disponibles para el agente |

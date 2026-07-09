@@ -37,6 +37,7 @@ Los slash commands se invocan escribiendo `/` seguido del nombre del comando en 
 | `/recap` | `/recap` | Genera un resumen de la sesión actual. También se activa automáticamente cuando Claude detecta una ausencia larga del usuario (away summary) | — |
 | `/branch` | `/branch [nombre]` | Crea una rama de la conversación actual en este punto | Alias: `/fork` |
 | `/export` | `/export [nombre-fichero]` | Exporta la conversación actual como texto plano. Con nombre, escribe al fichero. Sin nombre, ofrece copiar al portapapeles o guardar | — |
+| `/goal` | `/goal [descripción]` | Fija condiciones de finalización que se mantienen a través de turnos: Claude verifica el objetivo antes de darse por terminado, incluso si la conversación deriva en subtareas intermedias | v2.1.139 |
 
 ### Modelos y rendimiento
 
@@ -81,18 +82,32 @@ Los slash commands se invocan escribiendo `/` seguido del nombre del comando en 
 
 | Comando | Sintaxis | Descripción | Notas |
 |---------|----------|-------------|-------|
-| `/mcp` | `/mcp` | Gestióna conexiones de servidores MCP y autenticación OAuth. Muestra conectores ocultos por duplicados con un hint para eliminarlos | — |
+| `/mcp` | `/mcp` | Gestióna conexiones de servidores MCP y autenticación OAuth. Muestra conectores ocultos por duplicados con un hint para eliminarlos. Para autenticar sin interacción, usa `claude mcp login <nombre>` / `claude mcp logout <nombre>` (v2.1.186, ver [Modos de ejecución](./referencia-cli-modos-ejecucion.md)) | — |
 
 ### Agentes y skills
 
 | Comando | Sintaxis | Descripción | Notas |
 |---------|----------|-------------|-------|
-| `/agents` | `/agents` | Gestióna configuraciones de agentes | — |
+| `/agents` | `/agents` | Gestióna configuraciones de agentes (definiciones de subagentes). No confundir con el comando `claude agents` (sin `/`), que abre el dashboard de sesiones activas/background — ver [Modos de ejecución](./referencia-cli-modos-ejecucion.md) y [Módulo 16](../../modulo-16-agentes-background-workflows/README.md) | — |
 | `/skills` | `/skills` | Lista las skills disponibles. Incluye caja de búsqueda type-to-filter para filtrar por nombre mientras escribes | — |
 | `/less-permission-prompts` | `/less-permission-prompts` | Skill bundled que escanea los transcripts de la sesión y propone entradas para la allowlist de `settings.json`, reduciendo los prompts de permiso futuros | — |
 | `/ultrareview` | `/ultrareview [<PR#>]` | Revisión de código multi-agente en la nube. Con número de PR lanza la revisión sobre ese PR; sin argumento, actúa sobre los cambios actuales | Ver también subcomando `claude ultrareview` para uso no-interactivo |
-| `/plugin` | `/plugin` | Gestióna plugins de Claude Code | — |
+| `/plugin` | `/plugin` | Gestióna plugins de Claude Code. Para scripting sin interacción, usa los subcomandos `claude plugin init <nombre>`, `claude plugin details <nombre>` y `claude plugin prune` (ver [Modos de ejecución](./referencia-cli-modos-ejecucion.md)) | — |
 | `/reload-plugins` | `/reload-plugins` | Recarga todos los plugins activos para aplicar cambios pendientes sin reiniciar. Reporta conteos y errores de carga | — |
+| `/reload-skills` | `/reload-skills` | Recarga todas las skills del proyecto y del usuario para aplicar cambios pendientes sin reiniciar la sesión | v2.1.152 |
+
+### Revisión de código
+
+| Comando | Sintaxis | Descripción | Notas |
+|---------|----------|-------------|-------|
+| `/code-review` | `/code-review <nivel> [PR#]` | Revisión de código multi-agente con nivel de profundidad configurable (ej: `quick`, `standard`, `deep`, según disponibilidad). Sin PR, revisa los cambios pendientes del branch actual; con número de PR, revisa ese pull request. Sustituye a la skill `/simplify`, evolucionando en varias versiones (v2.1.147 → v2.1.152 → v2.1.154 → v2.1.202) | Con `--fix`, aplica automáticamente los hallazgos detectados en vez de solo reportarlos: `/code-review standard --fix` |
+| `/review` | `/review <PR#>` | Versión rápida de un solo paso para revisar un pull request, sin el análisis multi-agente de `/code-review`. Ya no requiere instalar el plugin `code-review` por separado | Usa `/code-review <nivel> <PR#>` cuando necesites la revisión multi-agente completa sobre un PR |
+
+### Agentes en segundo plano y Dynamic Workflows
+
+| Comando | Sintaxis | Descripción | Notas |
+|---------|----------|-------------|-------|
+| `/workflows` | `/workflows` | Muestra el estado y progreso de los runs de Dynamic Workflows (orquestación de decenas o cientos de agentes background para una tarea grande). En la vista de detalle de un agente, la tecla `f` filtra por estado | v2.1.154. Ver [Módulo 16](../../modulo-16-agentes-background-workflows/README.md) |
 
 ### Edición y visualización
 
@@ -138,7 +153,7 @@ Los slash commands se invocan escribiendo `/` seguido del nombre del comando en 
 
 | Comando | Sintaxis | Descripción | Notas |
 |---------|----------|-------------|-------|
-| `/doctor` | `/doctor` | Diagnostica y verifica la instalación y configuración de Claude Code. Desde v2.1.105 muestra iconos de estado y ofrece la opción `f` para que Claude repare automáticamente los problemás detectados | Útil para resolver problemás de configuración |
+| `/doctor` | `/doctor` | Chequeo completo que diagnostica **y** arregla la instalación y configuración de Claude Code. Muestra iconos de estado y ofrece la opción `f` para que Claude repare automáticamente los problemás detectados (v2.1.105); en v2.1.205 pasó a ser un chequeo integral que cubre instalación, configuración, permisos y conectividad en un solo paso | Alias: `/checkup` (v2.1.205). Útil para resolver problemás de configuración |
 | `/feedback` | `/feedback [report]` | Envia feedback sobre Claude Code | Alias: `/bug` |
 | `/team-onboarding` | `/team-onboarding` | Genera automáticamente una guía de rampa para nuevos miembros del equipo basándose en el uso local de Claude Code (CLAUDE.md, settings, skills, hooks configurados) | v2.1.101. Útil para documentar la configuración del equipo |
 
@@ -150,6 +165,7 @@ Los slash commands se invocan escribiendo `/` seguido del nombre del comando en 
 | `/focus` | `/focus` | Activa la focus view: muestra solo el prompt, resumen de herramientas y respuesta final, ocultando el transcript completo | Antes se activaba con `Ctrl+O` en modo `NO_FLICKER`. Ahora `Ctrl+O` alterna normal/detallado |
 | `/theme` | `/theme [nombre]` | Cambia el tema de color o crea temas con nombre personalizados. Los temas se guardan en `~/.claude/themes/` como JSON. Incluye variantes claras y oscuras, temas para daltonismo, temas ANSI y el tema "Auto (match terminal)" | Mejorado en v2.1.118 |
 | `/color` | `/color [color\|default]` | Establece el color de acento de la barra del prompt para la sesión actual. Cuando Remote Control está conectado, sincroniza ese color con claude.ai/code para distinguir visualmente sesiones | Mejorado en v2.1.118 |
+| `/scroll-speed` | `/scroll-speed [valor]` | Ajusta la velocidad de scroll del transcript en el terminal. Sin argumento abre un selector interactivo | v2.1.139 |
 
 ### Editor
 
@@ -187,6 +203,7 @@ Los slash commands se invocan escribiendo `/` seguido del nombre del comando en 
 | Comando | Sintaxis | Descripción | Notas |
 |---------|----------|-------------|-------|
 | `/add-dir` | `/add-dir <ruta>` | Añade un nuevo directorio de trabajo a la sesión actual | — |
+| `/cd` | `/cd <ruta>` | Cambia el directorio de trabajo de la sesión actual sin invalidar la prompt cache, a diferencia de salir y reabrir Claude Code en el nuevo directorio | v2.1.169 |
 
 ### Otras opciones
 
@@ -235,7 +252,7 @@ Claude Code incluye algunas skills de serie que aparecen en el menú `/`:
 
 | Skill | Descripción |
 |-------|-------------|
-| `/simplify` | Simplifica el código seleccionado |
+| `/simplify` | **[Sustituida por `/code-review`]** Simplificaba el código seleccionado. Su funcionalidad de revisión evolucionó hasta convertirse en el comando `/code-review <nivel> [PR#]` (v2.1.147→v2.1.202) |
 | `/batch` | Procesa múltiples elementos en lote |
 | `/debug` | Inicia un flujo de depuración guiado |
 | `/claude-api` | Carga material de referencia del Claude API/SDK para construir aplicaciones con la API de Anthropic |
@@ -251,11 +268,7 @@ Para crear una skill invocable como slash command, crea un directorio en `.claud
 
 ## Comandos heredados (legacy)
 
-Los ficheros en `.claude/commands/` siguen funcionando como slash commands pero se recomienda usar `skills/` para nuevos comandos. El comando `/review` fue eliminado y requiere instalar el plugin `code-review`:
-
-```
-claude plugin install code-review@claude-code-marketplace
-```
+Los ficheros en `.claude/commands/` siguen funcionando como slash commands pero se recomienda usar `skills/` para nuevos comandos. El comando `/review` (versión rápida de un paso) y `/code-review` (versión multi-agente configurable por nivel), documentados más arriba en la sección "Revisión de código", son nativos desde su evolución; ya no es necesario instalar el plugin `code-review` por separado para tener revisión de PRs desde el prompt.
 
 ---
 

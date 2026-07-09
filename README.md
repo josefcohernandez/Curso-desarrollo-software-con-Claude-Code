@@ -29,7 +29,7 @@ El contenido está basado en la **documentación oficial de Anthropic** (code.cl
 
 ## Estructura del curso
 
-El curso está organizado en **4 bloques progresivos** con **16 módulos**:
+El curso está organizado en **4 bloques progresivos** con **17 módulos**:
 
 ### Bloque 1: Fundamentos (Módulos 01-04)
 
@@ -44,35 +44,36 @@ El curso está organizado en **4 bloques progresivos** con **16 módulos**:
 
 | Módulo | Título | Tiempo | Descripción |
 |--------|--------|--------|-------------|
-| [05](modulo-05-configuracion-permisos/README.md) | Configuración y Permisos | 2h 05min | Jerarquía de settings, permisos, sandbox, keybindings, Auto Mode |
-| [06](modulo-06-planificacion-opus/README.md) | Plan Mode, Opus 4.7 y Workflows | 2h 45min | Plan Mode, Fast Mode, razonamiento adaptativo, effort `xhigh`, task budgets y workflows probados |
+| [05](modulo-05-configuracion-permisos/README.md) | Configuración y Permisos | 2h 35min | Jerarquía de settings, permisos, sandbox, keybindings, Auto Mode reforzado |
+| [06](modulo-06-planificacion-opus/README.md) | Plan Mode, Opus 4.8 y Workflows | 3h 05min | Plan Mode, Fast Mode, razonamiento adaptativo, effort `xhigh`, Sonnet 5/Fable 5/Opus 4.8, `fallbackModel`, task budgets y workflows probados |
 
 ### Bloque 3: Avanzado (Módulos 07-10)
 
 | Módulo | Título | Tiempo | Descripción |
 |--------|--------|--------|-------------|
-| [07](modulo-07-mcp/README.md) | MCP (Model Context Protocol) | 2h 35min | Servidores MCP, configuración, Deferred Tools, Tool Search, MCP Elicitation |
-| [08](modulo-08-hooks/README.md) | Hooks | 2h 05min | 26 eventos del ciclo de vida, hooks de agente, hooks de seguridad y autoformateo |
-| [09](modulo-09-agentes-skills-teams/README.md) | Subagentes, Skills y Agent Teams | 3h | Subagentes, worktree isolation, SendMessage, skills, Agent Teams |
-| [10](modulo-10-automatizacion-cicd/README.md) | Automatización y CI/CD | 2h 20min | Modo headless, GitHub Actions, cron nativo, tareas programadas |
+| [07](modulo-07-mcp/README.md) | MCP (Model Context Protocol) | 2h 50min | Servidores MCP, configuración, Deferred Tools, Tool Search, MCP Elicitation, `claude mcp login` |
+| [08](modulo-08-hooks/README.md) | Hooks | 2h 10min | 27 eventos del ciclo de vida (incl. `MessageDisplay`), hooks de agente, hooks de seguridad y autoformateo |
+| [09](modulo-09-agentes-skills-teams/README.md) | Subagentes, Skills y Agent Teams | 3h 35min | Subagentes en background por defecto, worktree isolation, SendMessage, skills, Agent Teams |
+| [10](modulo-10-automatizacion-cicd/README.md) | Automatización y CI/CD | 3h 40min | Modo headless, GitHub Actions, cron nativo, tareas programadas, Routines, Code Review managed, `/goal` |
 
-### Bloque 4: Experto y Enterprise (Módulos 11-15)
+### Bloque 4: Experto y Enterprise (Módulos 11-16)
 
 | Módulo | Título | Tiempo | Descripción |
 |--------|--------|--------|-------------|
-| [11](modulo-11-enterprise-seguridad/README.md) | Enterprise y Seguridad | 1h 15min | Seguridad, políticas enterprise, managed-settings.d/, mejores prácticas |
+| [11](modulo-11-enterprise-seguridad/README.md) | Enterprise y Seguridad | 1h 45min | Seguridad, políticas enterprise, managed-settings.d/, modelos organizacionales, Claude Code Gateway, mejores prácticas |
 | [12](modulo-12-metodologias-desarrollo-ia/README.md) | Metodologías de Desarrollo con IA | 2h | Spec-Driven Development, historias Gherkin, TDD con Claude, patrones avanzados |
-| [13](modulo-13-multimodalidad-notebooks/README.md) | Multimodalidad y Notebooks | 1h 50min | Imágenes, PDFs, Jupyter notebooks, VDD, Voice y Computer Use |
+| [13](modulo-13-multimodalidad-notebooks/README.md) | Multimodalidad y Notebooks | 2h 20min | Imágenes, PDFs, Jupyter notebooks, VDD, Voice, Computer Use, Channels, Chrome Integration (GA) |
 | [14](modulo-14-agent-sdk/README.md) | Claude Agent SDK | 2h | Construir agentes autónomos programáticamente con Python/TypeScript |
-| [15](modulo-15-plugins-marketplaces/README.md) | Plugins y Marketplaces | 1.5h | Empaquetar skills y hooks como plugins, marketplace público y privado, gestión enterprise |
+| [15](modulo-15-plugins-marketplaces/README.md) | Plugins y Marketplaces | 1h 50min | Empaquetar skills y hooks como plugins, auto-carga desde `.claude/skills`, marketplace público y privado, gestión enterprise |
+| [16](modulo-16-agentes-background-workflows/README.md) | Agentes en Segundo Plano y Workflows Dinámicos | 2h | Agent View (`claude agents`), sesiones en background, notificaciones, Dynamic Workflows y `/workflows` |
 
-### Proyecto Final (Módulo 16)
+### Proyecto Final (Módulo 17)
 
 | Módulo | Título | Tiempo | Descripción |
 |--------|--------|--------|-------------|
-| [16](modulo-16-proyecto-final/enunciado/README.md) | Proyecto Final Integrador | 4-6h | Construir una herramienta CLI completa aplicando todo lo aprendido (M01-M15) |
+| [17](modulo-17-proyecto-final/enunciado/README.md) | Proyecto Final Integrador | 4-6h | Construir una herramienta CLI completa aplicando todo lo aprendido (M01-M16) |
 
-**Tiempo total estimado: 35-37 horas**
+**Tiempo total estimado: 41-44 horas**
 
 ---
 
@@ -116,8 +117,15 @@ BLOQUE 4: EXPERTO Y ENTERPRISE
                                                 └──────────┘
                                                       │
                                                       ▼
+                                                ┌──────────┐
+                                                │   M16    │
+                                                │ Agentes  │
+                                                │Background│
+                                                └──────────┘
+                                                      │
+                                                      ▼
                               ┌────────────────────────────────┐
-                              │              M16               │
+                              │              M17               │
                               │       Proyecto Final           │
                               │          Integrador            │
                               └────────────────────────────────┘
@@ -129,11 +137,11 @@ BLOQUE 4: EXPERTO Y ENTERPRISE
 
 ### Para formación guiada (recomendado)
 
-1. Sigue los módulos en orden (1 → 15)
+1. Sigue los módulos en orden (1 → 16)
 2. Lee la teoría de cada módulo con Claude Code abierto
 3. Realiza los ejercicios prácticos al terminar cada módulo
 4. No avances al siguiente módulo sin completar los ejercicios
-5. El proyecto final (M16) integra todo lo aprendido
+5. El proyecto final (M17) integra todo lo aprendido
 
 ### Para consulta rápida
 
@@ -155,8 +163,8 @@ Cada módulo funciona como referencia independiente:
 2. Cada miembro sigue los módulos a su ritmo
 3. Usa los módulos 01-06 como onboarding obligatorio
 4. Los módulos 07-11 son opcionales según el rol
-5. Los módulos 12-15 son muy recomendables antes del proyecto final
-6. El proyecto final (M16) se puede hacer en parejas
+5. Los módulos 12-16 son muy recomendables antes del proyecto final
+6. El proyecto final (M17) se puede hacer en parejas
 
 ---
 
@@ -242,7 +250,11 @@ Curso-desarrollo-software-con-Claude-Code/
 │   ├── teoria/
 │   └── ejercicios/
 │
-├── modulo-16-proyecto-final/          # Proyecto integrador (M01-M15)
+├── modulo-16-agentes-background-workflows/ # Agent View, sesiones background, Dynamic Workflows
+│   ├── teoria/
+│   └── ejercicios/
+│
+├── modulo-17-proyecto-final/          # Proyecto integrador (M01-M16)
 │   ├── enunciado/
 │   ├── solucion-referencia/
 │   └── criterios-evaluacion/
@@ -285,6 +297,16 @@ Curso-desarrollo-software-con-Claude-Code/
 | 3.5 | 7 abril 2026 | Claude Code 2.1.92 | Hook PermissionDenied, defer en PreToolUse, MCP maxResultSizeChars, /powerup, forceRemoteSettingsRefresh, plugin bin/, 2 deprecaciones |
 | 3.6 | 14 abril 2026 | Claude Code 2.1.107 | Effort default high, wizard Vertex AI, Monitor tool, /team-onboarding, OS CA trust, monitors en plugins, PreCompact blocking, 8 env vars nuevas |
 | 3.7 | 24 abril 2026 | Claude Code 2.1.118 + Opus 4.7 | /recap, /tui fullscreen, /focus separado, temas personalizados, xhigh effort, push notifications, auto mode sin flag, /less-permission-prompts, hooks mcp_tool, Skill tool→slash commands, ENABLE_PROMPT_CACHING_1H, plugin tag, /ultrareview, 6 env vars nuevas |
+| 3.8 | 2 mayo 2026 | Claude Code 2.1.126 | Desktop app redesign (M01): sesiones paralelas, layout drag-and-drop, diffs inline, preview integrada, PR monitor auto-merge, tareas programadas locales, sesiones SSH remotas, `/desktop`. Routines cloud (M10): triggers schedule/API/GitHub events, endpoint `/fire`, daily cap. Code Review managed service (M10): `@claude review`, findings Important/Nit/Pre-existing, `REVIEW.md`, dashboard analytics. Integraciones Slack y web (M10): `@Claude` en Slack, routing Chat vs Code, View Session. Channels (M13): modo push vs pull MCP, pairing plugins, sender allowlists. Chrome Integration (M13): consola/DOM live, GIF, apps autenticadas, `/chrome` |
+| 3.9 | 9 julio 2026 | Claude Code 2.1.205 | v2.1.128-v2.1.205 (62 versiones, 177 novedades, 154 cubiertas): **Módulo nuevo M16** "Agentes en Segundo Plano y Workflows Dinámicos" (Agent View `claude agents`, Dynamic Workflows `/workflows`); proyecto final renumerado M16→M17. 3 modelos nuevos: Claude Sonnet 5 (default, 1M contexto nativo), Claude Fable 5, Opus 4.8 (M01/M06). Cambio arquitectural: subagentes en background por defecto (M09). Auto Mode reforzado: `classifyAllShell`, bloqueo git destructivo, `hard_deny`, ya no opt-in, Bedrock/Vertex/Foundry (M05). Agent Teams reescrito sin `TeamCreate`/`TeamDelete` (M09). `claude mcp login/logout`, roots, fix seguridad `.mcp.json` (M07). Hook `MessageDisplay` (M08). `/goal`, self-hosted runner `post-session` (M10). Modelos organizacionales, Claude Code Gateway (M11). Chrome Integration → GA (M13). Auto-carga de plugins desde `.claude/skills` (M15). `/simplify`→`/code-review`, modo "default"→"Manual". 7 cheatsheets CLI ref actualizados |
+
+### Novedades v3.8 (2 mayo 2026)
+
+**Features cubiertas (v2.1.119-v2.1.126):** Desktop app redesign completo (M01) — gestión de sesiones paralelas, layout de paneles drag-and-drop, diffs con comentarios inline, preview integrada, PR monitor con auto-merge, tareas programadas locales, sesiones SSH remotas, handoff CLI→Desktop con `/desktop`. Routines cloud (M10) — automatización sin sesión local con triggers schedule/API/GitHub events. Code Review managed service (M10) — revisión de PRs vía GitHub App sin CI propio, personalizable con `REVIEW.md`. Integraciones Slack y web (M10) — `@Claude` en canales de Slack, claude.ai/code con View Session. Channels (M13) — eventos push de Telegram/Discord/iMessages hacia la sesión activa. Chrome Integration (M13) — debugging de consola/DOM y extracción de datos en tiempo real.
+
+**Nuevos ficheros de teoría:** `06-routines-cloud.md`, `07-code-review-managed.md`, `08-integraciones-slack-y-web.md` (M10); `06-channels.md`, `07-chrome-integration.md` (M13)
+
+**Nota:** esta versión se implementó directamente en el submódulo (commit `f4093fd`) sin sincronizar en su momento `CURSO_CLAUDE_CODE.md` ni el README raíz del monorepo; la sincronización se completó como parte del refresco v3.9.
 
 ### Novedades v3.7 (24 abril 2026)
 
@@ -337,4 +359,4 @@ Basado en la documentación pública de [Anthropic](https://docs.anthropic.com).
 
 ---
 
-> **Consejo**: Empieza por el [Módulo 01](modulo-01-introduccion/README.md) y avanza paso a paso. La gestión de contexto (Módulo 03) es lo que más impactará tu productividad diaria. El proyecto final (Módulo 16) integra todo lo aprendido.
+> **Consejo**: Empieza por el [Módulo 01](modulo-01-introduccion/README.md) y avanza paso a paso. La gestión de contexto (Módulo 03) es lo que más impactará tu productividad diaria. El proyecto final (Módulo 17) integra todo lo aprendido.

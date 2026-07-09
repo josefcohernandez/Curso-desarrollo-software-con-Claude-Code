@@ -63,3 +63,11 @@ Lee este módulo con Claude Code abierto. Prueba cada comando que se menciona mi
 ---
 
 **Siguiente módulo:** [Módulo 04 - Memoria: CLAUDE.md](../modulo-04-memoria-claude-md/README.md)
+
+---
+
+## Navegación
+
+| Anterior | Siguiente |
+|----------|-----------|
+| [Módulo 02: CLI y Primeros Pasos](../modulo-02-cli-primeros-pasos/README.md) | [Módulo 04: Memoria y CLAUDE.md](../modulo-04-memoria-claude-md/README.md) |

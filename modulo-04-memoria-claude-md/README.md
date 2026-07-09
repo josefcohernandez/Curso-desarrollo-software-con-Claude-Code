@@ -72,3 +72,11 @@ Al completar este módulo serás capaz de:
 - **Jerarquía de memoria**: sistema de precedencia donde lo más específico prevalece sobre lo general.
 - **Tipos de memoria**: cuatro categorías de memoria estructurada: `user`, `feedback`, `project` y `reference`.
 - **MEMORY.md**: índice central de memorias; solo contiene punteros a ficheros individuales, no contenido directo.
+
+---
+
+## Navegación
+
+| Anterior | Siguiente |
+|----------|-----------|
+| [Módulo 03: Contexto y Tokens](../modulo-03-contexto-y-tokens/README.md) | [Módulo 05: Configuración y Permisos](../modulo-05-configuracion-permisos/README.md) |

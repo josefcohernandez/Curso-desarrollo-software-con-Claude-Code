@@ -228,25 +228,48 @@ Aplicación móvil para consultas rápidas y revisión de resultados sobre la ma
 
 ## Modelos disponibles
 
-Claude Code puede utilizar diferentes modelos de la familia Claude, cada uno optimizado para distintos escenarios:
+Claude Code puede utilizar diferentes modelos de la familia Claude, cada uno optimizado para distintos escenarios. Desde mayo de 2026 la familia se ha renovado por completo: **Claude Opus 4.8** es ahora el modelo flagship, **Claude Sonnet 5** es el modelo por defecto de Claude Code, y se ha sumado **Claude Fable 5**, un modelo de posicionamiento distinto orientado a tareas narrativas/creativas. Opus 4.7, Opus 4.6, Sonnet 4.6 y Haiku 4.5 (generación anterior) siguen disponibles para compatibilidad, pero ya no son la referencia recomendada para empezar un proyecto nuevo.
 
-### Opus 4.6 (Razonamiento más potente)
+### Opus 4.8 (Flagship, razonamiento más potente)
 
-- **Identificador:** `claude-opus-4-6`
+- **Identificador:** `claude-opus-4-8`
+- **Disponible desde:** v2.1.154 (1 mayo 2026)
 - **Fortalezas:** Razonamiento profundo, planificación de arquitectura, problemas complejos, pensamiento adaptativo (extended thinking)
 - **Ideal para:** Diseño de sistemas, debugging de problemas difíciles, refactoring a gran escala, revisiones de código exhaustivas
-- **Velocidad:** Más lento que los otros modelos
-- **Coste:** El más caro
-- **Pensamiento adaptativo:** Opus 4.6 incluye "adaptive thinking" -- puede dedicar más o menos tiempo a razonar según la complejidad del problema
+- **Velocidad:** Más lento que Sonnet o Haiku
+- **Coste:** El más caro de la familia
+- **Nivel de esfuerzo por defecto:** `high` (antes `medium` en planes Pro/Max). El nuevo nivel `/effort xhigh` está disponible para las tareas más difíciles, por encima de `high` y por debajo de `max`
+- **Fast mode:** en Opus 4.8, Fast mode cuesta 2x la tarifa estándar a cambio de 2.5x más velocidad (antes era 6x tarifa en Opus 4.7)
+- Es el sucesor directo de Opus 4.7 (abril 2026) y Opus 4.6; el detalle de los niveles de esfuerzo y el razonamiento adaptativo se cubre en profundidad en el **Módulo 06**
 
-### Sonnet 4.6 (Desarrollo diario)
+### Sonnet 5 (nuevo modelo por defecto)
 
-- **Identificador:** `claude-sonnet-4-6` (la versión puede variar)
-- **Fortalezas:** Excelente equilibrio entre calidad y velocidad
-- **Ideal para:** Trabajo de desarrollo diario, implementación de features, corrección de bugs, tests
-- **Velocidad:** Rápido
-- **Coste:** Moderado
-- **Recomendación:** Este es el modelo que usarás el 80% del tiempo
+- **Identificador:** `claude-sonnet-5`
+- **Disponible desde:** v2.1.197 (30 junio 2026)
+- **Novedad clave:** es ahora el **modelo por defecto de Claude Code**, sustituyendo a Sonnet 4.6
+- **Ventana de contexto:** 1M tokens **nativos** — hasta ahora el contexto de 1M era una característica diferenciadora de Opus; con Sonnet 5 pasa a estar disponible de forma nativa también en el modelo de uso diario, sin necesidad de flags o headers beta
+- **Fortalezas:** Excelente equilibrio entre calidad y velocidad, ahora con contexto masivo nativo
+- **Ideal para:** Trabajo de desarrollo diario, implementación de features, corrección de bugs, tests, y también tareas que requieren mucho contexto (codebases grandes, refactorings extensos)
+- **Precio promocional:** $2/$10 por Mtok (input/output) hasta el 31 de agosto de 2026, frente al precio estándar de la generación anterior ($3/$15)
+- **Recomendación:** Este es el modelo que usarás la mayor parte del tiempo
+
+### Fable 5 (modelo especializado "Mythos-class")
+
+- **Identificador:** `claude-fable-5`
+- **Disponible desde:** v2.1.170 (20 mayo 2026)
+- **Posicionamiento:** Fable 5 no compite con Sonnet u Opus como modelo de referencia para programar. Es un modelo de clase **"Mythos"**, con un perfil más narrativo/especializado: generación de contenido, documentación extensa con tono cuidado, explicaciones didácticas y tareas donde la calidad de la redacción y la coherencia narrativa importan tanto como la corrección técnica
+- **Ideal para:** Redacción de documentación de producto, contenido educativo, changelogs narrados, generación de textos largos coherentes dentro de un proyecto (por ejemplo, guías de usuario o material de onboarding)
+- **No es recomendable para:** Tareas de ingeniería pura (debugging, arquitectura, refactoring), donde Opus o Sonnet ofrecen mejor relación calidad/coste
+- **Effort y casos de uso:** el perfil de esfuerzo de Fable 5 está optimizado para fluidez de escritura, no para razonamiento técnico profundo; no sustituye a Opus en tareas que requieran `xhigh` o `max`
+
+### Modelos de la generación anterior (siguen disponibles)
+
+| Modelo | Identificador | Estado |
+|--------|---------------|--------|
+| Opus 4.7 | `claude-opus-4-7` | Disponible, sustituido por Opus 4.8 como flagship |
+| Opus 4.6 | `claude-opus-4-6` | Disponible vía API/Bedrock/Vertex |
+| Sonnet 4.6 | `claude-sonnet-4-6` | Disponible, sustituido por Sonnet 5 como modelo por defecto |
+| Haiku 4.5 | `claude-haiku-4-5-20251001` | Sigue siendo el modelo rápido/económico de referencia |
 
 ### Haiku 4.5 (Rápido y económico)
 
@@ -257,13 +280,17 @@ Claude Code puede utilizar diferentes modelos de la familia Claude, cada uno opt
 - **Coste:** El más barato
 - **Limitaciones:** Menor capacidad de razonamiento complejo
 
+### Lean system prompt (v2.1.154)
+
+Desde v2.1.154, el **"lean system prompt"** (un system prompt más ligero y optimizado) es el comportamiento **por defecto para todos los modelos**, con una excepción: **Haiku, Sonnet 4.6 y Opus 4.7 (y anteriores)** mantienen el system prompt completo por compatibilidad. Los modelos lanzados después de ese cambio (Opus 4.8, Fable 5 y Sonnet 5) usan el lean system prompt desde su lanzamiento. Esto no cambia el comportamiento observable para el usuario, pero reduce ligeramente el consumo de tokens de entrada en cada turno.
+
 ### Cómo cambiar de modelo
 
 En la CLI puedes cambiar el modelo de varias formas:
 
 ```bash
 # Especificar modelo al iniciar
-claude --model claude-opus-4-6
+claude --model claude-opus-4-8
 
 # Dentro de una sesión, usar el comando /model
 /model opus
@@ -272,15 +299,19 @@ claude --model claude-opus-4-6
 /fast
 ```
 
+> El comportamiento exacto de `/model` (si guarda el cambio como nuevo modelo por defecto o solo lo aplica a la sesión actual) se explica en detalle en el **Módulo 06**, junto con `fallbackModel` y la evolución de los comandos de revisión de código.
+
 ### Cuándo usar cada modelo
 
 | Tarea | Modelo recomendado |
 |-------|-------------------|
-| Diseñar arquitectura de un sistema | Opus 4.6 |
-| Debugging de un problema difícil | Opus 4.6 |
-| Implementar una feature | Sonnet 4.6 |
-| Corregir un bug sencillo | Sonnet 4.6 |
-| Escribir tests | Sonnet 4.6 |
+| Diseñar arquitectura de un sistema | Opus 4.8 |
+| Debugging de un problema difícil | Opus 4.8 |
+| Implementar una feature | Sonnet 5 |
+| Corregir un bug sencillo | Sonnet 5 |
+| Escribir tests | Sonnet 5 |
+| Trabajar sobre un codebase muy grande (mucho contexto) | Sonnet 5 (1M nativo) |
+| Redactar documentación extensa o contenido narrativo | Fable 5 |
 | Preguntas rápidas sobre sintaxis | Haiku 4.5 |
 | Generar boilerplate | Haiku 4.5 |
 | Procesar muchos archivos en lote | Haiku 4.5 |

@@ -1,13 +1,22 @@
-# 02 - Opus 4.7 y Razonamiento Adaptativo
+# 02 - Opus 4.8 y Razonamiento Adaptativo
 
-## Qué es Opus 4.7
+## Qué es Opus 4.8
 
-Opus 4.7 es el modelo más capaz de Anthropic (disponible desde v2.1.111). Mantiene
-la ventana de **1M tokens de contexto** e introduce el nivel de esfuerzo `xhigh`
-para razonamiento de máxima profundidad. Disponible para suscriptores de los planes
-**Max** de claude.ai.
+Opus 4.8 es el modelo más capaz de Anthropic y el nuevo **flagship** de Claude Code
+(disponible desde v2.1.154, 1 mayo 2026). Sustituye a Opus 4.7 (abril 2026, v2.1.111)
+como referencia para las tareas de mayor complejidad. Mantiene la ventana de
+**1M tokens de contexto**, tiene el nivel de esfuerzo `high` como **valor por defecto**
+y conserva el nivel `xhigh` para razonamiento de máxima profundidad en las tareas
+más difíciles.
 
-Opus 4.6 sigue disponible para usuarios de API key, Bedrock y Vertex.
+> **Nota sobre la disponibilidad de contexto de 1M:** hasta la llegada de Sonnet 5
+> (v2.1.197), la ventana de 1M tokens era una característica diferenciadora de Opus.
+> Desde Sonnet 5, el contexto de 1M es nativo también en el modelo por defecto de
+> Claude Code (ver [04-fast-mode-y-modelos.md](04-fast-mode-y-modelos.md)).
+
+Opus 4.7, Opus 4.6, y versiones anteriores siguen disponibles (API key, Bedrock,
+Vertex y, en el caso de Opus 4.7, también planes Max) para quien necesite fijar
+una versión concreta por compatibilidad, pero ya no son la recomendación por defecto.
 
 ---
 
@@ -19,9 +28,9 @@ Opus 4.6 sigue disponible para usuarios de API key, Bedrock y Vertex.
 |-------|--------|----------------|
 | **Bajo (low)** | Tareas simples, respuestas directas | Todos los modelos |
 | **Medio (medium)** | Tareas con algo de complejidad | Todos los modelos |
-| **Alto (high)** | Problemas complejos, multi-archivo **(default Pro/Max desde v2.1.117)** | Todos los modelos |
-| **Extra alto (xhigh)** | Thinking de máxima profundidad entre `high` y `max` | **Solo Opus 4.7** |
-| **Máximo (max)** | Razonamiento sin límites | **Solo Opus 4.6 y 4.7** |
+| **Alto (high)** | Problemas complejos, multi-archivo **(default para todos los planes desde v2.1.117, y default específico de Opus 4.8)** | Todos los modelos |
+| **Extra alto (xhigh)** | Thinking de máxima profundidad entre `high` y `max`, para las tareas más difíciles | **Solo Opus 4.8** (heredado de Opus 4.7) |
+| **Máximo (max)** | Razonamiento sin límites | **Solo Opus 4.6, 4.7 y 4.8** |
 
 Opus decide automáticamente cuánto "pensar" basándose en la complejidad.
 
@@ -64,11 +73,13 @@ Extended thinking sigue siendo útil para:
 | Modelo | Coste (in/out) | Contexto | Usar para | No usar para |
 |--------|---------------|----------|-----------|-------------|
 | **Haiku 4.5** | $1/$5 | 200K | Commit messages, formateo, tareas triviales | Cualquier cosa que requiera razonamiento |
-| **Sonnet 4.6** | $3/$15 | 1M | Desarrollo diario, features, tests, refactoring | Decisiones arquitectónicas complejas |
-| **Opus 4.6** | $5/$25 | 1M | Planificación, debug complejo, arquitectura (API/Bedrock/Vertex) | Tareas rutinarias |
-| **Opus 4.7** | $5/$25 | 1M | Todo lo de Opus 4.6 + nivel `xhigh` (**planes Max de claude.ai**) | Tareas rutinarias |
+| **Sonnet 5** | $2/$10 (promo hasta 31 ago 2026, luego $3/$15) | 1M nativo | Desarrollo diario, features, tests, refactoring, trabajo sobre codebases grandes | Decisiones arquitectónicas muy complejas |
+| **Fable 5** | Consultar documentación oficial | — | Documentación extensa, contenido narrativo, redacción cuidada | Ingeniería pura, arquitectura, debugging |
+| **Opus 4.8** | $5/$25 | 1M | Planificación, debug complejo, arquitectura, nivel `xhigh` para lo más difícil | Tareas rutinarias |
 
-> **Nota v3.0:** Opus 4.6 soporta hasta **128K tokens de salida**. Sonnet 4.6 alcanza **1M de contexto** con 64K tokens de salida.
+> Opus 4.7 y Opus 4.6 siguen disponibles (planes Max/API/Bedrock/Vertex) para quien necesite fijar una versión concreta, y Sonnet 4.6 sigue siendo válido, pero Opus 4.8 y Sonnet 5 son ya las referencias recomendadas.
+
+> **Nota v3.0:** Opus 4.6 soporta hasta **128K tokens de salida**. Sonnet 4.6 alcanza **1M de contexto** con 64K tokens de salida. Sonnet 5 mantiene el contexto de 1M ya de forma nativa, sin necesidad de configuración adicional.
 
 ### Árbol de Decisión
 
@@ -92,8 +103,8 @@ claude --model opusplan
 ```
 
 **Comportamiento**:
-- Cuando Claude planifica → usa Opus (mejor razonamiento)
-- Cuando Claude ejecuta (editar, escribir, bash) → usa Sonnet (más barato)
+- Cuando Claude planifica → usa Opus 4.8 (mejor razonamiento)
+- Cuando Claude ejecuta (editar, escribir, bash) → usa Sonnet 5 (más barato, y con contexto de 1M nativo para ejecuciones que tocan muchos archivos)
 
 **Ideal para**: Features grandes donde la planificación importa pero
 la ejecución es mecánica.
@@ -102,12 +113,12 @@ la ejecución es mecánica.
 
 | Enfoque | Planificación | Ejecución | Coste típico feature |
 |---------|--------------|-----------|---------------------|
-| Todo Opus | Opus ($5/$25) | Opus ($5/$25) | $1-3 |
-| Todo Sonnet | Sonnet ($3/$15) | Sonnet ($3/$15) | $0.50-1.50 |
-| **opusplan** | Opus ($5/$25) | Sonnet ($3/$15) | **$0.60-1.50** |
+| Todo Opus | Opus 4.8 ($5/$25) | Opus 4.8 ($5/$25) | $1-3 |
+| Todo Sonnet | Sonnet 5 ($2/$10 promo) | Sonnet 5 ($2/$10 promo) | $0.35-1.00 |
+| **opusplan** | Opus 4.8 ($5/$25) | Sonnet 5 ($2/$10 promo) | **$0.45-1.20** |
 | Haiku | Haiku ($1/$5) | Haiku ($1/$5) | $0.10-0.30 |
 
-opusplan ofrece la **calidad de Opus en planificación** con el **coste de Sonnet en ejecución**.
+opusplan ofrece la **calidad de Opus en planificación** con el **coste de Sonnet en ejecución**. Los importes de Sonnet 5 corresponden al precio promocional vigente hasta el 31 de agosto de 2026; a partir de esa fecha se aplicará el precio estándar ($3/$15).
 
 ---
 
@@ -127,6 +138,8 @@ claude --model opusplan    # Híbrido
 > **Aviso v2.1.108:** Al ejecutar `/model` para cambiar de modelo **durante una conversación activa**, Claude Code muestra una advertencia: el siguiente mensaje **releerá el historial completo** sin poder aprovechar el prompt cache acumulado. Esto puede aumentar significativamente el coste del siguiente turno si la conversación es larga.
 >
 > Estrategia para minimizar el coste: cambia de modelo al inicio de una nueva sesión (`/clear` + `/model`) en lugar de a mitad de conversación.
+
+> **Importante:** desde v2.1.153, `/model` **guarda el modelo elegido como nuevo modelo por defecto** para futuras sesiones (no solo para la sesión actual). Si quieres probar un modelo sin cambiar tu configuración por defecto, usa la opción de sesión única. El detalle completo de este cambio de comportamiento, junto con `fallbackModel` y los modelos por defecto organizacionales, se cubre en [07-fallback-model-y-comandos-revision.md](07-fallback-model-y-comandos-revision.md).
 
 ### Estrategia por Fase del Día
 
@@ -187,13 +200,16 @@ cobertura exhaustiva.
 ## Resumen
 
 ```
-90% del trabajo  → Sonnet ($3/$15)
-Planificación    → Opus (4.6 en API, 4.7 en planes Max) o opusplan
-Tareas triviales → Haiku ($1/$5)
-Debug complejo   → Opus con effort high/xhigh/max o "ultrathink"
-xhigh            → Solo Opus 4.7 (planes Max de claude.ai)
+Mayoría del trabajo → Sonnet 5 ($2/$10 promo hasta 31 ago 2026)
+Planificación       → Opus 4.8 o opusplan
+Tareas triviales    → Haiku ($1/$5)
+Contenido narrativo → Fable 5
+Debug complejo      → Opus 4.8 con effort high/xhigh/max o "ultrathink"
+xhigh               → Solo Opus 4.8 (heredado de Opus 4.7)
 ```
 
-- El nivel `xhigh` está entre `high` y `max` en profundidad de razonamiento y es exclusivo de Opus 4.7
+- Opus 4.8 (v2.1.154) sustituye a Opus 4.7 como modelo flagship; Sonnet 5 (v2.1.197) sustituye a Sonnet 4.6 como modelo por defecto y añade contexto de 1M nativo
+- El nivel `xhigh` está entre `high` y `max` en profundidad de razonamiento y es exclusivo de Opus 4.8 (heredado de Opus 4.7)
 - Cambiar de modelo a mitad de conversación invalida el prompt cache: hazlo al inicio de sesión
-- Desde v2.1.117, el default para planes Pro/Max es `high` (antes era `medium`)
+- Desde v2.1.117, el default de esfuerzo para todos los planes es `high` (antes era `medium` en Pro/Max); Opus 4.8 mantiene `high` como default
+- Desde v2.1.153, `/model` guarda el cambio como nuevo modelo por defecto salvo que elijas aplicarlo solo a la sesión actual (ver [07-fallback-model-y-comandos-revision.md](07-fallback-model-y-comandos-revision.md))

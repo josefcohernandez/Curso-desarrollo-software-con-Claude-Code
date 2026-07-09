@@ -89,9 +89,13 @@ Claude Code. Los precios están expresados por millón de tokens (MTok).
 
 | Modelo | Input (por 1M tokens) | Output (por 1M tokens) | Cached input |
 |--------|-----------------------|------------------------|--------------|
-| Claude Opus 4.6 | $5.00 | $25.00 | $0.50 (90% ahorro) |
-| Claude Sonnet 4.6 | $3.00 | $15.00 | $0.30 (90% ahorro) |
+| Claude Opus 4.8 (flagship) | $5.00 | $25.00 | $0.50 (90% ahorro) |
+| Claude Sonnet 5 (default) | $2.00* | $10.00* | $0.20* (90% ahorro) |
+| Claude Fable 5 | $3.00 | $15.00 | $0.30 (90% ahorro) |
+| Claude Opus 4.7 | $5.00 | $25.00 | $0.50 (90% ahorro) |
 | Claude Haiku 4.5 | $1.00 | $5.00 | $0.10 (90% ahorro) |
+
+*Precio promocional de Sonnet 5 vigente hasta el 31 de agosto de 2026.
 
 > Los precios son aproximados y pueden variar. Consulta siempre los precios
 > actualizados en https://www.anthropic.com/pricing antes de planificar un
@@ -295,7 +299,7 @@ complejidad del código y la longitud de las respuestas.
 
 > Registrar el coste de cada fase del proyecto te permitirá calibrar estos rangos
 > con los datos reales de tu equipo. Este registro es especialmente útil durante
-> el proyecto final (Capítulo 16).
+> el proyecto final (Capítulo 17).
 
 ---
 

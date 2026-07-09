@@ -16,6 +16,14 @@ introducida en v2.1.111 y ampliada en v2.1.120. A diferencia de pedir a Claude
 "revisa este archivo", `/ultrareview` orquesta varios subagentes que analizan
 el código en paralelo y consolidan sus hallazgos en un informe unificado.
 
+> **Evolución posterior:** a partir de v2.1.154, la capacidad de revisión
+> multi-agente en la nube se fue integrando también en el comando `/code-review`
+> (heredero de `/simplify`), hasta que en v2.1.202 `/code-review <level> <pr#>`
+> quedó establecido como la vía recomendada para este tipo de revisión, mientras
+> que `/ultrareview` se mantiene disponible como alias por compatibilidad. Todo
+> el detalle de esta evolución está en
+> [07-fallback-model-y-comandos-revision.md](07-fallback-model-y-comandos-revision.md).
+
 **Qué examina cada subagente (por defecto):**
 - Corrección lógica y posibles bugs
 - Vulnerabilidades de seguridad
@@ -205,4 +213,4 @@ necesitas revisar el output con detenimiento.
 
 ## Siguiente paso
 
-[07 - Workflows avanzados con revisión integrada](../ejercicios/02-workflow-completo.md)
+[07 - Fallback models, `/model` y evolución de `/code-review`](07-fallback-model-y-comandos-revision.md)

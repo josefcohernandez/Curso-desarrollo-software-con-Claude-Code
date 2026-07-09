@@ -76,7 +76,7 @@ Empezaste la planificación desde claude.ai en el móvil durante el desplazamien
 Cuando el modelo principal no está disponible o su latencia es demasiado alta (por saturación o mantenimiento), Claude Code puede cambiar automáticamente a un modelo de respaldo.
 
 ```bash
-claude --model claude-opus-4-6 --fallback-model claude-sonnet-4-6
+claude --model claude-opus-4-8 --fallback-model claude-sonnet-5
 ```
 
 Si Opus no responde dentro del umbral de latencia configurado, la sesión continúa con Sonnet sin interrupciones. Esto es especialmente útil en momentos de alta demanda global o en pipelines de CI/CD donde la interrupción del agente tiene coste alto.
@@ -85,10 +85,12 @@ También puedes configurarlo de forma permanente en el fichero de settings del p
 
 ```json
 {
-  "model": "claude-opus-4-6",
-  "fallbackModel": "claude-sonnet-4-6"
+  "model": "claude-opus-4-8",
+  "fallbackModel": "claude-sonnet-5"
 }
 ```
+
+> **Novedades v2.1.152 y v2.1.166:** `fallbackModel` ahora admite **hasta 3 modelos de respaldo en orden de prioridad**, y `--fallback-model` (antes limitado a modo no interactivo) **también aplica a sesiones interactivas**. Además, si el modelo principal deja de existir (por ejemplo, un ID deprecado), Claude Code cambia automáticamente al `--fallback-model` configurado **para el resto de la sesión**, sin necesidad de reintentar manualmente. El detalle completo de la configuración con varios modelos, junto con los cambios en `/model` y en los comandos de revisión de código, se cubre en [07-fallback-model-y-comandos-revision.md](07-fallback-model-y-comandos-revision.md).
 
 ## Ejemplos prácticos
 
@@ -127,7 +129,7 @@ claude --remote
 
 ```bash
 # Al final de la jornada: iniciar tarea larga en sesión remota
-claude --remote --model claude-opus-4-6
+claude --remote --model claude-opus-4-8
 > "Refactoriza el módulo de pagos en src/payments/ para separar
 >  la lógica de negocio de la capa de infraestructura.
 >  Sigue el patrón repositorio. Ejecuta los tests al finalizar cada fichero."
@@ -147,8 +149,8 @@ En un entorno de CI/CD donde Claude Code actúa como agente de revisión:
 # En el script de CI
 export CLAUDE_CODE_EFFORT_LEVEL=medium
 claude \
-  --model claude-opus-4-6 \
-  --fallback-model claude-sonnet-4-6 \
+  --model claude-opus-4-8 \
+  --fallback-model claude-sonnet-5 \
   -p "Revisa el diff de este PR y reporta problemas de seguridad o regresiones"
 ```
 

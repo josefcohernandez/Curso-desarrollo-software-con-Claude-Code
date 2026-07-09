@@ -1,4 +1,4 @@
-# Modulo 16: Proyecto Final Integrador
+# Módulo 17: Proyecto Final Integrador
 
 ## Construir una Aplicación Completa Usando Claude Code como Copiloto
 

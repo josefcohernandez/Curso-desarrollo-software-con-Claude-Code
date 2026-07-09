@@ -84,7 +84,7 @@ Al completar este módulo, serás capaz de:
    |
 4. Ejercicio 03: ciclo TDD completo (20 min)
    |
-5. Aplicar en el Módulo 16 (Proyecto Final)
+5. Aplicar en el Módulo 17 (Proyecto Final)
 ```
 
 ---
@@ -102,3 +102,11 @@ La diferencia entre un desarrollador que "usa IA" y uno que **desarrolla con IA*
 - [Best Practices - Documentación oficial](https://code.claude.com/docs/en/best-practices)
 - [Common Workflows - Documentación oficial](https://code.claude.com/docs/en/common-workflows)
 - [Cucumber - Referencia Gherkin](https://cucumber.io/docs/gherkin/reference/)
+
+---
+
+## Navegación
+
+| Anterior | Siguiente |
+|----------|-----------|
+| [Módulo 11: Enterprise y Seguridad](../modulo-11-enterprise-seguridad/README.md) | [Módulo 13: Multimodalidad y Notebooks](../modulo-13-multimodalidad-notebooks/README.md) |

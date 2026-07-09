@@ -311,7 +311,7 @@ Controlan qué acciones puede realizar Claude de forma autónoma.
 
 | Flag | Descripción | Ejemplo |
 |------|-------------|---------|
-| `--permission-mode` | Modo de permisos: `default`, `acceptEdits`, `plan`, `bypassPermissions` | `claude --permission-mode plan` |
+| `--permission-mode` | Modo de permisos: `manual` (antes `default`), `acceptEdits`, `plan`, `bypassPermissions` | `claude --permission-mode plan` |
 | `--allowedTools` | Lista de herramientas permitidas sin pedir confirmación | `claude --allowedTools "Read,Grep,Glob"` |
 | `--disallowedTools` | Lista de herramientas bloqueadas | `claude --disallowedTools "Bash"` |
 | `--dangerously-skip-permissions` | Omite TODAS las confirmaciones de permisos (PELIGROSO) | Solo para CI/CD controlado |
@@ -485,6 +485,53 @@ claude auth login
 
 > **Tip para WSL2:** si el navegador no se abre automáticamente, copia la URL que muestra el CLI, ábrela en el navegador de Windows, y cuando la redirección falle pega el código que aparece en la barra de direcciones.
 
+**Aviso de expiración de login (v2.1.203)**
+
+Cuando tu sesión de autenticación está a punto de caducar, Claude Code muestra un aviso previo en el terminal. Esto es especialmente útil para sesiones que se dejan corriendo en segundo plano (por ejemplo, una tarea larga lanzada con `--max-turns` alto o un proceso de automatización de larga duración): sin el aviso, el proceso se interrumpiría de golpe al expirar el token, perdiendo el trabajo en curso. Con el aviso, tienes margen para renovar la sesión (`claude auth login`) antes de que se corte.
+
+```text
+⚠ Tu sesión expirará en 10 minutos. Ejecuta `claude auth login` para renovarla
+  y evitar que se interrumpan tareas en segundo plano.
+```
+
+### 3.9 Modo Seguro (`--safe-mode`)
+
+Cuando Claude Code se comporta de forma inesperada (una skill que falla al cargar, un hook que bloquea toda acción, un servidor MCP que no responde), resulta difícil saber si el problema viene de tu configuración o del propio CLI. El flag `--safe-mode` (v2.1.169) resuelve esto arrancando una sesión "limpia": sin `CLAUDE.md`, sin plugins, sin skills, sin hooks y sin servidores MCP.
+
+```bash
+claude --safe-mode
+```
+
+También puedes activarlo mediante variable de entorno, útil para scripts de diagnóstico o para dejarlo activo temporalmente en una terminal:
+
+```bash
+export CLAUDE_CODE_SAFE_MODE=1
+claude
+```
+
+| Método | Cuándo usarlo |
+|--------|---------------|
+| `claude --safe-mode` | Diagnóstico puntual, una sola sesión |
+| `CLAUDE_CODE_SAFE_MODE=1` | Sesiones repetidas de troubleshooting en la misma terminal |
+
+**Flujo de troubleshooting recomendado:**
+
+```bash
+# 1. Reproduce el problema en modo seguro
+claude --safe-mode
+> "Reproduce el error que veías al editar src/app.ts"
+
+# 2. Si el problema desaparece, la causa está en tu configuración
+#    (CLAUDE.md, un hook, un plugin o un servidor MCP)
+
+# 3. Vuelve a la sesión normal y usa /doctor (o su alias /checkup)
+#    para localizar el componente concreto que falla
+claude
+> /checkup
+```
+
+> **Relación con `/doctor`:** `--safe-mode` descarta toda la configuración de entrada para aislar el problema; `/doctor` (ver [02 - Modo Interactivo](02-modo-interactivo.md)) diagnostica y repara la configuración existente sin desactivarla. Úsalos juntos: primero aísla con `--safe-mode`, luego repara con `/doctor`.
+
 ---
 
 ## 4. Combinaciones Útiles
@@ -611,3 +658,4 @@ claude "Crea tests E2E con Playwright para el flujo de registro de usuario"
 | Solo lectura/planificación | `--permission-mode plan` |
 | Limitar gasto | `--max-budget-usd X` |
 | Personalizar instrucciones | `--system-prompt "..."` |
+| Diagnosticar sin configuración (CLAUDE.md, plugins, skills, hooks, MCP) | `--safe-mode` |

@@ -151,6 +151,28 @@ En la extensión de VSCode, Claude Code genera automáticamente un **título des
 
 Los títulos se generan al vuelo y se actualizan conforme avanza la conversación. Por ejemplo, una sesión que comienza con "arregla el bug de login" puede titularse automáticamente como "Fix: autenticación con caracteres especiales".
 
+### Nombres de sesión legibles en el CLI (v2.1.196)
+
+Desde la v2.1.196, esta generación automática de nombres descriptivos ya no está limitada a la extensión de VSCode: el **CLI también genera un nombre legible** para cada sesión nueva justo al arrancarla, sin esperar a que avance la conversación. Esto hace que el selector de `claude -r` sea útil desde el primer mensaje, en lugar de mostrar solo IDs o marcas de tiempo hasta que la sesión acumula suficiente contenido.
+
+```bash
+claude -r
+# Selector de sesiones:
+#   "Fix: autenticación con caracteres especiales"   (hace 2 horas)
+#   "Migración de endpoints a TypeScript"            (ayer)
+#   "Revisión de queries lentas en /orders"           (hace 3 días)
+```
+
+**Idioma del nombre generado (v2.1.176):** el nombre se genera en el mismo idioma en que se desarrolla la conversación. Si prefieres forzar un idioma concreto independientemente del idioma que uses al escribir, configúralo con el setting `language` en `.claude/settings.json` o `~/.claude/settings.json`:
+
+```json
+{
+  "language": "es"
+}
+```
+
+Esto es útil en equipos donde se trabaja habitualmente en inglés técnico pero se quiere que los nombres de sesión (y otros textos generados) queden en español para facilitar la búsqueda y el contexto compartido entre compañeros.
+
 ---
 
 ## Resumen de Sesión: `/recap` y Away Summary
@@ -261,6 +283,8 @@ Esto es especialmente relevante para equipos que trabajan con .NET, Azure o infr
 5. **`/compact` si la sesión es larga** y necesitas seguir
 6. **`Esc` para cancelar** si Claude va por mal camino
 7. **`/recap` antes de un `/clear`** si quieres un registro del trabajo realizado
+8. **`/cd` en vez de reiniciar** si necesitas cambiar de directorio sin perder el prompt cache (ver [02 - Modo Interactivo](02-modo-interactivo.md), sección "Cambiar de Directorio con `/cd`")
+9. **`--safe-mode` para diagnosticar** cuando una sesión se comporta de forma extraña y no sabes si el problema viene de tu configuración (ver [01 - Comandos CLI](01-comandos-cli.md), sección 3.9 "Modo Seguro")
 
 ---
 

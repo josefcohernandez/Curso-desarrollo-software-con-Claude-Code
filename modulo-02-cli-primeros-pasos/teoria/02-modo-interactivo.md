@@ -61,6 +61,7 @@ Los slash commands son acciones integradas que no consumen tokens de la API.
 | `/undo` | Alias de `/rewind` (v2.1.108) |
 | `/recap` | Generar un resumen del trabajo realizado en la sesión actual (v2.1.108) |
 | `/logout` | Cerrar sesión de Claude Code (desautentica el cliente) |
+| `/cd <ruta>` | Mueve la sesión activa a un nuevo directorio de trabajo sin perder el contexto ni romper el prompt cache (v2.1.169). Ver detalle más abajo |
 
 ### Comandos de Información
 
@@ -70,7 +71,8 @@ Los slash commands son acciones integradas que no consumen tokens de la API.
 | `/usage` | Ver el coste y estadísticas de la sesión: tokens consumidos, coste estimado en USD y más métricas (v2.1.118). Fusiona los anteriores `/cost` y `/stats` |
 | `/cost` | Atajo a la pestaña de coste dentro de `/usage` (sigue funcionando) |
 | `/model` | Ver o cambiar modelo actual |
-| `/doctor` | Diagnosticar problemas de configuración, conexión y permisos. Desde v2.1.105, muestra iconos de estado y ofrece la opción `f` para que Claude repare automáticamente los problemas detectados |
+| `/doctor` | Chequeo completo de configuración, conexión, permisos, plugins, skills, hooks y servidores MCP. Diagnostica **y repara**. Desde v2.1.105, muestra iconos de estado y ofrece la opción `f` para que Claude repare automáticamente los problemas detectados. Desde v2.1.205 el chequeo es más exhaustivo (cubre más componentes de la instalación) |
+| `/checkup` | Alias nuevo de `/doctor` (v2.1.205). Mismo comportamiento; ambos nombres son intercambiables |
 | `/status` | Estado de la sesión |
 
 ### Comandos de Configuración
@@ -98,6 +100,157 @@ Los slash commands son acciones integradas que no consumen tokens de la API.
 |---------|------------|
 | `/theme` | Cambiar o crear temas de color |
 | `/recap` | Mostrar resumen del estado de la sesión actual |
+
+---
+
+## Autocompletado de Slash Commands: Rellenar vs. Ejecutar
+
+> **Cambio de comportamiento (v2.1.162)**
+
+Antes de la v2.1.162, hacer clic en un slash command del menú de autocompletado lo **ejecutaba directamente**. A partir de esta versión, el clic solo **rellena el comando en el prompt**; tienes que pulsar `Enter` para ejecutarlo.
+
+```
+> /rec        ← escribes parte del comando
+  /recap      ← aparece en el menú de autocompletado
+  /resume
+
+[clic en /recap]  → el prompt queda como "> /recap" (sin ejecutar)
+[Enter]           → ahora sí se ejecuta
+```
+
+Este cambio evita ejecuciones accidentales al navegar el menú con el ratón o al pulsar Tab varias veces, especialmente en comandos que no admiten deshacerse fácilmente. Si tenías memorizado el flujo anterior (clic = ejecución inmediata), acostúmbrate a confirmar siempre con `Enter`.
+
+---
+
+## Cambiar de Directorio con `/cd`
+
+> **Novedad v2.1.169**
+
+Hasta ahora, para trabajar en otro directorio dentro de la misma sesión había que salir y volver a lanzar `claude` desde la nueva ruta, lo que reiniciaba el prompt cache (el mecanismo que evita reprocesar el system prompt y el contexto estático en cada turno) y encarecía el siguiente mensaje. El comando `/cd` mueve la sesión activa a un nuevo directorio de trabajo **sin** ese coste:
+
+```
+> /cd ../otro-proyecto
+```
+
+**Cuándo usarlo:**
+
+- Trabajas en un monorepo y necesitas moverte de `packages/api` a `packages/web` sin perder el hilo de la conversación.
+- Quieres comparar código entre dos proyectos hermanos sin abrir dos sesiones distintas.
+- Prefieres seguir con la misma sesión (y su historial) tras detectar que la tarea en realidad pertenece a otro repositorio.
+
+```
+> /cd ../shared-lib
+> "Revisa si la función formatCurrency ya existe aquí antes de crearla en el proyecto principal"
+```
+
+> **Diferencia con `--add-dir`:** `--add-dir` (ver [01 - Comandos CLI](01-comandos-cli.md)) **añade** un directorio adicional al contexto sin cambiar el directorio principal de trabajo. `/cd` **cambia** el directorio de trabajo activo de la sesión. Usa `--add-dir` cuando necesitas leer de varios sitios a la vez, y `/cd` cuando el foco de trabajo se traslada a otro lugar.
+
+---
+
+## Rewind Avanzado
+
+### Reanudar desde antes de un `/clear` (v2.1.191)
+
+`/rewind` (o su alias `/undo`) tradicionalmente deshacía el último turno de la conversación activa. A partir de la v2.1.191, `/rewind` también puede **reanudar una conversación desde un punto anterior a un `/clear`**. Esto es útil cuando ejecutaste `/clear` por error, o cuando quieres recuperar el contexto de una tarea anterior sin tener que buscarla con `/resume`.
+
+```
+> /rewind
+```
+
+El selector de `/rewind` muestra los puntos de control disponibles, incluyendo los que quedaron "al otro lado" de un `/clear` previo dentro de la misma sesión.
+
+### Opción "Summarize up to here" (v2.1.141)
+
+El menú de `/rewind` incluye la opción **"Summarize up to here"**, que comprime todo el contexto anterior al punto seleccionado en un resumen, en lugar de descartarlo o mantenerlo íntegro. Es un punto intermedio entre `/compact` (resume toda la conversación) y `/clear` (la elimina por completo): conservas el punto de control exacto que elegiste, pero liberas espacio de contexto de todo lo anterior.
+
+```
+> /rewind
+  [Selecciona un punto de control]
+  → Summarize up to here
+```
+
+**Cuándo usar cada opción:**
+
+| Necesitas... | Usa... |
+|---|---|
+| Deshacer solo el último turno | `/rewind` (sin más) |
+| Volver a un punto de control concreto | `/rewind` → selecciona el punto |
+| Recuperar contexto de antes de un `/clear` | `/rewind` → selecciona el punto anterior al `/clear` |
+| Liberar contexto pero conservar un resumen desde un punto | `/rewind` → "Summarize up to here" |
+
+---
+
+## Modo Bash (`!`)
+
+Escribir `!` al inicio del prompt activa el modo bash: el texto que sigue se ejecuta directamente como comando de shell en lugar de enviarse como mensaje a Claude.
+
+```
+> !ls -la src/
+> !git status
+```
+
+### Autocompletado de rutas en vivo (v2.1.193)
+
+En modo bash, Claude Code ahora ofrece **autocompletado de rutas de fichero en vivo** mientras escribes, igual que en una shell normal. Esto reduce errores de tipeo al referenciar archivos y acelera comandos que combinan varias rutas.
+
+```
+> !cat src/comp<TAB>
+              → src/components/
+```
+
+### Respuesta automática al output (v2.1.186)
+
+Desde la v2.1.186, tras ejecutar un comando `!bash`, Claude **responde automáticamente** al resultado (por ejemplo, interpretando el output de `!git status` y sugiriendo el siguiente paso), en lugar de quedarse a la espera de que tú describas lo que acaba de pasar.
+
+```
+> !npm test
+  [output del comando]
+  [Claude analiza el resultado y comenta si hay tests en fallo, sin que se lo pidas]
+```
+
+Si prefieres el comportamiento anterior (ejecutar el comando y esperar tu siguiente instrucción sin comentario automático), desactívalo en `.claude/settings.json`:
+
+```json
+{
+  "respondToBashCommands": false
+}
+```
+
+---
+
+## Preguntas Interactivas: `AskUserQuestion`
+
+> **Cambio de comportamiento (v2.1.200)**
+
+Cuando Claude necesita una decisión tuya durante una tarea (por ejemplo, elegir entre dos enfoques de implementación), usa la herramienta interna `AskUserQuestion` para mostrarte opciones y esperar tu respuesta. Antes de la v2.1.200, si no respondías en un tiempo determinado, Claude Code **continuaba automáticamente** con una opción por defecto.
+
+A partir de la v2.1.200, ese comportamiento ya **no** es el predeterminado: Claude espera tu respuesta indefinidamente. Si prefieres el comportamiento anterior (o uno similar, pero explícito), puedes activar un **timeout de inactividad opcional** desde `/config`:
+
+```
+> /config
+  → Ajusta el timeout de inactividad para AskUserQuestion
+```
+
+**Cuándo activar el timeout:** en flujos semi-automatizados donde alguien lanza una tarea y no puede quedarse pendiente de responder preguntas, pero quiere que la sesión progrese igualmente en lugar de bloquearse esperando indefinidamente. En pair programming o revisión activa, lo habitual es dejarlo desactivado (comportamiento por defecto) para no perder ninguna decisión importante.
+
+---
+
+## Llamadas de Herramientas en Paralelo
+
+> **Cambio de comportamiento (v2.1.161)**
+
+Cuando Claude ejecuta varias herramientas en paralelo dentro del mismo turno (por ejemplo, varios comandos `Bash` independientes, o una combinación de `Read` y `Bash`), antes de la v2.1.161 un fallo en **cualquiera** de esas llamadas cancelaba el resto del lote, aunque no tuvieran relación entre sí.
+
+A partir de la v2.1.161, un `Bash` que falla dentro de un lote de llamadas paralelas **ya no cancela** las demás llamadas del mismo lote. Cada herramienta se resuelve de forma independiente y Claude ve el resultado (éxito o error) de cada una por separado.
+
+```
+Lote paralelo:
+  1. Bash: npm run lint         → falla (exit code 1)
+  2. Bash: npm run typecheck    → se ejecuta igualmente
+  3. Read: src/index.ts         → se ejecuta igualmente
+```
+
+**Por qué importa:** en tareas donde Claude lanza varias comprobaciones independientes a la vez (lint, typecheck, tests, lectura de ficheros), un solo fallo ya no te obliga a repetir todo el lote. Claude recibe el diagnóstico completo de una vez y puede decidir cómo proceder con la información de todas las llamadas, no solo de las que tuvieron éxito antes del fallo.
 
 ---
 

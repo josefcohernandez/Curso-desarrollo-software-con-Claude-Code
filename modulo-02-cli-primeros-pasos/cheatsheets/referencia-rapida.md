@@ -22,6 +22,7 @@ claude --resume                 # Continuar sesión
 | `--verbose` | | Output detallado |
 | `--no-mcp` | | Sin servidores MCP |
 | `--dangerously-skip-permissions` | | Sin permisos (solo CI) |
+| `--safe-mode` | | Arranca sin CLAUDE.md, plugins, skills, hooks ni MCP (troubleshooting) |
 
 ## Slash Commands
 
@@ -32,6 +33,8 @@ claude --resume                 # Continuar sesión
 | `/compact [foco]` | Compactar conversación |
 | `/exit` | Salir |
 | `/resume` | Reanudar sesión anterior |
+| `/cd <ruta>` | Cambiar de directorio sin romper el prompt cache |
+| `/rewind` | Deshacer turno / volver a un punto de control (incluso antes de `/clear`) |
 
 ### Info
 | Comando | Función |
@@ -39,7 +42,7 @@ claude --resume                 # Continuar sesión
 | `/help` | Ayuda |
 | `/cost` | Tokens y coste |
 | `/model [nombre]` | Ver o cambiar modelo |
-| `/doctor` | Diagnóstico |
+| `/doctor` (o `/checkup`) | Chequeo completo: diagnostica y repara |
 | `/status` | Estado de la sesión |
 
 ### Config

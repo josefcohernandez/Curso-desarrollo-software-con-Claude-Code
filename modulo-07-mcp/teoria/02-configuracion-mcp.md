@@ -143,6 +143,54 @@ Esto es útil cuando un equipo usa conectores compartidos desde claude.ai y un m
 
 ---
 
+## Autenticación de Servidores MCP desde el CLI
+
+> **Novedad (v2.1.186)**
+
+Hasta esta versión, autenticar un servidor MCP que requiere OAuth u otro flujo de login solo era posible desde el comando interactivo `/mcp`, dentro de una sesión. Desde v2.1.186, el CLI expone comandos dedicados para autenticar (o cerrar sesión) sin entrar en el REPL:
+
+```bash
+# Autenticar un servidor MCP configurado
+claude mcp login <nombre-servidor>
+
+# Cerrar la sesión de un servidor MCP autenticado
+claude mcp logout <nombre-servidor>
+```
+
+Esto es útil en scripts de aprovisionamiento, onboarding de nuevos miembros del equipo o pasos previos a una sesión headless que necesita el servidor ya autenticado.
+
+### Flag `--no-browser` para entornos SSH
+
+En máquinas remotas sin navegador disponible (servidores SSH, contenedores, entornos CI), el flujo OAuth estándar no puede abrir una ventana de navegador local. El flag `--no-browser` evita el intento de apertura automática y en su lugar muestra la URL de autorización para completarla manualmente desde otra máquina:
+
+```bash
+claude mcp login <nombre-servidor> --no-browser
+```
+
+```text
+Para autorizar, visita esta URL desde un navegador:
+https://auth.ejemplo.com/oauth/authorize?client_id=...&state=...
+
+Esperando autorización...
+```
+
+> **Cuándo usarlo:** Siempre que trabajes vía SSH sobre una máquina sin entorno gráfico. Copia la URL mostrada y ábrela en el navegador de tu máquina local; el CLI queda a la espera de que completes el flujo OAuth.
+
+### Aviso al arrancar cuando un servidor necesita autenticación
+
+> **Novedad (v2.1.193)**
+
+Si al iniciar Claude Code hay servidores MCP configurados con autenticación pendiente (token caducado o login nunca completado), la sesión muestra un aviso al arrancar indicando qué servidores están afectados, con un hint que apunta a `/mcp`:
+
+```text
+⚠ 2 servidores MCP requieren autenticación: github, jira
+  Ejecuta /mcp o `claude mcp login <nombre>` para autenticarlos.
+```
+
+Esto evita el escenario silencioso en el que un servidor aparece "conectado" en `/mcp` pero sus herramientas fallan en la primera invocación porque el token nunca se renovó.
+
+---
+
 ## Tool Search
 
 **Tool Search** carga herramientas MCP bajo demanda en vez de todas a la vez:
@@ -227,6 +275,29 @@ Esto reduce los falsos negativos en entornos con servicios que tardan en estar l
   }
 }
 ```
+
+### Timeout de Herramientas MCP Remotas Colgadas
+
+> **Novedad (v2.1.187)**
+
+El campo `timeout` de arriba controla cuánto se espera a que el servidor **arranque**. Un problema distinto es el de las llamadas a herramientas MCP remotas que se quedan colgadas una vez el servidor ya está conectado: antes de v2.1.187, Claude Code esperaba siempre un tiempo fijo de **5 minutos** antes de abortar la llamada, sin posibilidad de ajustarlo.
+
+Desde v2.1.187, ese tiempo de espera es configurable mediante la variable de entorno `CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT` (en milisegundos):
+
+```bash
+# Reducir el timeout de inactividad a 60 segundos
+export CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT=60000
+
+claude
+```
+
+| Escenario | Valor recomendado |
+|-----------|-------------------|
+| Servidores MCP remotos con latencia alta pero estables | Aumentar (p. ej. `600000` = 10 min) |
+| Servidores MCP en CI/CD donde las llamadas deben fallar rápido | Reducir (p. ej. `30000` = 30 s) |
+| Uso general local (transporte stdio) | Dejar el valor por defecto (5 min, sin definir la variable) |
+
+> **Nota:** Este timeout mide **inactividad**, no la duración total de la llamada. Si el servidor sigue enviando notificaciones de progreso MCP, el contador se reinicia y la llamada no se aborta.
 
 ---
 

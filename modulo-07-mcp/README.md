@@ -15,7 +15,7 @@ MCP es el estándar abierto que permite a Claude Code conectarse con herramienta
 
 ## Duración
 
-**2 h 35 min** (85 min de teoría + 50 min de ejercicios + 20 min de exploración)
+**2 h 50 min** (100 min de teoría + 50 min de ejercicios + 20 min de exploración)
 
 ## Prerrequisitos
 
@@ -40,3 +40,11 @@ modulo-07-mcp/
     ├── github-config.md
     └── filesystem-config.md
 ```
+
+---
+
+## Navegación
+
+| Anterior | Siguiente |
+|----------|-----------|
+| [Módulo 06: Plan Mode, Opus 4.8 y Workflows](../modulo-06-planificacion-opus/README.md) | [Módulo 08: Hooks](../modulo-08-hooks/README.md) |

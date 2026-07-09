@@ -98,6 +98,61 @@ Se dispara al **iniciar o reanudar** una sesión de Claude Code.
 
 Casos de uso: cargar variables de entorno del proyecto, verificar que las dependencias están instaladas, mostrar el estado del repo al empezar.
 
+#### Forzar re-escaneo de skills con `reloadSkills` (v2.1.152)
+
+Un hook `SessionStart` puede devolver `reloadSkills: true` en su respuesta JSON para forzar que Claude Code **re-escanee los directorios de skills** (proyecto, usuario y plugins) al arrancar la sesión, en lugar de usar el índice cacheado de la sesión anterior.
+
+```bash
+#!/bin/bash
+# Fuerza el re-escaneo de skills si se detecta un skill nuevo sin indexar
+if [ -d ".claude/skills" ] && [ -n "$(find .claude/skills -newer .claude/.skills-cache 2>/dev/null)" ]; then
+  echo '{"reloadSkills": true}'
+else
+  exit 0
+fi
+```
+
+Esto es útil en equipos donde los skills se actualizan con frecuencia (por ejemplo, generados por un pipeline interno) y se quiere garantizar que cada sesión nueva arranca con la última versión disponible, sin depender de que el usuario reinicie Claude Code manualmente.
+
+> **Comando relacionado:** `/reload-skills` (v2.1.152) hace lo mismo bajo demanda, **dentro de una sesión ya iniciada**, sin necesidad de reiniciarla:
+>
+> ```bash
+> claude
+> > /reload-skills    # Re-escanea los directorios de skills sin reiniciar la sesión
+> ```
+>
+> Usa el hook `reloadSkills` para automatizar el re-escaneo al inicio de cada sesión; usa `/reload-skills` cuando necesites refrescar los skills manualmente a mitad de una sesión larga (por ejemplo, tras instalar un plugin nuevo con skills).
+
+#### Fijar el título de sesión con `hookSpecificOutput.sessionTitle` (v2.1.152)
+
+Además del mecanismo ya existente en `UserPromptSubmit` (ver más abajo), un hook `SessionStart` puede devolver `hookSpecificOutput.sessionTitle` para asignar el título de la sesión **desde el primer momento**, antes de que el usuario escriba el primer prompt:
+
+```bash
+#!/bin/bash
+# Título de sesión basado en el ticket activo y la fecha
+TICKET=$(cat .claude/ticket 2>/dev/null || echo "sin-ticket")
+echo "{\"hookSpecificOutput\": {\"sessionTitle\": \"[$TICKET] $(date +%d-%m)\"}}"
+```
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/scripts/set-session-title-inicial.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+> **Diferencia con el `sessionTitle` de `UserPromptSubmit`:** el de `SessionStart` fija el título nada más arrancar la sesión (útil para nombrar sesiones automáticas o programadas antes de que exista ningún prompt). El de `UserPromptSubmit` permite actualizar el título más adelante, en función del contenido del prompt enviado.
+
 ### SessionEnd
 
 Se dispara al **terminar** una sesión.
@@ -360,6 +415,57 @@ Se dispara **cuando ocurre un error de API durante la respuesta de Claude**. Út
 }
 ```
 
+### Stop y SubagentStop: feedback al modelo con `additionalContext` (v2.1.163)
+
+Los eventos `Stop` (Claude termina de responder) y `SubagentStop` (un subagente termina) pueden bloquear la finalización devolviendo `exit 2` o `{"decision": "block"}`, lo que Claude interpreta como un **error** que debe corregir. Desde v2.1.163, ambos eventos admiten una alternativa más fina: devolver `hookSpecificOutput.additionalContext` para **dar feedback al modelo sin marcar la ejecución como error**.
+
+La diferencia es importante: bloquear con `exit 2` fuerza a Claude a tratar la situación como un fallo que debe resolver antes de terminar. Devolver `additionalContext` simplemente añade información al contexto de la siguiente respuesta, dejando que Claude decida cómo (o si) actuar sobre ella, sin la connotación de error.
+
+```bash
+#!/bin/bash
+# hook Stop que añade contexto sin bloquear ni marcar error
+INPUT=$(cat)
+
+PENDING=$(git status --porcelain | wc -l)
+
+if [ "$PENDING" -gt 0 ]; then
+  jq -n --arg n "$PENDING" '{
+    "hookSpecificOutput": {
+      "hookEventName": "Stop",
+      "additionalContext": ("Nota: quedan " + $n + " ficheros con cambios sin commitear en el repositorio.")
+    }
+  }'
+else
+  exit 0
+fi
+```
+
+Configuración correspondiente:
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/scripts/recordar-cambios-pendientes.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+| Mecanismo | Efecto en Claude | Cuándo usarlo |
+|-----------|-------------------|----------------|
+| `exit 2` / `{"decision": "block"}` | Trata la situación como error a resolver antes de terminar | Condición que debe corregirse obligatoriamente (tests rotos, lint fallido) |
+| `hookSpecificOutput.additionalContext` | Añade información al contexto, sin marcar error | Recordatorios, avisos informativos, contexto adicional que Claude puede tener en cuenta libremente |
+
+`SubagentStop` funciona de forma equivalente, aplicado al momento en que un subagente concreto termina su ejecución: el hook puede añadir contexto sobre el resultado del subagente sin forzar un reintento.
+
 ### SubagentStart
 
 Se dispara **cuando se crea un subagente**. Útil para tracking de subagentes activos.
@@ -461,6 +567,74 @@ Casos de uso frecuentes:
 - Enviar la notificación a un canal de Slack cuando un agente de larga duración termina
 - Reproducir un sonido con `paplay` o `afplay` además de mostrar la notificación visual
 - Registrar todas las notificaciones en un fichero de log para auditoría
+
+#### Sub-tipos `agent_needs_input` / `agent_completed` (v2.1.198)
+
+Las notificaciones de background agents (sesiones lanzadas con `claude --bg` o desde el panel de agentes) incluyen un campo `reason` en el JSON del hook `Notification` que distingue **dos sub-tipos**:
+
+| `reason` | Significado |
+|----------|-------------|
+| `agent_needs_input` | El agente background está bloqueado esperando una decisión o input del usuario |
+| `agent_completed` | El agente background ha terminado su trabajo |
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+REASON=$(echo "$INPUT" | jq -r '.reason // empty')
+
+case "$REASON" in
+  agent_needs_input) notify-send 'Claude Code' 'Un agente necesita tu input' ;;
+  agent_completed) notify-send 'Claude Code' 'Un agente ha terminado' ;;
+  *) : ;; # otras notificaciones, comportamiento por defecto
+esac
+```
+
+Esta nota documenta únicamente el evento de hook en sí. El detalle completo de uso de background agents, el panel de tareas y los workflows de notificación está en el [Módulo 16](../../modulo-16-agentes-background-workflows/teoria/01-agent-view.md).
+
+### MessageDisplay (v2.1.152)
+
+Se dispara **justo antes de mostrar el texto del mensaje del asistente al usuario**, después de que Claude ha terminado de generar la respuesta pero antes de que se renderice en la terminal o en la interfaz. El hook recibe el texto del mensaje y puede **transformarlo u ocultarlo** devolviendo una versión modificada, sin que eso afecte al contenido que queda registrado en el historial de la conversación para el modelo.
+
+```json
+{
+  "hooks": {
+    "MessageDisplay": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/scripts/redactar-secretos.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Ejemplo: redactar patrones que parezcan credenciales antes de mostrar el mensaje en pantalla, útil en sesiones grabadas para demos o en pipelines donde el output se retransmite a un canal compartido:
+
+```bash
+#!/bin/bash
+# redactar-secretos.sh
+INPUT=$(cat)
+TEXT=$(echo "$INPUT" | jq -r '.message // empty')
+
+# Redactar cadenas que parezcan tokens o claves API
+REDACTED=$(echo "$TEXT" | sed -E 's/(sk-[a-zA-Z0-9]{20,})/[REDACTADO]/g')
+
+echo "{\"hookSpecificOutput\": {\"hookEventName\": \"MessageDisplay\", \"displayText\": $(echo "$REDACTED" | jq -Rs .)}}"
+exit 0
+```
+
+| Campo de salida | Efecto |
+|------------------|--------|
+| `hookSpecificOutput.displayText` | Sustituye el texto que se muestra al usuario por el valor devuelto |
+| Sin salida (exit 0 sin JSON) | El mensaje se muestra sin modificaciones |
+
+> **Importante:** `MessageDisplay` afecta solo a la **presentación** del mensaje. El texto original generado por Claude sigue formando parte del historial de la conversación tal cual se generó; este hook no reescribe lo que el modelo "recuerda" haber dicho, solo lo que el usuario **ve** en pantalla.
+
+Casos de uso: redactar secretos accidentalmente incluidos en una respuesta antes de mostrarla en una sesión grabada o retransmitida, aplicar un formato visual personalizado, o suprimir mensajes que coincidan con un patrón de ruido conocido (por ejemplo, respuestas puramente informativas en modo `-p` silencioso).
 
 ---
 
@@ -774,6 +948,8 @@ El comportamiento es automático y no requiere configuración. El fichero tempor
 | Hooks async que fallan silenciosamente | Los errores de hooks async no interrumpen la sesión | Redirigir stderr a un log |
 | Hooks en skills ignorados | Frontmatter YAML mal formateado | Validar el YAML con un linter |
 | Leer variables de entorno inexistentes | Los datos llegan vía stdin (JSON), no como env vars | Usar `INPUT=$(cat)` y `jq` para extraer campos |
+| Confundir `additionalContext` con bloqueo | `additionalContext` no marca error; si necesitas forzar corrección, usa `exit 2` | Elegir el mecanismo según si la situación es un error obligatorio o solo informativa |
+| Esperar que `MessageDisplay` cambie el historial del modelo | Solo afecta a lo que ve el usuario en pantalla, no a lo que Claude recuerda haber dicho | Usar `PostToolUse`/`updatedToolOutput` si necesitas modificar lo que el modelo procesa |
 
 ---
 
@@ -789,3 +965,10 @@ El comportamiento es automático y no requiere configuración. El fichero tempor
 - El parámetro `"async": true` permite ejecutar hooks en background para operaciones largas sin bloquear la sesión
 - `"timeout"` limita el tiempo máximo de ejecución de un hook async
 - Solo **exit 2** bloquea operaciones; exit 1 u otros códigos no-zero no bloquean
+- **`MessageDisplay`** (v2.1.152) transforma u oculta el texto del asistente justo antes de mostrarlo, sin alterar el historial que ve el modelo
+- **`Stop`/`SubagentStop`** pueden devolver `hookSpecificOutput.additionalContext` (v2.1.163) para dar feedback al modelo sin marcar error, como alternativa más fina al bloqueo con `exit 2`
+- **`SessionStart`** puede devolver `reloadSkills: true` (v2.1.152) para forzar el re-escaneo de directorios de skills, y `hookSpecificOutput.sessionTitle` (v2.1.152) para fijar el título de sesión desde el arranque; el comando `/reload-skills` hace lo mismo bajo demanda dentro de una sesión ya iniciada
+- El campo `args` (array, exec form) en hooks de tipo `command` (v2.1.139) lanza el proceso sin pasar por shell; ver [01-sistema-hooks.md](01-sistema-hooks.md)
+- `continueOnBlock: true` en `PostToolUse` (v2.1.139) fuerza a que los hooks siguientes del mismo evento se ejecuten aunque uno anterior haya bloqueado; ver [01-sistema-hooks.md](01-sistema-hooks.md)
+- Los hooks reciben el effort level activo de la sesión (v2.1.133) vía JSON (`effort_level`) y variable de entorno (`$CLAUDE_CODE_EFFORT_LEVEL`); ver [01-sistema-hooks.md](01-sistema-hooks.md)
+- El hook `Notification` distingue los sub-tipos `agent_needs_input`/`agent_completed` (v2.1.198) para background agents; detalle de uso en el [Módulo 16](../../modulo-16-agentes-background-workflows/teoria/01-agent-view.md)

@@ -138,6 +138,22 @@ Este filtrado es automático cuando Claude lo considera útil. La ejecución de 
 | **Terceros maliciosos** | Servidor MCP con backdoor | Auditar código, usar oficiales |
 | **Secrets en config** | Tokens hardcoded | Usar ${ENV_VAR} siempre |
 | **Escritura no autorizada** | MCP modifica datos | Permisos granulares |
+| **Listado que ejecuta código** | `claude mcp list`/`get` arrancaban servidores auto-aprobados en workspace no confiable (corregido en v2.1.196) | Actualizar a v2.1.196+; verificar la confianza del workspace antes de inspeccionar `.mcp.json` de repos ajenos |
+
+### `claude mcp list` / `claude mcp get` ya no arrancan servidores automáticamente (v2.1.196)
+
+Antes de esta versión, ejecutar `claude mcp list` o `claude mcp get <nombre>` podía **arrancar automáticamente** los servidores MCP definidos en `.mcp.json` que estuvieran auto-aprobados vía un `.claude/settings.json` **committeado**, incluso en un workspace que Claude Code todavía no considera de confianza (por ejemplo, un repositorio recién clonado que aún no has revisado).
+
+Esto era un riesgo de seguridad real: un repositorio malicioso podía incluir un `.mcp.json` con un servidor cuyo `command` ejecutara código arbitrario al arrancar (un script disfrazado de servidor MCP), y ese código se ejecutaba **con solo listar los servidores configurados**, sin que el usuario ejecutara ninguna herramienta ni aceptara ningún prompt de confianza del proyecto.
+
+Desde v2.1.196, `claude mcp list` y `claude mcp get` **no arrancan servidores** cuando el workspace no es de confianza. Ambos comandos muestran la configuración (nombre, comando, argumentos) como una operación de solo lectura, sin ejecutar el proceso subyacente, hasta que el workspace se marca como confiable o el servidor se arranca explícitamente dentro de una sesión (`/mcp`).
+
+| Antes de v2.1.196 | Desde v2.1.196 |
+|--------------------|-----------------|
+| `claude mcp list` arranca todos los servidores auto-aprobados, aunque el workspace no sea de confianza | `claude mcp list` solo lee la configuración; no ejecuta procesos en workspaces no confiables |
+| Un `.mcp.json` malicioso podía ejecutar código con solo inspeccionar la configuración | Inspeccionar la configuración es una operación de solo lectura, segura por defecto |
+
+> **Riesgo que mitiga:** clonar un repositorio no confiable y ejecutar `claude mcp list` para "ver qué hay configurado" ya no es suficiente para desencadenar ejecución de código arbitrario. El workspace debe marcarse como confiable primero (el flujo estándar de confianza que Claude Code aplica al abrir un proyecto nuevo), reduciendo la superficie de ataque de repositorios ajenos.
 
 ### Mejores Prácticas
 

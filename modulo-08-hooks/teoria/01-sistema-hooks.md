@@ -7,7 +7,7 @@ eventos específicos en Claude Code. Son como "triggers" o "callbacks".
 
 ---
 
-## Los 26 Eventos
+## Los 27 Eventos
 
 ### Tabla completa de eventos
 
@@ -19,6 +19,7 @@ eventos específicos en Claude Code. Son como "triggers" o "callbacks".
 | **PermissionRequest** | Aparece un diálogo de permisos | Si |
 | **PostToolUse** | Después de una herramienta exitosa | No |
 | **PostToolUseFailure** | Después de una herramienta fallida | No |
+| **MessageDisplay** | Justo antes de mostrar el texto del asistente al usuario | Puede ocultar/transformar |
 | **Notification** | Se envía una notificación | No |
 | **SubagentStart** | Subagente creado | No |
 | **SubagentStop** | El subagente termina | Si |
@@ -65,6 +66,36 @@ Ejecuta un comando shell:
   }
 }
 ```
+
+#### Forma `exec` sin shell: campo `args` (v2.1.139)
+
+Por defecto, `command` se ejecuta a través de un shell (`sh -c "..."`), lo que permite pipes, variables y expansión de globs, pero también implica el overhead de lanzar un shell intermedio y el riesgo de errores de escaping en comandos con caracteres especiales. Desde v2.1.139, un hook de tipo `command` puede añadir el campo `args` (array de strings) para lanzar el ejecutable **directamente**, sin pasar por shell:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write(*.py)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ruff",
+            "args": ["format", "$FILEPATH"]
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+| Forma | Cómo se ejecuta | Cuándo usarla |
+|-------|-----------------|----------------|
+| Solo `command` (string) | Vía shell (`sh -c`) | Necesitas pipes, `&&`, redirecciones o expansión de variables de shell |
+| `command` + `args` (array) | Exec directo del proceso, sin shell | Comando simple con argumentos fijos; evita problemas de escaping y el overhead de un shell intermedio |
+
+> **Nota:** Con la forma `exec`, `$FILEPATH` y otras variables del entorno de hooks se siguen sustituyendo antes de invocar el proceso, pero no hay interpretación de shell (sin `|`, `&&`, comillas de shell, etc.) dentro de cada elemento de `args`.
 
 ### 2. Prompt
 
@@ -236,6 +267,39 @@ La sintaxis es idéntica a la de las reglas de permisos (`permissions.allow` / `
 
 ---
 
+## `continueOnBlock` en `PostToolUse` (v2.1.139)
+
+Cuando varios hooks `PostToolUse` están configurados para el mismo evento (por ejemplo, uno de logging y otro de linting), por defecto si uno de ellos produce una decisión de bloqueo, los hooks restantes de la cadena no se ejecutan. El campo `continueOnBlock: true` cambia ese comportamiento: fuerza a que el resto de hooks del mismo evento se ejecuten igualmente, aunque un hook anterior ya haya señalado un bloqueo.
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/scripts/lint-estricto.sh"
+          },
+          {
+            "type": "command",
+            "command": "/scripts/registrar-auditoria.sh",
+            "continueOnBlock": true
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+En este ejemplo, aunque `lint-estricto.sh` señale un problema de calidad de código, `registrar-auditoria.sh` se ejecuta igualmente porque tiene `continueOnBlock: true`. Sin este campo, un bloqueo del linter impediría que el hook de auditoría llegara a ejecutarse.
+
+> **Cuándo usarlo:** Hooks independientes entre sí (logging, métricas, notificaciones) que deben ejecutarse siempre, incluso cuando otro hook del mismo evento reporta un problema. No lo actives en hooks que dependen del resultado de uno anterior para decidir si tiene sentido ejecutarse.
+
+---
+
 ## Configuración
 
 En `.claude/settings.json`:
@@ -347,6 +411,30 @@ Variables de entorno disponibles (del sistema, no del evento):
 |----------|------------|
 | `$CLAUDE_PROJECT_DIR` | Directorio raiz del proyecto |
 | `$CLAUDE_ENV_FILE` | Script de shell que se ejecuta antes de cada comando Bash |
+
+### Effort level en el JSON de entrada (v2.1.133)
+
+Desde v2.1.133, los hooks reciben el **effort level** activo de la sesión (ver `CLAUDE_CODE_EFFORT_LEVEL` en el [Módulo 06](../../modulo-06-planificacion-opus/teoria/04-fast-mode-y-modelos.md)) tanto en el JSON de entrada por stdin como en una variable de entorno, sin necesidad de leer configuración adicional:
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+
+# Desde el JSON de entrada
+EFFORT_JSON=$(echo "$INPUT" | jq -r '.effort_level // empty')
+
+# Desde la variable de entorno equivalente
+EFFORT_ENV="$CLAUDE_CODE_EFFORT_LEVEL"
+
+echo "Effort activo: ${EFFORT_JSON:-$EFFORT_ENV}"
+```
+
+| Fuente | Campo/Variable | Disponible en |
+|--------|-----------------|----------------|
+| JSON por stdin | `effort_level` | Todos los hooks de tipo `command` |
+| Variable de entorno | `$CLAUDE_CODE_EFFORT_LEVEL` | Todos los hooks de tipo `command` |
+
+Esto es útil para hooks que adaptan su comportamiento al nivel de razonamiento de la sesión: por ejemplo, un hook de auditoría que solo registra en detalle las operaciones cuando el effort es `high` o `xhigh`, o un hook que evita lanzar un subagente costoso (`type: "agent"`) si la sesión está en `low` porque el usuario ha priorizado velocidad sobre profundidad.
 
 ---
 

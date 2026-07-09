@@ -61,6 +61,29 @@ del servidor y se comunica por stdin/stdout.
 
 Hay cientos de servidores MCP disponibles. Catálogo: https://github.com/modelcontextprotocol/servers
 
+> **Nota — nombres de servidor reservados (v2.1.205):** Los nombres `"Claude Preview"` y `"Claude Browser"` están reservados por Claude Code para el panel de navegador integrado de Claude Desktop. Si configuras un servidor MCP propio con alguno de estos nombres, la configuración se rechaza para evitar colisiones con el panel nativo. Elige siempre un nombre descriptivo de tu integración (`"postgres-prod"`, `"jira-empresa"`, etc.).
+
+---
+
+## Roots: Directorios de Trabajo Compartidos con el Servidor
+
+Además de tools, resources y prompts (lo que expone el **servidor**), MCP define **roots**: la lista de directorios de trabajo que el **cliente** (Claude Code) comparte con el servidor mediante la petición `roots/list`. Un servidor MCP puede consultar esta lista para saber en qué carpetas del sistema de archivos tiene sentido operar, sin depender de que el usuario le indique la ruta en cada llamada a una herramienta.
+
+> **Novedad (v2.1.203):** Los directorios adicionales añadidos a la sesión con `/add-dir` se incluyen ahora también en `roots/list`. Cuando la lista de roots cambia durante la sesión (por ejemplo, al ejecutar `/add-dir` a mitad de una tarea), Claude Code envía la notificación `notifications/roots/list_changed` a los servidores MCP conectados, para que puedan refrescar su vista de los directorios disponibles.
+
+```bash
+claude
+> /add-dir ../shared-libs
+```
+
+| Momento | Contenido de `roots/list` |
+|---------|---------------------------|
+| Al iniciar la sesión | Directorio de trabajo inicial (cwd) |
+| Tras `/add-dir ../shared-libs` | Directorio inicial + `../shared-libs` |
+| Tras varios `/add-dir` | Todos los directorios añadidos, en el orden en que se añadieron |
+
+Esto es especialmente relevante para servidores MCP de filesystem o de análisis de código que necesitan conocer todos los directorios activos de la sesión, no solo el directorio raíz con el que se inició Claude Code. Antes de v2.1.203, un servidor MCP conectado a una sesión con varios `/add-dir` solo veía el directorio inicial en `roots/list`, aunque Claude ya tuviera acceso a los directorios adicionales.
+
 ---
 
 ## Impacto en Tokens

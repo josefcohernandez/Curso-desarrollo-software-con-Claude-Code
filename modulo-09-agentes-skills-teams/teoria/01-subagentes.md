@@ -89,6 +89,8 @@ El subagente **Explore** es un investigador rápido y de solo lectura. Tiene acc
 - Ideal para investigación y exploración del codebase
 - Devuelve un resumen estructurado de lo que encontró
 
+> **Cambio de comportamiento (v2.1.198):** Antes, el subagente Explore corría **siempre en Haiku**, independientemente del modelo activo en la sesión principal, priorizando velocidad y coste sobre profundidad de análisis. Desde v2.1.198, Explore **hereda el modelo de la sesión principal**, con un tope máximo de Opus. Si tu sesión principal usa Sonnet, Explore usa Sonnet; si usa Opus, Explore usa Opus. Esto mejora la calidad de las investigaciones en sesiones donde ya se ha optado por un modelo más potente, a cambio de un coste algo mayor que el Haiku fijo de versiones anteriores.
+
 **Casos de uso ideales:**
 - "Encuentra todas las funciones que usan la base de datos"
 - "¿Cómo está estructurado el módulo de autenticación?"
@@ -192,6 +194,62 @@ Claude Code utiliza internamente la herramienta **Task** para lanzar subagentes.
 3. **Paralelismo**: si hay tareas independientes, lanza múltiples subagentes
 4. **Preservación de contexto**: si la salida sería muy grande, la aísla en un subagente
 
+---
+
+## Cambio arquitectural: subagentes en background por defecto (v2.1.198)
+
+> **Este es el cambio más importante de esta sección. Léela aunque ya conozcas subagentes de versiones anteriores de Claude Code.**
+
+Hasta v2.1.198, lanzar un subagente era una operación **bloqueante**: cuando Claude Code delegaba una tarea a un subagente, la sesión principal se quedaba esperando a que el subagente terminara antes de poder hacer cualquier otra cosa. El modelo mental era "Claude se detiene, el subagente trabaja, Claude retoma con el resultado".
+
+**Desde v2.1.198, los subagentes corren en segundo plano (background) por defecto.** El modelo mental correcto ahora es:
+
+```
+ANTES (bloqueante, hasta v2.1.197):
+Tú: "Investiga el módulo de auth y luego refactorízalo"
+    |
+    v
+Claude lanza subagente Explore
+    |
+    v
+[Claude Code BLOQUEADO esperando... no puedes interactuar]
+    |
+    v
+Subagente termina -> Claude retoma con el resumen
+
+DESDE v2.1.198 (background por defecto):
+Tú: "Investiga el módulo de auth y luego refactorízalo"
+    |
+    v
+Claude lanza subagente Explore EN BACKGROUND
+    |
+    v
+Claude SIGUE TRABAJANDO (puedes seguir dándole instrucciones,
+hacer otras preguntas, o Claude puede continuar con otra parte
+de la tarea mientras el subagente investiga)
+    |
+    v
+Cuando el subagente termina, Claude Code te NOTIFICA
+y el resultado se incorpora a la conversación
+```
+
+### Qué implica este cambio en la práctica
+
+- **Ya no hay bloqueo por defecto**: lanzar un subagente no detiene tu sesión. Puedes seguir interactuando con Claude Code mientras el subagente trabaja en paralelo.
+- **La notificación es automática**: no necesitas preguntar "¿ya terminó el subagente?" ni hacer polling. Claude Code te avisa cuando el subagente completa su trabajo.
+- **Varios subagentes en paralelo se sienten más naturales**: como cada uno corre en background, lanzar tres investigaciones simultáneas ya no implica una espera secuencial percibida por el usuario.
+- **El comportamiento síncrono (bloqueante) sigue existiendo** para casos donde Claude necesita el resultado del subagente antes de poder continuar con el siguiente paso de la tarea actual (por ejemplo, un subagente Plan cuyo resultado determina qué hace Claude a continuación). Claude decide automáticamente cuándo esperar el resultado y cuándo continuar en paralelo, según la dependencia real entre pasos.
+
+### Monitorización de subagentes en background
+
+Con subagentes corriendo en background, surge una necesidad nueva: **ver qué está pasando** con sesiones y subagentes que no están bloqueando tu terminal en primer plano. Claude Code ofrece un dashboard dedicado (`claude agents` / Agent View) para listar, filtrar y adjuntarte a sesiones y subagentes en background, además de mecanismos de notificación configurables.
+
+> **Este detalle de monitorización queda fuera del alcance de este módulo.** Para aprender a usar el dashboard `claude agents`, configurar notificaciones, y orquestar trabajo a gran escala con Dynamic Workflows sobre múltiples agentes en background, consulta el [Módulo 16: Agentes en Segundo Plano y Workflows Dinámicos](../../modulo-16-agentes-background-workflows/README.md). Este módulo (09) se centra en la mecánica de subagentes, skills y Agent Teams; el Módulo 16 cubre cómo **observar y escalar** ese trabajo cuando corre en background.
+
+### `subagent_type` insensible a mayúsculas y separadores (v2.1.140)
+
+El parámetro `subagent_type` del tool `Task`/`Agent` ahora hace matching sin distinguir mayúsculas de minúsculas ni el separador usado. `"general-purpose"`, `"General-Purpose"`, `"general_purpose"` y `"GeneralPurpose"` se resuelven todos al mismo tipo de subagente. Esto reduce errores al invocar subagentes desde scripts o prompts donde el nombre exacto del tipo no se recuerda con precisión.
+
 ### Parámetro model en Subagentes
 
 Los subagentes aceptan un parámetro `model` que define qué modelo de IA usan:
@@ -217,6 +275,27 @@ Task(subagent_type="plan", model="sonnet",
 Task(subagent_type="general-purpose", model="opus",
      prompt="Refactoriza el módulo de pagos para soportar múltiples proveedores")
 ```
+
+### Subagentes anidados: hasta 5 niveles de profundidad (v2.1.172)
+
+Un subagente puede, a su vez, lanzar sus propios subagentes. Desde v2.1.172, esta anidación está soportada oficialmente hasta un máximo de **5 niveles de profundidad**:
+
+```
+Agente principal
+  └── Subagente nivel 1 (ej. "coordinador de módulo")
+        └── Subagente nivel 2 (ej. "Explore de un submódulo")
+              └── Subagente nivel 3
+                    └── Subagente nivel 4
+                          └── Subagente nivel 5 (límite máximo)
+```
+
+**Cuándo es útil la anidación:** en tareas jerárquicas donde un subagente de alto nivel necesita descomponer su propio trabajo en subtareas independientes. Por ejemplo, un subagente "auditor de seguridad" que lanza subagentes Explore anidados para analizar cada módulo del proyecto en paralelo, sin que el agente principal tenga que coordinar cada uno directamente.
+
+**Precaución con el coste:** cada nivel de anidación multiplica el número de tool calls y el consumo de tokens potencial. Evita anidar más de 2-3 niveles salvo que la tarea realmente lo justifique; el límite de 5 es un tope de seguridad, no una recomendación de uso habitual.
+
+### Herencia de extended thinking en subagentes y compactación (v2.1.198)
+
+Los subagentes y el proceso de compactación de contexto ahora **heredan la configuración de extended thinking** (razonamiento extendido) de la sesión principal. Si activaste el razonamiento extendido visible en tu sesión (`toggleThinking` o el nivel de `effort` configurado), los subagentes que lances heredan ese mismo nivel en lugar de usar un valor por defecto independiente. Esto da consistencia entre la calidad de razonamiento de la sesión principal y la de los subagentes que delega.
 
 ---
 
@@ -528,11 +607,16 @@ Paso 3: Presentar el plan al usuario en el contexto principal
 | Concepto | Descripción |
 |----------|-------------|
 | Subagente | Asistente con su propia ventana de contexto |
-| Explore | Solo lectura: Glob, Grep, Read |
+| **Background por defecto (v2.1.198)** | Los subagentes corren en segundo plano por defecto; la sesión principal no se bloquea y recibe notificación al terminar |
+| Explore | Solo lectura: Glob, Grep, Read. Hereda el modelo de la sesión principal (tope Opus) desde v2.1.198 |
 | Plan | Arquitecto: lee codebase, devuelve planes |
 | General-Purpose | Capacidades completas |
 | Aislamiento | Solo el resumen vuelve al contexto principal |
 | Modelo | haiku (barato), sonnet (equilibrado), opus (potente) |
+| Subagentes anidados | Hasta 5 niveles de profundidad (v2.1.172) |
+| `subagent_type` | Insensible a mayúsculas y separadores desde v2.1.140 |
+| Extended thinking | Subagentes y compactación heredan la config. de razonamiento extendido de la sesión (v2.1.198) |
+| Monitorización en background | Dashboard `claude agents` y Dynamic Workflows — ver [Módulo 16](../../modulo-16-agentes-background-workflows/README.md) |
 | Agentes custom | `.claude/agents/nombre.md` con frontmatter YAML |
 | `initialPrompt` | Prompt automático al lanzar un agente (v3.0) |
 | `tools:` | Lista de herramientas permitidas en el agente |

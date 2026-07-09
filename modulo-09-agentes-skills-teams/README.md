@@ -2,7 +2,7 @@
 
 ## Orquestación avanzada de agentes en Claude Code
 
-> **Tiempo estimado:** 3 horas
+> **Tiempo estimado:** 3 h 35 min
 > **Nivel:** Avanzado
 > **Prerrequisitos:** Módulos 01-08 completados, familiaridad con Claude Code CLI
 
@@ -35,10 +35,10 @@ Este módulo te enseña a superar todas estas limitaciones.
 
 | Archivo | Tema | Duración |
 |---------|------|----------|
-| [01-subagentes.md](teoria/01-subagentes.md) | Subagentes en profundidad | 45 min |
-| [02-skills.md](teoria/02-skills.md) | Sistema de skills | 30 min |
-| [03-agent-teams.md](teoria/03-agent-teams.md) | Agent Teams (experimental) | 35 min |
-| [04-aislamiento-worktree-y-comunicacion.md](teoria/04-aislamiento-worktree-y-comunicacion.md) | Worktree isolation, SendMessage, background agents y task management | 30 min |
+| [01-subagentes.md](teoria/01-subagentes.md) | Subagentes en profundidad: background por defecto (v2.1.198), anidación hasta 5 niveles | 55 min |
+| [02-skills.md](teoria/02-skills.md) | Sistema de skills: directorios anidados, `disallowed-tools`, invocaciones apiladas | 40 min |
+| [03-agent-teams.md](teoria/03-agent-teams.md) | Agent Teams (experimental): team implícito, sin `TeamCreate`/`TeamDelete` | 40 min |
+| [04-aislamiento-worktree-y-comunicacion.md](teoria/04-aislamiento-worktree-y-comunicacion.md) | Worktree isolation, `SendMessage`, background agents y task management | 35 min |
 
 ### Ejercicios prácticos
 
@@ -87,6 +87,17 @@ Este módulo te enseña a superar todas estas limitaciones.
 - **Paralelismo**: Agent Teams para trabajo verdaderamente concurrente.
 - **Optimización de costes**: elegir el modelo correcto para cada subagente.
 - **Coordinación**: cómo los agentes se comunican entre sí.
+
+> **Ver también:** desde v2.1.198, los subagentes corren en background por defecto — Claude sigue trabajando y te notifica al terminar en vez de bloquear la sesión. Este módulo cubre esa mecánica (worktree isolation, `SendMessage`, background agents). Para el **dashboard de monitorización** de todas tus sesiones (`claude agents`), las notificaciones de agentes y la orquestación a gran escala con Dynamic Workflows, consulta el [Módulo 16: Agentes en Segundo Plano y Workflows Dinámicos](../modulo-16-agentes-background-workflows/README.md).
+
+---
+
+## Flujo de trabajo recomendado
+
+1. Lee la teoría en orden: `01-subagentes.md` → `02-skills.md` → `03-agent-teams.md` → `04-aislamiento-worktree-y-comunicacion.md`
+2. Completa los ejercicios prácticos en orden: subagentes primero, luego skills, luego Agent Teams (requiere más tokens y configuración)
+3. Revisa los ejemplos de referencia en `agentes/` y `skills/` como plantillas para tus propios componentes
+4. Antes de pasar al Módulo 10, asegúrate de entender la diferencia entre subagentes (delegación puntual) y Agent Teams (colaboración sostenida) — es la base conceptual de la automatización avanzada
 
 ---
 

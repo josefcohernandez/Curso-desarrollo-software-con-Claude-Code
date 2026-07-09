@@ -76,6 +76,54 @@ Si existe un skill con el mismo nombre en varias ubicaciones, la prioridad es:
 
 > **Nota:** Los skills personales tienen **más prioridad** que los de proyecto. Esto permite que un desarrollador personalice un skill de proyecto sin afectar al equipo.
 
+### Skills en directorios `.claude/skills` anidados (v2.1.178)
+
+Además de `.claude/skills/` en la raíz del proyecto, Claude Code detecta y carga automáticamente skills definidos en directorios `.claude/skills` **anidados** dentro de subcarpetas del proyecto. Un skill anidado se activa automáticamente cuando trabajas con ficheros de esa subcarpeta, sin necesidad de que esté en la raíz.
+
+```
+mi-monorepo/
+  .claude/
+    skills/
+      deploy-general/SKILL.md        # Skill global del monorepo
+  packages/
+    api/
+      .claude/
+        skills/
+          deploy-api/SKILL.md        # Solo se activa al trabajar en packages/api/
+    frontend/
+      .claude/
+        skills/
+          deploy-api/SKILL.md        # Mismo nombre "deploy-api", contexto distinto
+```
+
+**Colisión de nombres:** si dos skills anidados en carpetas distintas comparten el mismo nombre (como `deploy-api` en el ejemplo anterior), Claude Code los distingue en el menú `/skills` con el formato `<directorio>:<nombre>`:
+
+```
+/skills
+  deploy-general
+  packages/api:deploy-api
+  packages/frontend:deploy-api
+```
+
+Esto permite que equipos de un monorepo definan skills con el mismo nombre lógico pero comportamiento distinto según el paquete en el que trabajen, sin conflictos.
+
+### Precedencia entre `.claude/` anidados (v2.1.178)
+
+Cuando existen varios directorios `.claude/` anidados en la ruta hacia el directorio de trabajo actual (agentes, skills, workflows u output-styles con el mismo nombre en distintos niveles), **gana el más cercano al directorio de trabajo actual**. Esto aplica no solo a skills, sino también a agentes personalizados, workflows y output-styles definidos en `.claude/`.
+
+```
+proyecto/
+  .claude/agents/reviewer.md          # Nivel raíz
+  packages/api/
+    .claude/agents/reviewer.md        # Nivel packages/api
+
+# Si trabajas dentro de packages/api/, el agente "reviewer" que se
+# carga es el de packages/api/.claude/agents/reviewer.md (el más cercano),
+# no el de la raíz del proyecto.
+```
+
+Esta regla de "el más cercano gana" es coherente con la lógica de resolución de configuración por directorios y facilita que subproyectos dentro de un monorepo personalicen su comportamiento sin tener que coordinar cambios con la raíz.
+
 ---
 
 ## Formato del Archivo SKILL.md
@@ -210,6 +258,28 @@ Este campo también se aplica a los **commands** personalizados definidos con fr
 
 El setting `disableSkillShellExecution` (configurado en `settings.json`, no en el frontmatter) desactiva la ejecución inline de bloques de código shell dentro de skills y commands personalizados. Cuando está activo, los bloques `bash` del skill se muestran como referencia pero no se ejecutan directamente. Ver [Módulo 15](../../modulo-15-plugins-marketplaces/teoria/04-marketplaces-y-gestion-enterprise.md) para detalles sobre su uso en entornos enterprise.
 
+### disallowed-tools (v2.1.152)
+
+El campo `disallowed-tools` en el frontmatter de un skill o command retira herramientas específicas del conjunto disponible **mientras ese skill está activo**. A diferencia de `disallowedTools:` en agentes personalizados (que restringe el agente completo, ver [01-subagentes.md](01-subagentes.md)), este campo actúa a nivel de skill/command dentro de la sesión principal, sin necesidad de lanzar un subagente aparte.
+
+```yaml
+---
+name: "Revisión de Solo Lectura"
+description: "Analiza el código en busca de problemas sin modificar nada"
+disallowed-tools:
+  - Write
+  - Edit
+  - Bash
+---
+
+# Revisión de Solo Lectura
+
+Analiza el código en $ARGUMENTS y reporta problemas de calidad, pero no apliques
+ningún cambio: usa exclusivamente Read, Glob y Grep para tu análisis.
+```
+
+Con `disallowed-tools: [Write, Edit, Bash]`, aunque el prompt del skill intentara (por error o por contenido malicioso embebido) modificar ficheros o ejecutar comandos, esas herramientas no están disponibles mientras el skill está en ejecución. Es una capa de seguridad declarativa útil para skills de auditoría, revisión o generación de informes donde la escritura nunca debería ocurrir.
+
 ### disable-model-invocation (opcional)
 
 Controla si Claude procesa las instrucciones o simplemente las devuelve como texto:
@@ -273,6 +343,31 @@ Genera una nueva migración de base de datos con el nombre: add_email_to_users
 ```
 
 En el skill, `$ARGUMENTS` se sustituye por: `--env=staging --version=2.1.0 --skip-tests`
+
+### Escapar `$` literal con `\$` (v2.1.163)
+
+Si el contenido de un skill necesita incluir un carácter `$` literal seguido de un dígito (por ejemplo, para documentar una variable de shell como `$1` o un precio como `$5`), Claude Code podría interpretarlo por error como el inicio de una variable de sustitución. La sintaxis de escape `\$` evita esa ambigüedad:
+
+```markdown
+# Generar Script de Backup
+
+Genera un script bash que reciba el nombre de la base de datos como primer
+argumento posicional (\$1) y el precio del plan de backup sea de \$5/mes.
+```
+
+Sin el escape, `$1` podría intentar resolverse como una variable de skill inexistente. Con `\$1`, Claude Code interpreta el `$` como texto literal, no como el inicio de una sustitución.
+
+### Invocaciones apiladas de skills (v2.1.199)
+
+Antes de esta versión, si escribías varios skills seguidos en la misma línea, solo el primero se cargaba. Desde v2.1.199, Claude Code soporta **invocaciones apiladas**: puedes encadenar varios skills en un mismo prompt y todos se cargan, hasta un máximo de **5 skills** por invocación.
+
+```
+/security-review /generar-migracion añade columna role a la tabla users
+```
+
+En este ejemplo, Claude Code carga tanto el skill `security-review` como `generar-migracion`, y el texto restante ("añade columna role a la tabla users") se interpreta como contexto adicional disponible para ambos. Esto es útil para workflows donde varios procedimientos deben aplicarse en secuencia a la misma petición, sin tener que invocarlos uno a uno en turnos separados.
+
+**Límite:** un máximo de 5 skills apilados por invocación. Si necesitas encadenar más de 5 procedimientos, considera crear un skill compuesto que internamente documente el orden de los pasos.
 
 ### ${CLAUDE_EFFORT}
 
@@ -574,13 +669,18 @@ Este skill se ejecuta en un subagente (`context: fork`) porque:
 | Skill | Directorio con SKILL.md como entrypoint |
 | Ubicación proyecto | `.claude/skills/nombre-skill/SKILL.md` |
 | Ubicación usuario | `~/.claude/skills/nombre-skill/SKILL.md` |
-| Prioridad | Enterprise > Personal > Proyecto |
+| Skills anidados | `.claude/skills` en subcarpetas del proyecto; colisión de nombre se muestra como `<dir>:<nombre>` (v2.1.178) |
+| Precedencia en `.claude/` anidados | El agente/skill/workflow más cercano al directorio de trabajo actual gana (v2.1.178) |
+| Prioridad (ubicación) | Enterprise > Personal > Proyecto |
 | Carga | Bajo demanda (no al inicio de cada sesión) |
 | `$ARGUMENTS` | Variable sustituida con los argumentos del usuario |
+| `\$` | Escapa un `$` literal antes de un dígito (v2.1.163) |
 | `${CLAUDE_EFFORT}` | Variable con el nivel de effort activo: `low`, `medium`, `high`, `xhigh`, `max` (v2.1.120) |
 | `context: fork` | Ejecuta en subagente (contexto aislado) |
 | `effort` | Nivel de esfuerzo de razonamiento fijo del skill: `"low"`, `"medium"`, `"high"` |
 | `disable-model-invocation` | Si es `true`, devuelve el texto sin ejecutar |
+| `disallowed-tools` | Retira herramientas mientras el skill está activo (v2.1.152) |
+| Invocaciones apiladas | Hasta 5 skills encadenados en un mismo prompt (`/a /b ...`, v2.1.199) |
 | Invocación | `/nombre-del-skill` o Skill tool |
 | Comandos built-in via Skill tool | `/init`, `/review`, `/security-review` invocables automáticamente por el modelo (v2.1.108) |
 | vs CLAUDE.md | CLAUDE.md = siempre; Skills = bajo demanda |

@@ -39,6 +39,52 @@
 | `"Write(*.test.ts)"` | Escribir solo archivos test |
 | `"Bash(git*)"` | Cualquier comando git |
 
+### Sintaxis `Tool(param:value)`: matchear por parámetro de entrada (v2.1.178)
+
+Además de matchear por patrón de argumento posicional (`Bash(npm test:*)`), las reglas de permisos admiten la sintaxis `Tool(param:value)` para matchear por un **parámetro concreto** del input de la tool call. Esto es especialmente útil para herramientas cuyo riesgo depende de un parámetro estructurado y no de un string de comando.
+
+El caso más habitual es controlar qué modelo puede usar un subagente lanzado con la tool `Agent`:
+
+```json
+{
+  "permissions": {
+    "deny": [
+      "Agent(model:opus)"
+    ]
+  }
+}
+```
+
+Esta regla bloquea cualquier subagente que intente lanzarse usando el modelo `opus`, sin afectar a subagentes que usan `sonnet` o `haiku`. Es útil para limitar el coste cuando varios equipos comparten un proyecto y solo ciertos roles deben poder invocar subagentes con el modelo más caro.
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Agent(model:haiku)",
+      "Agent(model:sonnet)"
+    ],
+    "ask": [
+      "Agent(model:opus)"
+    ]
+  }
+}
+```
+
+### Patrón glob en la posición del nombre de herramienta (v2.1.166)
+
+Las reglas `deny` admiten el comodín `"*"` en la posición donde normalmente iría el nombre de la herramienta, para bloquear **todas** las tools de golpe:
+
+```json
+{
+  "permissions": {
+    "deny": ["*"]
+  }
+}
+```
+
+Esto es útil en configuraciones `managed-settings.json` muy restrictivas (por ejemplo, una sesión de solo lectura donde ninguna herramienta debería ejecutarse sin revisión), combinado con excepciones explícitas en `allow` a nivel de proyecto o usuario si la jerarquía lo permite. Recuerda que `deny` siempre gana: un `deny: ["*"]` en `managed-settings.json` bloquea cualquier `allow` de niveles inferiores.
+
 ---
 
 ## Herramientas Disponibles
@@ -54,6 +100,7 @@
 | **WebFetch** | Hacer peticiones HTTP | Medio |
 | **WebSearch** | Buscar en internet | Bajo |
 | **Task** | Lanzar subagentes | Bajo |
+| **Agent** | Lanzar subagentes/teammates con parámetros estructurados (`model`, `name`) — ver [Módulo 09](../../modulo-09-agentes-skills-teams/README.md) | Bajo-Medio (depende del `model`) |
 | **TodoWrite** | Gestionar lista de tareas | Bajo |
 
 ---
@@ -62,11 +109,17 @@
 
 Claude Code tiene 6 modos de permisos oficiales. Se pueden activar con `--permission-mode <modo>` desde CLI, con `Shift+Tab` durante una sesion interactiva, o persistir en `settings.json` con `"permissions": { "defaultMode": "<modo>" }`.
 
-### 1. default (por defecto)
+> **Renombrado v2.1.200:** El modo antes llamado **"default"** ahora se llama **"Manual"** en el CLI, en `--help`, y en las extensiones de VS Code y JetBrains. El flag `--permission-mode manual` es el nombre recomendado desde esta versión; `--permission-mode default` se sigue aceptando por retrocompatibilidad, pero la documentación y la interfaz ya usan "Manual" en todas partes. Si ves referencias a "default" en material más antiguo, es el mismo modo que "Manual".
+
+### 1. Manual (antes "default")
 
 Comportamiento estandar: pide confirmacion para herramientas que modifican (Write, Edit, Bash) segun la configuracion de permisos.
 
 ```bash
+# Nombre actual (recomendado desde v2.1.200)
+claude --permission-mode manual
+
+# Nombre anterior, aceptado por retrocompatibilidad
 claude --permission-mode default
 ```
 
@@ -106,13 +159,15 @@ Este modo es útil cuando se quiere un comportamiento estrictamente controlado: 
 claude -p "ejecuta tests" --dangerously-skip-permissions
 ```
 
-### 6. auto (research preview)
+### 6. auto
 
-Un clasificador de seguridad basado en IA decide automaticamente si permitir cada accion. Requiere modelos **Claude Sonnet 4.6** o **Claude Opus 4.6**. Ver [05-auto-mode.md](05-auto-mode.md) para detalles completos.
+Un clasificador de seguridad basado en IA decide automaticamente si permitir cada accion. Requiere modelos **Claude Sonnet 4.6**, **Claude Opus 4.6** o superior. Ver [05-auto-mode.md](05-auto-mode.md) para detalles completos.
 
 ```bash
 claude --permission-mode auto
 ```
+
+> **Cambio de comportamiento (v2.1.152):** Auto Mode ya **no requiere una pantalla de consentimiento opt-in** antes de activarse. En versiones anteriores, la primera vez que se activaba Auto Mode en una sesión, Claude Code mostraba un aviso que el usuario debía aceptar explícitamente. Desde v2.1.152, `--permission-mode auto` o `"defaultMode": "auto"` activan el modo directamente, igual que cualquier otro modo de permisos. Ver [05-auto-mode.md](05-auto-mode.md) para el detalle completo de esta y otras novedades recientes de Auto Mode.
 
 ---
 

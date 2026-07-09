@@ -75,7 +75,7 @@ echo 'export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1' >> ~/.bashrc
 
 ### Verificar que está Habilitado
 
-Al iniciar Claude Code con la variable habilitada, deberías ver indicadores de que las funciones de equipo están disponibles. Puedes comprobarlo intentando usar el comando `/agents`.
+Al iniciar Claude Code con la variable habilitada, deberías ver indicadores de que las funciones de equipo están disponibles. Puedes comprobarlo pidiéndole a Claude que lance un teammate con nombre (ver más abajo); no existe un comando `/agents` que listar o verificar — ese wizard interactivo fue **eliminado en v2.1.198** y la gestión de equipos es ahora en lenguaje natural.
 
 ---
 
@@ -155,29 +155,35 @@ Los teammates pueden enviarse mensajes entre sí para coordinarse:
 
 ## Crear y Gestionar un Agent Team
 
-### Crear Teammates
+> **Simplificación importante (v2.1.178): ya no hay que crear el team explícitamente.**
+>
+> En versiones anteriores, Agent Teams exponía las tools `TeamCreate` y `TeamDelete` para gestionar el ciclo de vida del equipo como una entidad separada de la sesión. Desde v2.1.178, esas tools han sido **eliminadas**. Con `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` activo, **cada sesión tiene un team implícito** desde el primer momento: no hay que crearlo, solo lanzar teammates dentro de él.
 
-```bash
-# Usando el comando /agents en una sesión interactiva
-> /agents
+### El wizard `/agents` ha sido eliminado (v2.1.198)
 
-# Esto abre un menú para:
-# 1. Crear un nuevo teammate
-# 2. Ver teammates existentes
-# 3. Asignar tareas
-# 4. Eliminar un teammate
+El comando interactivo `/agents` que antes abría un menú para crear, listar y eliminar teammates **ya no existe**. La gestión de agentes personalizados y teammates ahora se hace de dos formas:
+
+1. **Pidiéndoselo a Claude directamente**, en lenguaje natural, dentro de la sesión.
+2. **Editando `.claude/agents/` a mano**, creando o modificando los ficheros `.md` de definición de agente.
+
+Si tienes documentación, capturas de pantalla o scripts que referencian `/agents` como comando interactivo, actualízalos: ese flujo ya no está disponible desde v2.1.198.
+
+### Lanzar Teammates con el parámetro `name` del tool `Agent` (v2.1.178)
+
+En lugar de crear el team explícitamente, simplemente le pides a Claude que lance un teammate con un nombre, usando lenguaje natural. Internamente, Claude Code invoca el tool `Agent` con el parámetro `name`, y ese teammate queda registrado en el team implícito de la sesión:
+
+```
+Lanza un teammate llamado "frontend" especializado en React/TypeScript
+que trabaje solo en src/frontend/ y src/components/, y otro llamado
+"backend" especializado en Python/FastAPI que trabaje solo en src/api/
+y src/services/. Coordínalos para implementar el dashboard de estadísticas.
 ```
 
-### Desde la Línea de Comandos
+No hay un comando `TeamCreate` previo que ejecutar: el team existe implícitamente en cuanto la sesión tiene `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` activo, y el primer teammate nombrado que se lanza ya forma parte de él.
 
-```bash
-# Iniciar Claude Code con agentes predefinidos
-claude --agent frontend-dev --agent backend-dev --agent test-runner
-```
+### Definir Teammates con Archivos (sigue vigente)
 
-### Definir Teammates con Archivos
-
-Puedes predefinir tus teammates en `.claude/agents/`:
+Puedes seguir predefiniendo tus teammates como agentes personalizados en `.claude/agents/`, y pedirle a Claude que los use como teammates con nombre:
 
 ```
 .claude/
@@ -187,10 +193,35 @@ Puedes predefinir tus teammates en `.claude/agents/`:
     test-writer.md
 ```
 
-Y lanzarlos como equipo:
+```
+Usa los agentes definidos en .claude/agents/ (frontend-dev, backend-dev,
+test-writer) como teammates con esos mismos nombres para implementar
+el CRUD de productos.
+```
+
+### Desde la Línea de Comandos
+
+```bash
+# Iniciar Claude Code con agentes predefinidos precargados como candidatos a teammate
+claude --agent frontend-dev --agent backend-dev --agent test-runner
+```
+
+El flag `--agents nombre1,nombre2` de versiones anteriores para lanzar directamente un equipo desde CLI sigue funcionando como atajo, pero el mecanismo subyacente ya no depende de `TeamCreate`: simplemente precarga esos agentes como teammates disponibles en el team implícito de la sesión.
 
 ```bash
 claude --agents frontend-dev,backend-dev,test-writer
+```
+
+### Finalizar teammates
+
+Como `/agents` ya no existe, para finalizar un teammate se lo pides a Claude directamente:
+
+```
+Finaliza el teammate "frontend", ya no tiene tareas pendientes.
+```
+
+```
+Finaliza todos los teammates del equipo, la feature ya está completa.
 ```
 
 ---
@@ -264,6 +295,23 @@ brew install tmux
 # Al lanzar el equipo, especificar el modo de display
 claude --agents frontend-dev,backend-dev --teammate-mode tmux
 ```
+
+### Modo iTerm2 (v2.1.186)
+
+En macOS con iTerm2 como terminal, el setting `teammateMode: "iterm2"` abre cada teammate en una **pestaña o panel nativo de iTerm2** en lugar de un panel de tmux, aprovechando la integración de scripting de iTerm2:
+
+```json
+{
+  "teammateMode": "iterm2"
+}
+```
+
+```bash
+# Equivalente por flag de CLI
+claude --agents frontend-dev,backend-dev --teammate-mode iterm2
+```
+
+**Cuándo preferir iTerm2 sobre tmux:** si ya trabajas en iTerm2 de forma habitual, este modo evita añadir tmux como dependencia adicional y usa los paneles/pestañas nativos de la aplicación, con los atajos de teclado que ya conoces de iTerm2 en lugar de los de tmux. Solo está disponible en macOS con iTerm2 instalado.
 
 ---
 
@@ -409,14 +457,14 @@ Teammate C: Haiku   (tareas simples, formateo, búsqueda)
 
 ### 3. Limpiar Equipos al Terminar
 
-No dejes teammates corriendo sin tareas. Cierra el equipo cuando el trabajo esté completo:
+No dejes teammates corriendo sin tareas. Cierra el equipo cuando el trabajo esté completo pidiéndoselo a Claude directamente (el wizard `/agents dismiss` de versiones anteriores ya no existe, ver más arriba):
 
-```bash
-# Finalizar un teammate específico
-> /agents dismiss frontend-dev
+```
+Finaliza el teammate "frontend-dev", ya no tiene tareas pendientes.
+```
 
-# Finalizar todo el equipo
-> /agents dismiss-all
+```
+Finaliza todo el equipo, la feature está completa y verificada.
 ```
 
 ### 4. Usar Teams para Trabajo Genuinamente Paralelo
@@ -598,12 +646,17 @@ Como funcionalidad experimental, Agent Teams tiene algunas limitaciones:
 | Concepto | Descripción |
 |----------|-------------|
 | Agent Team | Equipo de agentes que colaboran en paralelo |
+| **Team implícito (v2.1.178)** | Cada sesión con `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` tiene un team implícito; ya no hace falta crearlo explícitamente |
+| `TeamCreate` / `TeamDelete` | **Eliminadas (v2.1.178)**. El team ya no se gestiona como entidad separada |
+| `Agent(name:...)` | Forma de lanzar un teammate: parámetro `name` del tool `Agent` (v2.1.178) |
+| `/agents` (wizard) | **Eliminado (v2.1.198)**. Gestión de agentes/teammates ahora es en lenguaje natural o editando `.claude/agents/` a mano |
 | Team Lead | Agente principal que coordina al equipo |
 | Teammate | Agente especializado con su propio contexto |
 | Shared Task List | Lista de tareas visible para todos los agentes |
 | Mailbox | Sistema de mensajes entre agentes |
 | in-process | Todos en el mismo terminal (por defecto) |
 | tmux | Cada teammate en un panel separado |
+| `teammateMode: "iterm2"` | Cada teammate en pestaña/panel nativo de iTerm2 en macOS (v2.1.186) |
 | Delegate mode | Team Lead asigna tareas autónomamente |
 | Habilitación | `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` |
 | Costo | ~7x más tokens que una sesión estándar |

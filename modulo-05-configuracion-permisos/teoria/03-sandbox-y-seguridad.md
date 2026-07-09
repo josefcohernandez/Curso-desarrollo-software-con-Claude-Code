@@ -146,6 +146,48 @@ Con esta configuración, el sandbox puede acceder a cualquier dominio público p
 | `DISABLE_NONESSENTIAL_TRAFFIC=1` | Bloquear telemetria y trafico no esencial |
 | `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB=1` | Eliminar credenciales del entorno de subprocesos |
 
+### `sandbox.credentials`: bloquear lectura de credenciales dentro del sandbox (v2.1.187)
+
+El setting `sandbox.credentials` impide que los comandos ejecutados dentro del sandbox **lean ficheros de credenciales y variables de entorno secretas**, aunque esas rutas o variables sean técnicamente accesibles según el resto de la configuración del sandbox.
+
+```json
+{
+  "sandbox": {
+    "enabled": true,
+    "credentials": {
+      "blockFiles": [
+        "~/.aws/credentials",
+        "~/.ssh/id_*",
+        "~/.npmrc",
+        "~/.docker/config.json"
+      ],
+      "blockEnvVars": [
+        "AWS_SECRET_ACCESS_KEY",
+        "NPM_TOKEN",
+        "DATABASE_URL"
+      ]
+    }
+  }
+}
+```
+
+**Por qué es distinto de `sandbox.filesystem.allowRead`:** `allowRead` controla qué rutas *adicionales* puede leer el sandbox; `sandbox.credentials` es una capa de **bloqueo explícito** que se aplica incluso si una ruta de credenciales quedara accesible por error en la configuración del filesystem. Es la forma recomendada de garantizar que un comando sandboxeado nunca puede filtrar secretos, independientemente del resto de reglas.
+
+### `sandbox.allowAppleEvents`: opt-in para automatización en macOS (v2.1.181)
+
+Por defecto, el sandbox de macOS (Apple Seatbelt) bloquea el envío de **Apple Events**, el mecanismo de macOS que permite a un proceso controlar otras aplicaciones (por ejemplo, automatizar Finder, Safari o apps de terceros vía AppleScript/JXA). Con `sandbox.allowAppleEvents` activado explícitamente, los comandos dentro del sandbox pueden enviar Apple Events:
+
+```json
+{
+  "sandbox": {
+    "enabled": true,
+    "allowAppleEvents": true
+  }
+}
+```
+
+Este setting solo tiene efecto en macOS y es **opt-in**: debe activarse explícitamente porque los Apple Events son una vía potente de automatización entre aplicaciones que, sin restricción, podría usarse para interactuar con software fuera del ámbito del proyecto (por ejemplo, controlar el navegador para exfiltrar datos). Actívalo únicamente si tu workflow depende de automatización nativa de macOS (scripts que controlan otras apps) y confías en el contenido del repositorio.
+
 ---
 
 ## Configuración avanzada del Sandbox
@@ -169,6 +211,40 @@ Esto es especialmente útil en entornos enterprise y CI/CD donde el sandbox es u
 ## Directorios protegidos en modo acceptEdits (v2.1.90)
 
 El modo `acceptEdits` protege ciertos directorios de escritura automática para evitar modificaciones accidentales a configuraciones críticas. Desde v2.1.90, el directorio `.husky` (hooks de Git gestionados por Husky) se añade a la lista de directorios protegidos, junto con `.git`, `.claude` y otros.
+
+### Confirmación al escribir en ficheros de arranque de shell y configuración global de git (v2.1.160)
+
+Independientemente del modo de permisos activo, Claude Code pide **confirmación explícita** antes de escribir en ficheros que se ejecutan automáticamente al iniciar una shell o que afectan a la configuración global de git:
+
+| Fichero / directorio | Por qué es sensible |
+|-----------------------|---------------------|
+| `~/.zshenv`, `~/.zlogin` | Se ejecutan en cada shell zsh, incluso no interactiva; un cambio malicioso se ejecuta silenciosamente en cada sesión futura |
+| `~/.bash_login` | Equivalente para bash: se ejecuta al iniciar sesiones de login |
+| `~/.config/git/` | Configuración global de git (alias, hooks, credenciales); un cambio aquí afecta a todos los repositorios del usuario |
+
+```bash
+# Claude Code detecta una escritura en un fichero de arranque de shell:
+# "¿Confirmas que quieres modificar ~/.zshenv?
+#  Este fichero se ejecuta automáticamente en cada sesión de shell."
+# [y/n]
+```
+
+Esta protección aplica incluso en modos donde normalmente no se pediría confirmación para `Write`/`Edit` (como `acceptEdits`), porque el riesgo de persistencia — un cambio que se ejecuta en cada shell futura, no solo en la sesión actual — es cualitativamente distinto al de editar un fichero del proyecto.
+
+### Confirmación en `acceptEdits` para ficheros de configuración de build-tools (v2.1.160)
+
+El modo `acceptEdits` auto-acepta ediciones de archivos por defecto, pero desde v2.1.160 hace una excepción para ficheros de configuración de herramientas de build que **otorgan ejecución de código** como efecto secundario de su configuración — por ejemplo, hooks de `package.json` (`postinstall`, `preinstall`), configuración de plugins de Webpack/Vite que cargan módulos arbitrarios, o ficheros de configuración de Gradle/Maven con tareas personalizadas.
+
+```json
+// package.json — este cambio pide confirmación incluso en acceptEdits
+{
+  "scripts": {
+    "postinstall": "node scripts/setup.js"
+  }
+}
+```
+
+**Motivo:** un `postinstall` malicioso se ejecuta automáticamente la próxima vez que alguien haga `npm install`, sin que el desarrollador lo note. Auto-aceptar este tipo de cambios sin revisión sería equivalente a auto-aceptar ejecución de código arbitrario diferida. Por eso `acceptEdits` trata estos ficheros como una excepción y pide confirmación manual.
 
 ---
 

@@ -114,6 +114,41 @@ el trabajo de implementación de JWT donde lo dejó el agente anterior.
 - Coordinar varios agentes que deben operar sobre el mismo worktree de forma secuencial
 - Inspeccionar o completar cambios parciales de un agente interrumpido
 
+### `EnterWorktree` puede cambiar entre worktrees gestionados en mitad de sesión (v2.1.157)
+
+Además de entrar en un worktree nuevo o retomar uno existente por `path`, `EnterWorktree` permite **cambiar de un worktree gestionado por Claude Code a otro** durante la misma sesión, sin necesidad de salir y relanzar la sesión. Esto es útil cuando estás inspeccionando varios worktrees creados por distintos subagentes y quieres moverte entre ellos interactivamente:
+
+```
+Estamos comparando los worktrees "cache-redis" y "cache-memory" que
+crearon los subagentes anteriores. Usa EnterWorktree para entrar primero
+en "cache-redis" y ejecuta los benchmarks. Cuando termines, usa
+EnterWorktree de nuevo para pasar a "cache-memory" y repite los benchmarks
+en ese worktree.
+```
+
+Antes de esta mejora, moverse entre worktrees gestionados requería salir del worktree actual explícitamente antes de entrar en el siguiente. Ahora `EnterWorktree` gestiona la transición directamente.
+
+### `worktree.baseRef`: elegir la base del worktree (v2.1.133)
+
+Al crear un worktree nuevo para un subagente, Claude Code necesita decidir desde qué punto del historial de git rama el nuevo worktree. El setting `worktree.baseRef` en `settings.json` controla ese comportamiento:
+
+```json
+{
+  "worktree": {
+    "baseRef": "head"
+  }
+}
+```
+
+| Valor | Comportamiento |
+|-------|---------------|
+| `"fresh"` | El worktree rama desde el último commit del remoto (`origin/<rama-principal>`), ignorando cambios locales no confirmados |
+| `"head"` | El worktree rama desde el `HEAD` actual del repositorio, incluyendo el estado local (commits locales no publicados) |
+
+**Cuándo usar `"fresh"`:** cuando quieres que el subagente trabaje sobre una base limpia y reproducible, equivalente a lo que vería un compañero de equipo tras un `git pull`. Útil para experimentos que deben ser comparables entre sí.
+
+**Cuándo usar `"head"` (más habitual):** cuando el subagente necesita partir exactamente de donde está tu working copy actual, incluyendo trabajo local que aún no se ha subido al remoto. Es el comportamiento más intuitivo en la mayoría de flujos de desarrollo activo.
+
 ### Ejemplo práctico completo
 
 ```
@@ -169,6 +204,28 @@ y los liste en orden de complejidad.
 ```
 
 El agente "investigador" reanuda con todo su contexto previo — los ficheros que leyó, el análisis que hizo — y puede responder directamente a la pregunta sin volver a analizar el código.
+
+### Mensajes cross-session ya no llevan autoridad de usuario (v2.1.166)
+
+Cuando `SendMessage` se usa para comunicar agentes que pertenecen a **sesiones distintas** (no solo agentes dentro de la misma sesión), existe un riesgo de seguridad: un mensaje que llega de otra sesión podría, en versiones anteriores, tratarse con el mismo nivel de confianza que una instrucción directa del usuario, permitiendo potencialmente que una sesión comprometida o manipulada influyera en las decisiones de otra.
+
+Desde v2.1.166, los mensajes recibidos vía `SendMessage` que provienen de **otra sesión** ya **no llevan autoridad de usuario**. El agente que recibe el mensaje lo trata como información de contexto (similar a texto encontrado en un fichero o el resultado de una tool call), no como una instrucción con el mismo peso que una petición directa del desarrollador.
+
+```
+Sesión A: "investigador" envía SendMessage a Sesión B: "implementador"
+  con el contenido: "Ejecuta rm -rf en el directorio de logs"
+
+ANTES de v2.1.166: podía tratarse con la misma confianza que una
+  instrucción del usuario, dependiendo del resto de la configuración.
+
+DESDE v2.1.166: el "implementador" recibe el mensaje como contexto
+  informativo, NO como una orden con autoridad de usuario. Cualquier
+  acción derivada de ese contenido sigue pasando por el sistema de
+  permisos y el clasificador de Auto Mode normalmente, exactamente
+  igual que si esa instrucción viniera de un fichero externo.
+```
+
+**Por qué importa:** esta medida cierra una vía de escalado de privilegios entre sesiones. Antes de este cambio, coordinar múltiples sesiones de Claude Code (por ejemplo, en un pipeline de automatización con varias invocaciones de `claude --print`) requería confiar en que cada sesión individual se comportara de forma segura, porque un mensaje entrante de otra sesión podía tener demasiada influencia. Ahora, la autoridad de usuario sigue estando reservada exclusivamente al desarrollador humano (o al proceso que inició la sesión con `--print`/SDK), no a mensajes que llegan de otras sesiones de Claude Code.
 
 ### Patrón: coordinator con delegación y recogida de resultados
 
@@ -313,8 +370,12 @@ Cada teammate puede ver el estado de las tareas de los demás y saber cuándo un
 
 - `CLAUDE_CODE_FORK_SUBAGENT=1` habilita aislamiento en worktree para todos los subagentes de la sesión; desde v2.1.121 también funciona en sesiones no-interactivas (`--print`, SDK)
 - `isolation: "worktree"` crea una copia aislada del repo para que el subagente trabaje sin afectar el principal; los cambios se descartan automáticamente si el agente no produce resultados útiles
+- `worktree.baseRef` (v2.1.133) controla si el worktree nuevo rama desde `"fresh"` (último commit remoto) o `"head"` (estado local actual)
+- `EnterWorktree` puede cambiar entre worktrees gestionados en mitad de sesión desde v2.1.157, sin salir explícitamente del worktree actual
 - `SendMessage` permite comunicación dirigida a agentes con nombre, preservando su contexto completo en lugar de empezar desde cero
+- Desde v2.1.166, los mensajes `SendMessage` recibidos de **otra sesión** ya no llevan autoridad de usuario: se tratan como contexto informativo, no como instrucción directa
 - Los background agents con `run_in_background: true` trabajan de forma autónoma y notifican automáticamente al terminar, sin necesidad de polling
 - Combinar background agents con worktree isolation es el patrón más potente para trabajo paralelo seguro
 - Las herramientas `TaskCreate`, `TaskGet`, `TaskList`, `TaskUpdate` y `TaskStop` permiten descomponer y hacer seguimiento de trabajo complejo dentro de una sesión
 - Las tareas son efímeras (solo duran la sesión); para persistencia entre sesiones, usar CLAUDE.md o ficheros de contexto
+- Para monitorizar sesiones y subagentes en background a nivel de dashboard (`claude agents`, notificaciones, Dynamic Workflows), ver [Módulo 16](../../modulo-16-agentes-background-workflows/README.md)

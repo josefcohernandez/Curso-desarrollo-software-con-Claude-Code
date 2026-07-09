@@ -55,7 +55,7 @@ Al completar este módulo, serás capaz de:
 | [04-visual-driven-development.md](teoria/04-visual-driven-development.md) | Visual-Driven Development: de mockup a código | 15 min |
 | [05-voice-y-computer-use.md](teoria/05-voice-y-computer-use.md) | `/voice`, push-to-talk y Remote Control con Computer Use | 15 min |
 | [06-channels.md](teoria/06-channels.md) | Channels: recibir eventos de Telegram, Discord e iMessages en la sesión activa | 16 min |
-| [07-chrome-integration.md](teoria/07-chrome-integration.md) | Chrome Integration: debugging de consola y DOM, test de formularios, extracción de datos | 16 min |
+| [07-chrome-integration.md](teoria/07-chrome-integration.md) | Chrome Integration (GA desde v2.1.198): debugging de consola y DOM, test de formularios, extracción de datos | 16 min |
 
 ### Ejercicios prácticos
 

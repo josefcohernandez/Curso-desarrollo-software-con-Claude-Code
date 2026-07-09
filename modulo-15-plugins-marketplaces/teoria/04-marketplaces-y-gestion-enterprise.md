@@ -18,13 +18,26 @@ El marketplace público de Claude Code es el repositorio centralizado de plugins
 El comando `/plugin` abre una interfaz interactiva con pestañas:
 
 - **Discover**: explorar plugins disponibles, navegar por categorías y ver detalles
-- **Installed**: ver los plugins instalados actualmente
+- **Installed**: ver los plugins instalados actualmente, incluida una subsección **Skills** dedicada (v2.1.186) que lista específicamente los skills aportados por cada plugin instalado, separados de hooks, agentes y servidores MCP
 - **Marketplaces**: gestionar las fuentes de plugins configuradas
 - **Errors**: diagnosticar problemas con plugins instalados
 
 > **Nota:** No existen los comandos `/plugin search`, `/plugin info` ni `/plugin featured` como subcomandos separados. Toda la exploración se realiza navegando las pestañas de la interfaz interactiva `/plugin`.
 
 **Antes de instalar cualquier plugin del marketplace**, revisa especialmente la sección de permisos en la pestaña Discover. Un plugin que solicita acceso a `Bash` sin restricciones tiene capacidad de ejecutar comandos arbitrarios en tu sistema.
+
+### Mejoras de navegación en `/plugin`
+
+Explorar un marketplace con muchos plugins se ha simplificado con dos mejoras de interfaz:
+
+| Mejora | Descripción |
+|--------|-------------|
+| Autocompletado de argumentos (v2.1.157) | Al escribir `/plugin`, los argumentos (nombres de plugin, de marketplace, subcomandos) se autocompletan a medida que escribes, en lugar de tener que recordar el nombre exacto |
+| Barra de búsqueda en Discover (v2.1.172) | La pestaña Discover incluye una barra de búsqueda que filtra los plugins del marketplace por nombre o descripción en tiempo real, útil cuando el marketplace tiene decenas de plugins |
+
+### Previsualizar componentes antes de instalar (v2.1.145)
+
+Antes de instalar un plugin, las pestañas **Discover** y **Browse** de `/plugin` muestran el inventario completo de sus componentes —comandos, agentes, skills, hooks y servidores MCP— directamente en la vista previa, sin necesidad de instalarlo primero ni de recurrir a `claude plugin details` (ver [01-que-son-los-plugins.md](01-que-son-los-plugins.md)). Esto permite evaluar el alcance y los permisos que solicita un plugin antes de comprometerse a instalarlo, reforzando la práctica de revisión de seguridad descrita más abajo en este capítulo.
 
 ### Instalar desde el marketplace
 
@@ -72,6 +85,41 @@ En `.claude/settings.json` (a nivel de usuario o proyecto):
 ```
 
 Desde v2.1.80, los plugins también pueden provenir de la fuente `source: 'settings'`, que indica que el plugin fue configurado directamente en el fichero de settings del usuario o del proyecto (en lugar de instalarse desde un marketplace). Esto aparece en la pestaña **Installed** de `/plugin` para distinguir plugins instalados manualmente vía configuración de los instalados desde un marketplace.
+
+### Omitir Git LFS en marketplaces: `skipLfs` (v2.1.153)
+
+Cuando un marketplace de tipo `github` o `git` incluye ficheros gestionados con Git LFS (Large File Storage) que no son necesarios para cargar los plugins —por ejemplo, assets de documentación o vídeos de demostración—, clonar el repositorio completo puede ser lento e innecesario. La opción `skipLfs` en la configuración del marketplace evita la descarga de los objetos LFS:
+
+```json
+{
+  "extraKnownMarketplaces": [
+    {
+      "source": "github",
+      "repo": "mi-empresa/plugins-marketplace",
+      "skipLfs": true
+    }
+  ]
+}
+```
+
+| Valor de `skipLfs` | Comportamiento al clonar/actualizar el marketplace |
+|----------------------|--------------------------------------------------------|
+| `false` (por defecto) | Se descargan también los objetos Git LFS del repositorio |
+| `true` | Los objetos LFS se omiten; solo se descarga el contenido necesario para descubrir y cargar los plugins |
+
+**Cuándo activarlo**: marketplaces privados que versionan material adicional pesado (vídeos, binarios de ejemplo, datasets de prueba) junto con los plugins, donde ese material no es necesario para que Claude Code descubra y cargue los componentes del plugin.
+
+### Clonar marketplaces vía HTTPS: `CLAUDE_CODE_PLUGIN_PREFER_HTTPS` (v2.1.141)
+
+Por defecto, cuando un marketplace o un plugin se identifica como un repositorio de GitHub (`owner/repo`), Claude Code intenta clonarlo usando **SSH**, lo que requiere que el desarrollador tenga una clave SSH configurada y añadida a su cuenta de GitHub. En entornos donde SSH está bloqueado por política de red (proxies corporativos, firewalls que solo permiten tráfico HTTPS saliente), esto impide instalar plugins o marketplaces.
+
+La variable de entorno `CLAUDE_CODE_PLUGIN_PREFER_HTTPS` fuerza el clonado vía HTTPS en su lugar:
+
+```bash
+export CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1
+```
+
+**Cuándo activarla**: redes corporativas que bloquean el puerto SSH (22) saliente pero permiten HTTPS (443), o equipos que prefieren autenticarse con un token de acceso personal de GitHub en lugar de gestionar claves SSH en cada máquina de desarrollo. Es recomendable fijar esta variable a nivel de managed settings (`env` en `managed-settings.json`) en organizaciones donde todo el tráfico de red pasa por un proxy HTTPS.
 
 Con esta configuración, los desarrolladores de la organización pueden explorar e instalar plugins internos con el mismo flujo que el marketplace público:
 
@@ -215,9 +263,13 @@ export CLAUDE_CODE_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE=1
 
 ## Resumen
 
-- El marketplace público se explora con `/plugin` (interfaz interactiva con pestañas: Discover, Installed, Marketplaces, Errors)
+- El marketplace público se explora con `/plugin` (interfaz interactiva con pestañas: Discover, Installed —con subsección Skills desde v2.1.186—, Marketplaces, Errors)
+- Desde v2.1.145, Discover y Browse muestran el inventario de comandos, agentes, skills, hooks y servidores MCP de cada plugin antes de instalarlo
+- El autocompletado de argumentos (v2.1.157) y la barra de búsqueda en Discover (v2.1.172) simplifican la exploración de marketplaces grandes
 - Los plugins se instalan con `claude plugin install <nombre>@<marketplace>`. El marketplace oficial es `claude-plugins-official`
 - Los marketplaces privados se añaden con `/plugin marketplace add owner/repo` o con `extraKnownMarketplaces` en `.claude/settings.json`
+- `skipLfs` (v2.1.153) evita descargar objetos Git LFS innecesarios al clonar un marketplace `github`/`git`
+- `CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1` (v2.1.141) fuerza el clonado de marketplaces y plugins vía HTTPS en redes que bloquean SSH saliente
 - Los plugins `managed` se distribuyen a todos los usuarios de la organización y no pueden desinstalarse individualmente
 - `blockedMarketplaces` bloquea fuentes de plugins específicas; `strictKnownMarketplaces` controla qué marketplaces pueden añadirse
 - Antes de instalar un plugin de terceros, revisa el origen, los permisos solicitados y el código de los hooks

@@ -55,7 +55,7 @@ El manifest define únicamente la identidad del plugin. Reside dentro del direct
 }
 ```
 
-El manifest solo contiene estos cuatro campos: `name`, `description`, `version` y `author`.
+El manifest contiene cuatro campos de identidad: `name`, `description`, `version` y `author`. Además, admite la clave opcional `defaultEnabled` (ver más abajo) para controlar la activación por defecto.
 
 Los componentes del plugin (skills, hooks, agentes, servidores MCP) **no se declaran en el manifest**. Se descubren automáticamente por la estructura de directorios:
 
@@ -64,7 +64,45 @@ Los componentes del plugin (skills, hooks, agentes, servidores MCP) **no se decl
 - `hooks/` - El archivo `hooks.json` define los hooks del plugin
 - `commands/` - Comandos personalizados del plugin
 
-> **Importante:** No uses campos como `dependencies`, `configuration`, `components`, `engines` o `license` en el manifest. El formato oficial solo reconoce los cuatro campos indicados.
+> **Importante:** No uses campos como `dependencies`, `configuration`, `components`, `engines` o `license` en el manifest. El formato oficial solo reconoce `name`, `description`, `version`, `author` y, opcionalmente, `defaultEnabled`.
+
+---
+
+## Controlar la Activación por Defecto: `defaultEnabled` (v2.1.154)
+
+Por defecto, cuando un usuario instala un plugin, todos sus componentes (skills, hooks, subagentes) quedan **activos inmediatamente**. Para plugins que añaden coste, alcance o riesgo que el usuario debería aceptar explícitamente —por ejemplo, un plugin que se conecta a un servicio externo de pago, o uno con hooks que interceptan comandos sensibles— el manifest puede declarar `defaultEnabled: false`:
+
+```json
+{
+  "name": "conector-facturacion-externa",
+  "description": "Sincroniza datos de facturación con el proveedor externo Stripe Billing",
+  "version": "1.0.0",
+  "author": "equipo-finanzas@empresa.com",
+  "defaultEnabled": false
+}
+```
+
+Con `defaultEnabled: false`, el plugin se instala pero permanece **deshabilitado** hasta que el usuario lo activa explícitamente:
+
+```bash
+# Activar un plugin que se instaló deshabilitado
+claude plugin enable conector-facturacion-externa
+
+# O desde la interfaz interactiva
+/plugin
+```
+
+| Valor de `defaultEnabled` | Comportamiento tras `claude plugin install` |
+|----------------------------|-----------------------------------------------|
+| No declarado (comportamiento por defecto) | El plugin queda activo inmediatamente |
+| `false` | El plugin se instala pero permanece deshabilitado hasta activación manual |
+| `true` | Equivalente a no declararlo: activo inmediatamente |
+
+**Persistencia**: una vez que el plugin se instala con `defaultEnabled: false`, ese estado inicial (deshabilitado) persiste incluso si una versión posterior del plugin cambia el valor de `defaultEnabled` en el manifest. Esto evita que una actualización active retroactivamente un componente que el usuario decidió no usar.
+
+**Cuándo usarlo**: plugins que añaden coste recurrente (conectores a APIs de pago), plugins con hooks que interceptan operaciones sensibles (deploys, pagos, borrado de datos), o cualquier capacidad que el equipo de plataforma quiere distribuir ampliamente pero activar solo bajo consentimiento explícito del usuario.
+
+> **Nota:** Este campo requiere Claude Code v2.1.154 o superior. En versiones anteriores, el campo se ignora y el plugin se activa inmediatamente al instalarse.
 
 ---
 
@@ -124,6 +162,21 @@ Puntos clave sobre los monitors:
 ## Empaquetar Skills Existentes
 
 Si ya tienes skills en `.claude/skills/` de tu proyecto, puedes empaquetarlos en un plugin. Crea una subcarpeta dentro de `skills/` con el nombre del skill y coloca el archivo `SKILL.md` dentro. El plugin descubrirá automáticamente todos los skills por la estructura de directorios; no es necesario declararlos en el manifest.
+
+### `SKILL.md` en la raíz del plugin (v2.1.142)
+
+Para plugins que empaquetan un **único skill**, no siempre es necesario crear el subdirectorio `skills/<nombre>/`. Desde v2.1.142, Claude Code también detecta como skill un fichero `SKILL.md` colocado directamente en la **raíz** del plugin, sin subdirectorio intermedio:
+
+```
+mi-plugin-simple/
+├── .claude-plugin/
+│   └── plugin.json
+└── SKILL.md          # Detectado directamente como skill del plugin (v2.1.142)
+```
+
+Esto simplifica la estructura de plugins de un solo skill, evitando el nivel de anidación `skills/<nombre>/SKILL.md` cuando el plugin no necesita agrupar varios skills. Si el plugin crece y necesita más de un skill, sigue siendo necesario migrar a la estructura `skills/<nombre>/SKILL.md` por cada skill adicional, ya que un único `SKILL.md` en la raíz solo puede representar un skill.
+
+> **Nota:** Esta detección requiere Claude Code v2.1.142 o superior. En versiones anteriores, un `SKILL.md` en la raíz del plugin se ignora si no está dentro de `skills/<nombre>/`.
 
 Los campos disponibles en el frontmatter YAML de un `SKILL.md` son:
 
@@ -499,13 +552,15 @@ claude plugin install deploy-safe@claude-plugins-official
 
 ## Resumen
 
-- La estructura mínima de un plugin es `.claude-plugin/plugin.json` (con 4 campos: name, description, version, author) más al menos un subdirectorio con un componente
+- La estructura mínima de un plugin es `.claude-plugin/plugin.json` (con 4 campos: name, description, version, author, más el opcional `defaultEnabled`) más al menos un subdirectorio con un componente
 - El manifest solo declara la identidad del plugin; los componentes se descubren automáticamente por estructura de directorios
 - Los skills se colocan en `skills/<nombre-skill>/SKILL.md`, los hooks en `hooks/hooks.json`, los agentes en `agents/`
+- Para plugins de un único skill, `SKILL.md` en la **raíz** del plugin también se detecta automáticamente, sin necesidad del subdirectorio `skills/<nombre>/` (v2.1.142+)
+- `defaultEnabled: false` (v2.1.154) hace que el plugin se instale deshabilitado, requiriendo `claude plugin enable` explícito antes de que sus componentes se activen
 - Los servidores MCP se descubren automáticamente, no se declaran en el manifest
 - Los plugins pueden distribuir temas de interfaz en el directorio `themes/` (ficheros JSON); el usuario los activa con `/theme` (v2.1.118+)
 - `claude plugin tag v1.2.0` crea un git tag de release con validación de versión semántica integrada (v2.1.118+)
-- El ciclo de desarrollo local es: crear estructura -> probar con `claude --plugin-dir ./mi-plugin` -> iterar
+- El ciclo de desarrollo local es: crear estructura -> probar con `claude --plugin-dir ./mi-plugin` -> iterar (o iniciar desde cero con `claude plugin init <nombre>`, v2.1.157)
 - El ciclo de release es: `claude plugin validate` → `claude plugin tag` → `git push origin --tags`
 - `claude plugin tag` (v2.1.118) crea el git tag `v{version}` a partir del campo `version` del manifest, validando que sigue semver
 - La publicación en el marketplace se hace a través del formulario web en platform.claude.com (no existe comando CLI para publicar)

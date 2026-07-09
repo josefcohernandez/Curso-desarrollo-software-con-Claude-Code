@@ -231,6 +231,75 @@ Desde v2.1.117, las opciones `blockedMarketplaces` y `strictKnownMarketplaces` s
 >
 > **Desde v2.1.117**: Las restricciones se comprueban también en el momento de la operación de instalación o gestión, de modo que el bloqueo es efectivo independientemente de cómo se intente la instalación.
 
+### Marketplaces sugeridos: `pluginSuggestionMarketplaces` (v2.1.152)
+
+Además de bloquear o restringir marketplaces, los administradores pueden controlar de qué fuentes Claude Code **sugiere proactivamente** plugins al usuario a través de tips contextuales (por ejemplo, cuando detecta un patrón de trabajo que un plugin conocido resolvería). El setting `pluginSuggestionMarketplaces` define la lista de marketplaces cuyos plugins pueden aparecer en estas sugerencias:
+
+```json
+{
+  "pluginSuggestionMarketplaces": [
+    "claude-plugins-official",
+    "mi-empresa/plugins-marketplace"
+  ]
+}
+```
+
+| Sin `pluginSuggestionMarketplaces` | Con `pluginSuggestionMarketplaces` |
+|-------------------------------------|--------------------------------------|
+| Claude Code puede sugerir plugins de cualquier marketplace conocido (público o `extraKnownMarketplaces`) | Las sugerencias proactivas se limitan a los marketplaces listados explícitamente |
+
+**Diferencia con `blockedMarketplaces`/`strictKnownMarketplaces`**: estas dos opciones controlan qué se puede **instalar**; `pluginSuggestionMarketplaces` controla qué se puede **sugerir** de forma proactiva. Un marketplace puede estar permitido para instalación manual pero excluido de las sugerencias automáticas, por ejemplo si contiene plugins experimentales que el equipo de plataforma no quiere promocionar activamente a todos los desarrolladores.
+
+> Para el resto de novedades de plugins de esta versión (auto-carga desde `.claude/skills`, `claude plugin init`, `defaultEnabled`, dependencias entre plugins), consulta el [Módulo 15: Plugins y Marketplaces](../../modulo-15-plugins-marketplaces/README.md).
+
+---
+
+## Requisitos de versión mínima/máxima: `requiredMinimumVersion` y `requiredMaximumVersion` (v2.1.163)
+
+Al igual que `forceRemoteSettingsRefresh` bloquea el arranque si las políticas no están frescas, los managed settings `requiredMinimumVersion` y `requiredMaximumVersion` bloquean el arranque de Claude Code si el binario instalado está **fuera del rango de versión permitido** por la organización:
+
+```json
+{
+  "requiredMinimumVersion": "2.1.150",
+  "requiredMaximumVersion": "2.1.210"
+}
+```
+
+| Escenario | Comportamiento |
+|-----------|----------------|
+| Versión instalada por debajo de `requiredMinimumVersion` | Claude Code **rechaza arrancar** con un mensaje indicando la versión mínima requerida |
+| Versión instalada por encima de `requiredMaximumVersion` | Claude Code **rechaza arrancar**; útil para congelar una versión validada mientras se completa la evaluación de seguridad de una release nueva |
+| Versión dentro del rango | Arranque normal |
+
+**Casos de uso**:
+
+- **Forzar actualización de seguridad**: si se descubre una vulnerabilidad corregida en una versión concreta, `requiredMinimumVersion` garantiza que ningún desarrollador siga usando una versión vulnerable.
+- **Congelar una versión validada**: en entornos regulados donde cada versión de Claude Code pasa por un proceso de aprobación de seguridad, `requiredMaximumVersion` impide que los desarrolladores actualicen automáticamente a una versión aún no aprobada, incluso si `claude update` la descarga.
+- **Ventana de compatibilidad conocida**: combinar ambos valores para garantizar que toda la organización opera dentro de un rango de versiones probado con la infraestructura interna (Gateway, servidores MCP corporativos, etc.).
+
+Igual que el resto de managed settings, estas claves solo tienen efecto cuando se definen en `managed-settings.json` o en un fragmento de `managed-settings.d/`; no pueden sobrescribirse desde `settings.json` de proyecto o usuario.
+
+---
+
+## Política de fusión entre niveles: `parentSettingsBehavior` (v2.1.133)
+
+Por defecto, la jerarquía de settings de Claude Code fusiona las configuraciones de cada nivel (managed → proyecto → usuario) según las reglas estándar: los arrays de permisos se concatenan, las claves escalares se sobrescriben por el nivel de mayor prioridad. El managed setting `parentSettingsBehavior` permite a los administradores **cambiar esta política de fusión** para toda la organización, endureciendo o relajando cómo interactúan los niveles inferiores con las políticas gestionadas.
+
+```json
+{
+  "parentSettingsBehavior": "strict"
+}
+```
+
+| Valor | Efecto |
+|-------|--------|
+| `merge` (comportamiento por defecto) | Los niveles de proyecto y usuario pueden añadir configuración adicional que se fusiona con la managed, sin contradecir los `deny` |
+| `strict` | Los niveles de proyecto y usuario solo pueden **restringir** aún más la configuración managed; cualquier intento de ampliar permisos o cambiar valores protegidos se ignora silenciosamente |
+
+**Cuándo usar `strict`**: organizaciones con requisitos de cumplimiento donde incluso la posibilidad teórica de que un `settings.json` de proyecto amplíe una política gestionada (por ejemplo, añadiendo un `allow` que no contradice ningún `deny` explícito pero sí amplía la superficie de permisos) representa un riesgo inaceptable. Con `parentSettingsBehavior: strict`, la política gestionada se convierte en un techo real, no solo en una base con `deny` prioritarios.
+
+> Esta clave es de nivel **admin-tier**: solo tiene efecto si se define en las managed settings del sistema. Definirla en `settings.json` de proyecto o usuario no tiene ningún efecto.
+
 ---
 
 ## Política fail-closed: `forceRemoteSettingsRefresh` (v2.1.92)
@@ -311,3 +380,6 @@ Los administradores IT que ya gestionan las políticas de Claude Code en Windows
 - Ideal para organizaciones multi-equipo donde diferentes departamentos gestionan diferentes aspectos de la configuración
 - Desde v2.1.117, `blockedMarketplaces` y `strictKnownMarketplaces` se aplican en las operaciones de instalación de plugins, no solo en la visualización del marketplace
 - `wslInheritsWindowsSettings: true` permite que Claude Code en WSL herede las políticas gestionadas desde el lado Windows, simplificando la gestión centralizada en entornos mixtos
+- `pluginSuggestionMarketplaces` (v2.1.152) limita de qué marketplaces Claude Code puede sugerir plugins de forma proactiva, independientemente de qué marketplaces estén permitidos para instalación manual
+- `requiredMinimumVersion`/`requiredMaximumVersion` (v2.1.163) bloquean el arranque de Claude Code si el binario instalado está fuera del rango de versión aprobado por la organización
+- `parentSettingsBehavior: strict` (v2.1.133) convierte la política gestionada en un techo real: los niveles de proyecto y usuario solo pueden restringir, nunca ampliar, la configuración managed

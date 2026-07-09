@@ -196,3 +196,7 @@ La integración de Slack es más útil cuando el canal tiene un propósito claro
 - Solo funciona en **canales**, no en DMs, y requiere plan **Team o Enterprise** con GitHub conectado.
 - **Claude Code en la web** (claude.ai) ofrece una sesión de Claude Code sin instalación local, útil para revisar código desde máquinas sin acceso de instalación.
 - La selección automática de repositorio usa el contexto del canal y del hilo; se puede corregir con el botón **Change Repo** o mencionando el repositorio explícitamente en el mensaje.
+
+## Siguiente paso
+
+Continúa con [09-goal-y-self-hosted-runners.md](09-goal-y-self-hosted-runners.md) para aprender a fijar condiciones de finalización en tareas largas con `/goal` y a configurar hooks de ciclo de vida en self-hosted runners.

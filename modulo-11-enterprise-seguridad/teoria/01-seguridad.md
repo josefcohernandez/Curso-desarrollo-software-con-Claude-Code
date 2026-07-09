@@ -344,6 +344,51 @@ Para restringir el acceso a red del sandbox, usa la configuración de dominios p
 
 El sandbox se activa para comandos Bash ejecutados por Claude. No afecta a la lectura de archivos ni a las operaciones MCP.
 
+#### `sandbox.credentials` desde la perspectiva enterprise (v2.1.187)
+
+El [Módulo 05](../../modulo-05-configuracion-permisos/teoria/03-sandbox-y-seguridad.md) explica en detalle el setting `sandbox.credentials`, que bloquea la lectura de ficheros de credenciales (`blockFiles`) y variables de entorno secretas (`blockEnvVars`) dentro del sandbox, incluso si esas rutas quedaran técnicamente accesibles por el resto de la configuración del filesystem:
+
+```json
+{
+  "sandbox": {
+    "enabled": true,
+    "credentials": {
+      "blockFiles": [
+        "~/.aws/credentials",
+        "~/.ssh/id_*",
+        "~/.npmrc",
+        "~/.docker/config.json"
+      ],
+      "blockEnvVars": [
+        "AWS_SECRET_ACCESS_KEY",
+        "NPM_TOKEN",
+        "DATABASE_URL"
+      ]
+    }
+  }
+}
+```
+
+Desde la perspectiva enterprise, lo relevante es que este bloque puede fijarse a nivel de **managed settings** (`managed-settings.json` o un fragmento de `managed-settings.d/`, ver [04-managed-settings-d.md](04-managed-settings-d.md)), de modo que ningún proyecto ni usuario individual pueda reducir la lista de bloqueo. Al igual que con las reglas `deny` del sistema de permisos, un `sandbox.credentials` definido a nivel managed tiene prioridad: los niveles de proyecto y usuario pueden **añadir** más rutas o variables a bloquear, pero no pueden **eliminar** las impuestas centralmente. Esto convierte `sandbox.credentials` en la base recomendada de cualquier política gestionada de sandbox: define ahí la lista mínima de credenciales que nunca deben ser legibles por comandos sandboxeados en toda la organización (claves cloud, tokens de registries privados, credenciales de bases de datos de producción).
+
+#### Rutas de herramientas del sandbox en Linux: `sandbox.bwrapPath` y `sandbox.socatPath` (v2.1.133)
+
+En Linux, el sandbox de Claude Code se apoya en herramientas del sistema —`bubblewrap` (`bwrap`) para el aislamiento de namespaces y `socat` para el proxy de red controlado. Por defecto, Claude Code busca estos binarios en las rutas estándar del `PATH`. Las claves managed settings `sandbox.bwrapPath` y `sandbox.socatPath` permiten a los administradores fijar rutas explícitas a estos ejecutables:
+
+```json
+{
+  "sandbox": {
+    "enabled": true,
+    "bwrapPath": "/opt/empresa/tools/bwrap",
+    "socatPath": "/opt/empresa/tools/socat"
+  }
+}
+```
+
+**Cuándo es necesario**: en imágenes de contenedor endurecidas (hardened) o en entornos donde los binarios del sistema no están en las rutas por defecto —por ejemplo, cuando el equipo de seguridad distribuye versiones auditadas de `bwrap` y `socat` en una ruta controlada en lugar de depender del paquete del sistema operativo. Sin esta configuración, si Claude Code no encuentra los binarios en el `PATH`, el sandbox de Linux no puede activarse y las sesiones podrían ejecutarse sin aislamiento si no hay una política que lo impida explícitamente.
+
+> **Nota**: Estas claves solo tienen efecto en Linux. macOS usa Apple Seatbelt (sandbox nativo del sistema) y no requiere `bwrap` ni `socat`.
+
 ---
 
 ## El sistema de permisos como capa de seguridad
@@ -478,6 +523,8 @@ Un servidor MCP comprometido podría:
 | Archivos maliciosos | Inyección de prompt | Revisión de fuentes externas, permisos |
 | MCP servers | Servidores comprometidos | Solo fuentes confiables, revisión de código |
 | Sandbox | Ejecución sin restricciones | `sandbox.enabled: true` en settings.json o `/sandbox` |
+| Filtración de credenciales en sandbox | Lectura de ficheros/env vars secretos por comandos sandboxeados | `sandbox.credentials` fijado a nivel managed (v2.1.187) |
+| Binarios de sandbox no encontrados en Linux | `bwrap`/`socat` fuera del `PATH` en imágenes endurecidas | `sandbox.bwrapPath` / `sandbox.socatPath` (v2.1.133) |
 | Código generado | Errores de seguridad en el código | Revisión humana obligatoria |
 
 ---

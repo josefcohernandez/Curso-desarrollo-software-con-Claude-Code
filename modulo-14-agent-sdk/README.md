@@ -72,7 +72,7 @@ Al terminar este módulo serás capaz de:
 | Bucle agéntico | Claude decide qué herramientas usar, las ejecuta y observa resultados automáticamente |
 | `ClaudeAgentOptions` | Configuración del agente: herramientas, permisos, system prompt, MCP y hooks |
 | `allowed_tools` | Lista de herramientas preaprobadas que el agente puede usar sin pedir permiso |
-| `permission_mode` | Nivel de supervisión humana: `acceptEdits`, `bypassPermissions`, `default` |
+| `permission_mode` | Nivel de supervisión humana: `acceptEdits`, `bypassPermissions`, `manual` (antes `default`) |
 | `AgentDefinition` | Definición de un subagente especializado |
 | `HookMatcher` | Asocia callbacks a eventos del ciclo de vida dentro del SDK |
 | `resume` | Reanuda una sesión existente por su ID para mantener contexto entre ejecuciones |

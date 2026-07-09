@@ -1,5 +1,7 @@
 # Chrome Integration: Debugging y Extracción de Datos desde el Navegador
 
+> **Estado: Disponibilidad General (GA) desde v2.1.198.** Chrome Integration ya no requiere activación experimental ni consideraciones de disponibilidad limitada: es una capacidad estable del producto, lista para flujos de trabajo diarios.
+
 Claude Code puede trabajar con tu navegador Chrome o Edge en tiempo real: leer errores de consola, inspeccionar el DOM, rellenar formularios y extraer datos de páginas web. Este capítulo explica cómo activar la integración con Chrome y cómo aprovecharla en flujos de desarrollo y testing.
 
 ---
@@ -234,6 +236,7 @@ Algunas páginas bloquean la captura de pantalla por CSP (Content Security Polic
 
 ## Puntos clave
 
+- Chrome Integration alcanzó **Disponibilidad General (GA)** en v2.1.198: es una capacidad estable, no experimental
 - La extensión "Claude in Chrome" (v1.0.36+) es el requisito previo; sin ella el flag `--chrome` no tiene efecto
 - Se activa con `--chrome` al iniciar, `/chrome` durante la sesión, o estableciendo `chromeIntegrationEnabled: true` en los settings
 - Claude puede leer errores de consola, inspeccionar el DOM, rellenar formularios, extraer datos y grabar GIFs

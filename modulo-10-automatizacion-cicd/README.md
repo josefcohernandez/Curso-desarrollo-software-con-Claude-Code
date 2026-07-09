@@ -2,9 +2,9 @@
 
 ## Descripción general
 
-Este módulo cubre cómo integrar Claude Code en pipelines de automatización, sistemas de integración continua (CI) y despliegue continuo (CD). Aprenderemos a usar Claude Code en modo no interactivo, a configurar GitHub Actions con la acción oficial `claude-code-action@v1`, a crear workflows avanzados (revisión por rutas, tareas programadas y triaje de issues), a crear scripts de automatización que potencien los flujos de trabajo de tu equipo, y a aprovechar los servicios cloud de Anthropic (Routines, Code Review managed service, integraciones Slack y web) para automatizar sin infraestructura propia.
+Este módulo cubre cómo integrar Claude Code en pipelines de automatización, sistemas de integración continua (CI) y despliegue continuo (CD). Aprenderemos a usar Claude Code en modo no interactivo, a configurar GitHub Actions con la acción oficial `claude-code-action@v1`, a crear workflows avanzados (revisión por rutas, tareas programadas y triaje de issues), a crear scripts de automatización que potencien los flujos de trabajo de tu equipo, a aprovechar los servicios cloud de Anthropic (Routines, Code Review managed service, integraciones Slack y web) para automatizar sin infraestructura propia, y a cerrar tareas largas de forma autónoma con `/goal` y gestionar el ciclo de vida de self-hosted runners.
 
-**Tiempo estimado:** 3 horas y 20 minutos
+**Tiempo estimado:** 3 horas y 40 minutos
 
 ---
 
@@ -25,6 +25,8 @@ Al completar este módulo, serás capaz de:
 11. **Crear y configurar Routines** cloud con triggers de schedule, API HTTP y GitHub events.
 12. **Activar el Code Review managed service** y personalizar el comportamiento con `REVIEW.md`.
 13. **Invocar Claude Code desde Slack** con `@Claude` y desde la interfaz web de claude.ai.
+14. **Fijar condiciones de finalización con `/goal`** para que Claude complete tareas largas a través de múltiples turnos sin supervisión constante.
+15. **Configurar el hook `post-session`** en self-hosted runners para preservar artefactos y logs antes de que se destruya el workspace efímero.
 
 ---
 
@@ -42,6 +44,7 @@ Al completar este módulo, serás capaz de:
 | [06-routines-cloud.md](teoria/06-routines-cloud.md) | Routines: automatización cloud sin sesión local | 20 min |
 | [07-code-review-managed.md](teoria/07-code-review-managed.md) | Code Review managed service: revisión de PRs sin CI propio | 20 min |
 | [08-integraciones-slack-y-web.md](teoria/08-integraciones-slack-y-web.md) | Claude Code en Slack y en la web | 20 min |
+| [09-goal-y-self-hosted-runners.md](teoria/09-goal-y-self-hosted-runners.md) | `/goal`: cierre de tareas largas y hook `post-session` en self-hosted runners | 20 min |
 
 ### Ejercicios prácticos
 
@@ -104,6 +107,9 @@ Al completar este módulo, serás capaz de:
 | **`REVIEW.md`** | Fichero en la raíz del repo que personaliza el foco y el idioma del managed service |
 | **Findings** | Hallazgos del managed service: `Important`, `Nit` y `Pre-existing` |
 | **`@Claude` en Slack** | Integración que permite invocar Claude Code desde un canal de Slack |
+| **`/goal`** | Fija una condición de finalización que Claude verifica tras cada turno con un modelo clasificador rápido; sigue trabajando hasta cumplirla |
+| **Self-hosted runner** | Proceso que ejecuta sesiones de Claude Code en infraestructura propia dentro de workspaces efímeros |
+| **Hook `post-session`** | Hook de ciclo de vida del self-hosted runner que se ejecuta tras terminar la sesión y antes de destruir el workspace |
 
 ---
 
@@ -120,7 +126,9 @@ Al completar este módulo, serás capaz de:
    |
 5. Estudiar servicios cloud: Routines, Code Review managed, Slack/web (60 min)
    |
-6. Adaptar los workflows de ejemplo a tu proyecto real
+6. Estudiar `/goal` y self-hosted runners (20 min)
+   |
+7. Adaptar los workflows de ejemplo a tu proyecto real
 ```
 
 ---
@@ -141,3 +149,11 @@ Los scripts de automatización pueden adaptarse para analizar código en cualqui
 - [Guía de seguridad de claude-code-action](https://github.com/anthropics/claude-code-action/blob/main/docs/security.md)
 - [GitHub Actions - Documentación](https://docs.github.com/en/actions)
 - [Claude Code Action en GitHub Marketplace](https://github.com/marketplace/actions/claude-code-action-official)
+
+---
+
+## Navegación
+
+| Anterior | Siguiente |
+|----------|-----------|
+| [Módulo 09: Subagentes, Skills y Agent Teams](../modulo-09-agentes-skills-teams/README.md) | [Módulo 11: Enterprise y Seguridad](../modulo-11-enterprise-seguridad/README.md) |

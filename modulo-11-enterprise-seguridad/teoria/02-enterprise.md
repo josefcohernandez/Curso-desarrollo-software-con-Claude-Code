@@ -227,6 +227,145 @@ Limita qué pueden hacer los servidores MCP:
 }
 ```
 
+### Conectores cloud MCP de claude.ai: `allowAllClaudeAiMcps` (v2.1.149)
+
+Además de los servidores MCP declarados explícitamente en `mcpServers`, claude.ai ofrece **conectores cloud MCP** preconfigurados (Google Drive, Jira, Notion, Linear, y otros) que el usuario puede activar desde su cuenta. Por defecto, en un despliegue enterprise con managed settings, estos conectores cloud no están disponibles: solo se cargan los servidores MCP definidos explícitamente en `managed-mcp.json`.
+
+El managed setting `allowAllClaudeAiMcps` permite que los conectores cloud MCP configurados en la cuenta de claude.ai del usuario se carguen **junto con** los servidores definidos en `managed-mcp.json`, en lugar de sustituirlos:
+
+```json
+{
+  "allowAllClaudeAiMcps": true
+}
+```
+
+| Valor | Comportamiento |
+|-------|---------------|
+| `false` (por defecto en managed) | Solo se cargan los servidores MCP de `managed-mcp.json`; los conectores cloud de claude.ai se ignoran |
+| `true` | Se cargan los servidores de `managed-mcp.json` **y** los conectores cloud MCP que el usuario tenga activados en claude.ai |
+
+**Cuándo activarlo**: organizaciones donde los usuarios ya gestionan sus propias integraciones cloud (por ejemplo, cada desarrollador conecta su propio Google Drive o su propia cuenta de Jira) y el equipo de plataforma no quiere mantener una configuración centralizada para cada conector individual, pero sí quiere seguir imponiendo los servidores MCP corporativos obligatorios definidos en `managed-mcp.json`.
+
+**Cuándo mantenerlo desactivado**: entornos regulados donde todo servidor MCP debe pasar por revisión y aprobación explícita del equipo de seguridad antes de estar disponible para cualquier sesión de Claude Code.
+
+---
+
+## Modelos por Defecto Organizacionales
+
+Anthropic ha ampliado el control que los administradores tienen sobre qué modelos usan los miembros de la organización, tanto a nivel de valor por defecto como de restricción dura.
+
+### Modelo por defecto de organización o de rol (v2.1.196)
+
+Los administradores de organizaciones en planes Enterprise pueden fijar un **modelo por defecto** para los miembros que usan Claude Code, configurable desde la consola de administración de claude.ai:
+
+- **A nivel de organización**: se aplica a todos los miembros que no tengan un modelo seleccionado manualmente.
+- **A nivel de rol personalizado**: se aplica solo a los miembros de ese rol, y tiene prioridad sobre el valor de organización. Si un miembro pertenece a varios roles con valores por defecto distintos, se aplica el modelo más capaz de los configurados.
+
+Cuando un administrador fija o cambia el modelo por defecto, este sustituye al modelo seleccionado actualmente en el picker de cada miembro para **nuevas conversaciones**. El desarrollador conserva la libertad de elegir otro modelo para cualquier conversación concreta: el valor de organización es un punto de partida, no una restricción dura (para restricciones duras, ver `enforceAvailableModels` a continuación).
+
+En el comando `/model`, la fila del modelo por defecto muestra la etiqueta correspondiente según el origen de la configuración:
+
+```text
+$ /model
+
+  Sonnet 4.6                    (seleccionado)
+  Opus 4.8
+> Default — Org default          <-- fijado por el administrador de la organización
+  Haiku 4.5
+```
+
+Si el valor proviene de un rol específico en lugar de la organización completa, la etiqueta cambia a `Role default`.
+
+### `enforceAvailableModels`: restricción dura sobre el modelo Default (v2.1.175)
+
+La lista blanca `availableModels` en managed settings ya restringía qué modelos podían **seleccionarse manualmente** desde el picker o con `/model`. Sin embargo, antes de v2.1.175, el modelo `Default` (el que Claude Code usa si el usuario no ha elegido explícitamente ninguno) podía seguir resolviendo a un modelo fuera de esa lista, porque `Default` no pasaba por la comprobación de `availableModels`.
+
+El managed setting `enforceAvailableModels` cierra esa brecha: cuando está activo, el modelo `Default` se resuelve **dentro** de `availableModels` en lugar de usar el valor por defecto interno de Claude Code.
+
+```json
+{
+  "availableModels": ["claude-sonnet-4-6", "claude-haiku-4-5"],
+  "enforceAvailableModels": true
+}
+```
+
+| Configuración | Comportamiento de `Default` |
+|----------------|------------------------------|
+| `availableModels` sin `enforceAvailableModels` | `Default` sigue resolviendo al modelo interno de Claude Code, aunque no esté en la lista; la petición se rechaza en tiempo de ejecución si ese modelo no está autorizado |
+| `availableModels` con `enforceAvailableModels: true` | `Default` resuelve a un modelo dentro de la lista `availableModels`, evitando el rechazo en tiempo de ejecución |
+
+**Recomendación**: si defines `availableModels` en tu política gestionada, activa siempre `enforceAvailableModels` junto a ella. De lo contrario, los usuarios que no seleccionan modelo manualmente pueden encontrarse con peticiones rechazadas de forma intermitente sin entender por qué.
+
+### Restricciones aplicadas de forma consistente en todas las superficies (v2.1.187)
+
+Desde v2.1.187, las restricciones de modelo organizacionales (`availableModels`, `enforceAvailableModels`) se aplican de forma uniforme en **todas** las formas de seleccionar un modelo, cerrando vías que antes podían eludir la política:
+
+| Superficie | Antes de v2.1.187 | Desde v2.1.187 |
+|------------|--------------------|-----------------|
+| Model picker interactivo (`/model`) | Filtrado por `availableModels` | Filtrado por `availableModels` |
+| Flag `--model` en CLI | Podía forzar un modelo fuera de la lista | Rechazado si el modelo no está en `availableModels` |
+| Comando `/model <nombre>` con argumento directo | Inconsistente según el punto de entrada | Rechazado si el modelo no está en `availableModels` |
+| Variable de entorno `ANTHROPIC_MODEL` | Podía saltarse el filtrado del picker | Rechazado si el modelo no está en `availableModels` |
+
+Esto es relevante para automatizaciones y scripts: un pipeline de CI que fije `ANTHROPIC_MODEL` a un modelo no autorizado por la política de la organización fallará explícitamente en lugar de ejecutarse con un modelo fuera de política. Para la configuración general de `/model` y selección de modelos, consulta el [Módulo 06](../../modulo-06-planificacion-opus/teoria/04-fast-mode-y-modelos.md).
+
+---
+
+## Claude Code Gateway: Proxy Centralizado Multi-Nube
+
+> **Novedad**: soporte para el proveedor `anthropicAws` (v2.1.198)
+
+Para organizaciones que necesitan un único punto de control sobre el acceso, el coste y las políticas de Claude Code sin depender de la consola de administración de claude.ai, Anthropic ofrece el **Claude Code Gateway**: un servicio autoalojado (self-hosted) que se sitúa entre los clientes de Claude Code de los desarrolladores y el proveedor de modelo elegido por la organización.
+
+### Qué resuelve el Gateway
+
+En lugar de que cada desarrollador gestione su propia API key o sus propias credenciales cloud, el Gateway centraliza:
+
+- **Autenticación**: los desarrolladores inician sesión con el IdP corporativo (SSO vía OIDC); el Gateway es quien posee la credencial upstream real.
+- **Control de acceso por grupo**: los grupos del IdP se mapean a listas de modelos permitidos y a políticas de managed settings, aplicadas del lado servidor.
+- **Enrutado a múltiples proveedores**: el Gateway traduce las peticiones de los clientes al formato de cada proveedor upstream configurado, con failover entre ellos.
+- **Telemetría centralizada**: exporta métricas OTLP a la plataforma de observabilidad de la organización (Datadog, Splunk, ClickHouse, etc.).
+
+El Gateway se incluye en el propio binario `claude`, por lo que el mismo ejecutable que corre Claude Code en un portátil sirve el proceso del Gateway con `claude gateway --config gateway.yaml`.
+
+### Proveedores upstream soportados
+
+```yaml
+# gateway.yaml (fragmento)
+upstreams:
+  - provider: bedrock
+    region: us-east-1
+  - provider: anthropicAws
+    region: us-east-1
+  - provider: anthropic
+```
+
+| Proveedor (`provider`) | Corresponde a |
+|--------------------------|----------------|
+| `bedrock` | Amazon Bedrock |
+| `anthropicAws` | **Claude Platform on AWS** (v2.1.198) — acceso nativo a la plataforma de Anthropic a través de la cuenta AWS del cliente |
+| `googleCloud` | Google Cloud Agent Platform / Vertex AI |
+| `microsoftFoundry` | Microsoft Foundry |
+| `anthropic` | API directa de Anthropic |
+
+### `anthropicAws`: Claude Platform on AWS como upstream (v2.1.198)
+
+A diferencia de Amazon Bedrock —donde AWS opera la infraestructura de inferencia— **Claude Platform on AWS** da acceso a la experiencia nativa de la plataforma de Anthropic (Messages API, Agent Skills, ejecución de código, features beta) directamente a través de la cuenta AWS de la organización, con Anthropic operando la infraestructura de inferencia. El Gateway mantiene la credencial de AWS y enruta las peticiones en nombre de los desarrolladores usando un rol IAM de tarea, sin que cada desarrollador necesite gestionar sus propias credenciales AWS.
+
+Desde v2.1.198, los equipos que configuran el Gateway pueden referenciar `anthropicAws` como un upstream con nombre, sin tener que construir manualmente cadenas de endpoint compatibles con Bedrock. Esto simplifica la migración de organizaciones que ya usan Bedrock como upstream y quieren evaluar Claude Platform on AWS sin reescribir la configuración de enrutado del Gateway.
+
+> **Requisito de versión**: el upstream `anthropicAws` requiere Claude Code v2.1.198 o superior en el servidor donde corre el Gateway.
+
+### Cuándo usar el Gateway frente a Claude Enterprise
+
+| Necesidad | Solución recomendada |
+|-----------|------------------------|
+| Requisitos de residencia de datos que exigen enrutar la inferencia por tu propia nube | Gateway (Bedrock, Claude Platform on AWS, Google Cloud, Microsoft Foundry) |
+| SCIM provisioning, Claude Code en web/móvil, gestión centralizada sin infraestructura propia | Claude Enterprise (consola de administración de claude.ai) |
+| Organizaciones que ya operan su propio LLM Gateway o API Gateway | Reutilizar esa infraestructura; Claude Code soporta gateways de terceros compatibles con el protocolo documentado por Anthropic |
+
+El Gateway y las políticas gestionadas (`managed-settings.json` / `managed-settings.d/`) son complementarios: el Gateway aplica el control de acceso a modelos y entrega managed settings por grupo de IdP en el momento del login, mientras que las managed settings tradicionales siguen aplicándose localmente en la jerarquía de configuración del cliente.
+
 ---
 
 ## Backends de proveedores cloud
@@ -505,6 +644,57 @@ Cuando OTEL está activo, Claude Code inyecta automáticamente la variable de en
 
 Esta propagación garantiza que los comandos de shell, scripts de build y herramientas externas invocadas por Claude formen parte de la misma traza distribuida, facilitando la correlación end-to-end en plataformas como Jaeger, Zipkin o Datadog.
 
+### Evento OTEL `claude_code.assistant_response`: texto redactado por defecto (v2.1.193)
+
+El evento OpenTelemetry `claude_code.assistant_response` se emite cada vez que el modelo genera una respuesta. Desde v2.1.193, este evento incluye un campo con el **texto de la respuesta del modelo**, pero por defecto ese campo se envía **redactado** (vacío o sustituido por un marcador) para evitar exponer contenido potencialmente sensible en el backend de observabilidad.
+
+Para incluir el texto real de las respuestas en las trazas OTEL, activa explícitamente:
+
+```bash
+export OTEL_LOG_ASSISTANT_RESPONSES=1
+```
+
+| Configuración | Contenido del campo de respuesta en `claude_code.assistant_response` |
+|----------------|--------------------------------------------------------------------|
+| Por defecto (sin la variable) | Redactado — el evento se emite, pero sin el texto de la respuesta |
+| `OTEL_LOG_ASSISTANT_RESPONSES=1` | Texto completo de la respuesta del modelo incluido en el evento |
+
+> **Precaución**: activar esta variable envía el contenido completo de las respuestas del modelo a tu backend de observabilidad. Úsala solo en entornos donde ese backend cumple los mismos requisitos de seguridad y retención que el resto del pipeline de datos sensibles, y evita activarla en producción salvo necesidad justificada de auditoría o depuración.
+
+### Etiquetas de recurso en métricas: `OTEL_RESOURCE_ATTRIBUTES` (v2.1.161)
+
+Desde v2.1.161, los pares clave-valor definidos en la variable estándar de OpenTelemetry `OTEL_RESOURCE_ATTRIBUTES` se incluyen como **labels en los datapoints de métricas** que Claude Code exporta, no solo como atributos de resource a nivel de proceso. Esto permite segmentar y filtrar métricas de coste, tokens y latencia por cualquier dimensión organizacional sin necesidad de un backend que procese atributos de resource por separado.
+
+```bash
+export OTEL_RESOURCE_ATTRIBUTES="team=platform,cost_center=eng-412,environment=staging"
+```
+
+Con esta configuración, cada datapoint de métrica (por ejemplo, `claude_code.token.usage` o `claude_code.cost.usage`) incluye las etiquetas `team`, `cost_center` y `environment`, lo que permite construir dashboards y alertas agrupados por equipo o centro de coste directamente desde las métricas, sin depender de joins adicionales con datos de resource.
+
+### Atributos `workflow.run_id` y `workflow.name` en agentes de Dynamic Workflows (v2.1.202)
+
+Los agentes lanzados por **Dynamic Workflows** —cubiertos en detalle en el [Módulo 16: Agentes en Segundo Plano y Workflows Dinámicos](../../modulo-16-agentes-background-workflows/README.md)— incluyen desde v2.1.202 los atributos `workflow.run_id` y `workflow.name` en su telemetría OTEL. Esto permite correlacionar los eventos de coste, tokens y herramientas de cada agente individual con la ejecución de workflow concreta que lo originó, algo especialmente útil cuando un mismo workflow dinámico lanza múltiples agentes en paralelo y es necesario atribuir el consumo de cada uno a su rama de ejecución.
+
+```json
+{
+  "event": "cost.usage",
+  "workflow.run_id": "wf-run-8f3a2c1e",
+  "workflow.name": "migracion-esquema-api",
+  "cost_usd": 0.34
+}
+```
+
+### `CLAUDE_CODE_ENABLE_FEEDBACK_SURVEY_FOR_OTEL` (v2.1.136)
+
+Claude Code puede mostrar ocasionalmente una encuesta breve de satisfacción al finalizar una sesión. En entornos con OTEL activo y sesiones automatizadas (CI/CD, self-hosted runners), estas encuestas interactivas no tienen sentido y pueden interferir con la ejecución no interactiva. La variable `CLAUDE_CODE_ENABLE_FEEDBACK_SURVEY_FOR_OTEL` controla si la encuesta se activa cuando OTEL está configurado:
+
+```bash
+# Desactivar explícitamente la encuesta de feedback en entornos con OTEL activo
+export CLAUDE_CODE_ENABLE_FEEDBACK_SURVEY_FOR_OTEL=0
+```
+
+**Recomendación**: en pipelines de CI/CD, self-hosted runners y cualquier ejecución no interactiva con OTEL configurado, fija esta variable a `0` a nivel de managed settings o de entorno del runner para evitar prompts interactivos inesperados en procesos automatizados.
+
 ### Header de sesión en peticiones API
 
 Claude Code incluye el header `X-Claude-Code-Session-Id` en todas las peticiones que realiza a la API. Este identificador de sesión es constante durante toda la sesión interactiva o de automatización, y cambia en cada nueva invocación de Claude Code.
@@ -758,3 +948,16 @@ Auto Mode permite que Claude Code tome decisiones de permisos automáticamente u
 | `blockedMarketplaces`/`strictKnownMarketplaces` | Bloqueo efectivo en operaciones de instalación de plugins | Enterprise (v2.1.117) |
 | Vertex AI mTLS X.509 ADC | Autenticación con certificados en Vertex AI | Todos (v2.1.121) |
 | `invocation_trigger` en OTEL `skill_activated` | Origen de la invocación de skills en trazas | Todos (v2.1.126) |
+| `allowAllClaudeAiMcps` | Combina conectores cloud MCP de claude.ai con `managed-mcp.json` | Enterprise (v2.1.149) |
+| Modelo por defecto de organización/rol | "Org default"/"Role default" en `/model` | Enterprise (v2.1.196) |
+| `enforceAvailableModels` | El modelo Default también respeta la allowlist `availableModels` | Enterprise (v2.1.175) |
+| Restricciones de modelo consistentes | `availableModels` aplicado en picker, `--model`, `/model` y `ANTHROPIC_MODEL` | Enterprise (v2.1.187) |
+| Claude Code Gateway | Proxy autoalojado multi-nube con SSO y control de modelos por grupo | Enterprise |
+| `anthropicAws` en Gateway | Claude Platform on AWS como upstream con nombre | Enterprise (v2.1.198) |
+| `claude_code.assistant_response` | Evento OTEL con texto de respuesta redactado por defecto | Todos (v2.1.193) |
+| `OTEL_LOG_ASSISTANT_RESPONSES` | Incluye el texto real de las respuestas en OTEL | Todos (v2.1.193) |
+| `OTEL_RESOURCE_ATTRIBUTES` en métricas | Labels de resource en datapoints de métricas | Todos (v2.1.161) |
+| `workflow.run_id`/`workflow.name` en OTEL | Trazabilidad de agentes de Dynamic Workflows | Todos (v2.1.202) |
+| `CLAUDE_CODE_ENABLE_FEEDBACK_SURVEY_FOR_OTEL` | Controla la encuesta de feedback en entornos con OTEL | Todos (v2.1.136) |
+| `sandbox.bwrapPath`/`sandbox.socatPath` | Rutas explícitas a binarios del sandbox en Linux | Todos (v2.1.133) |
+| `pluginSuggestionMarketplaces` | Marketplaces cuyos plugins se sugieren vía tips | Enterprise (v2.1.152) |

@@ -1,0 +1,17 @@
+name: Tarea
+description: Trabajo técnico sin funcionalidad nueva (docs, CI, refactor, dependencias), o un cambio S.
+title: "chore: "
+labels: [tarea]
+body:
+  - type: textarea
+    id: que
+    attributes:
+      label: Qué y por qué
+      description: Una frase basta si es S.
+    validations:
+      required: true
+  - type: textarea
+    id: hecho
+    attributes:
+      label: Hecho cuando
+      description: Cómo se comprueba que está terminado.

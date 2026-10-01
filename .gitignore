@@ -3,3 +3,12 @@ book/output/
 
 ignore/
 REVISION-ERRORES.md
+# >>> metodología común
+.env
+.env.*
+!.env.example
+data/
+.claude/worktrees/
+.claude/settings.local.json
+CLAUDE.local.md
+# <<< metodología común

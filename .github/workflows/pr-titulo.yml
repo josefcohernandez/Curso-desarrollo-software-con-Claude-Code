@@ -1,0 +1,24 @@
+# Título del PR con formato `tipo: descripción` (METODOLOGIA.md §6). Con squash, el título es el
+# commit que queda en main. Va aparte de ci.yml porque es lo único que hay que repetir al editar
+# el título: así una edición no relanza ni tapa la verificación del código.
+name: pr-titulo
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions: {}
+
+jobs:
+  titulo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Título del PR
+        env:
+          TITULO: ${{ github.event.pull_request.title }}
+        run: |
+          re='^(feat|fix|docs|refactor|test|chore|ci|perf|build|revert)(\([a-z0-9._-]+\))?!?: [^ ].*[^.]$'
+          if [[ ! $TITULO =~ $re ]]; then
+            echo "::error::El título debe ser 'tipo: descripción' (feat, fix, docs, refactor, test, chore, ci, perf, build, revert; '!' si rompe algo; sin punto final). Es: $TITULO"
+            exit 1
+          fi

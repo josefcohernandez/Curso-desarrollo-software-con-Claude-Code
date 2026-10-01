@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+#
+# Bloquea el push directo a la rama principal. Todo entra por PR, que es lo que
+# dispara la CI y deja un diff revisable (METODOLOGIA.md §2).
+#
+# Se activa por clon (git no versiona .git/hooks); lo hace `flujo adoptar`:
+#   git config core.hooksPath .githooks
+#
+# Salida de emergencia, deliberadamente incómoda de teclear:
+#   ALLOW_MAIN_PUSH=1 git push origin main
+#
+set -u
+
+[ "${ALLOW_MAIN_PUSH:-0}" = "1" ] && exit 0
+
+principal="$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null)"
+principal="${principal#origin/}"
+if [ -z "$principal" ]; then
+  for r in main master; do
+    git show-ref -q "refs/remotes/origin/$r" && { principal="$r"; break; }
+  done
+fi
+principal="${RAMA_BASE:-${principal:-main}}"
+
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+  if [ "$remote_ref" = "refs/heads/$principal" ]; then
+    cat >&2 <<FIN
+✋ Push directo a '$principal' bloqueado (.githooks/pre-push).
+
+   Todo entra por PR:
+     flujo abrir <issue>  →  gh pr create  →  flujo cerrar
+
+   Salida de emergencia:  ALLOW_MAIN_PUSH=1 git push origin $principal
+FIN
+    exit 1
+  fi
+done
+
+exit 0

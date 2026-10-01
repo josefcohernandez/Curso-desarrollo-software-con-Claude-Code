@@ -1,0 +1,37 @@
+name: Bug
+description: Algo no funciona como debería.
+title: "fix: "
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Versión
+      description: Versión instalada o commit (p. ej. v1.4.0).
+    validations:
+      required: true
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Pasos para reproducirlo
+      value: |
+        1.
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: Qué esperaba
+    validations:
+      required: true
+  - type: textarea
+    id: obtenido
+    attributes:
+      label: Qué pasó
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs o capturas
+      render: text

@@ -20,20 +20,9 @@ for f in sys.stdin.read().split("\0"):
 '
 
 # test-modules.py valida estructura, markdown, enlaces internos, scripts, YAML, JSON y bloques
-# de código de cada módulo. Se ejecuta por módulo y solo con los que conoce (M01-M15): su lista
-# MODULES no está al día con la estructura de 17 módulos y la pasada completa falla hoy
-# (modulo-16-proyecto-final, REVISION-ERRORES.md y ../CURSO_CLAUDE_CODE.md). Cuando se ponga al
-# día, este bucle se sustituye por `python3 test-modules.py`.
-paso "Módulos M01-M15 (test-modules.py)"
-for n in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15; do
-  if ! salida="$(python3 test-modules.py --module "$n" 2>&1)"; then
-    printf '%s\n' "$salida"
-    echo "test-modules.py --module $n: falla" >&2
-    exit 1
-  fi
-  printf 'M%s ok  ' "$n"
-done
-echo
+# de código de los 17 módulos y la raíz. Sale con error si hay algún FAIL (los WARN no fallan).
+paso "Módulos M01-M17 (test-modules.py)"
+python3 test-modules.py
 
 paso "Enlaces relativos de todo el curso (incluye M16, M17 y recursos/)"
 python3 scripts/check-enlaces.py

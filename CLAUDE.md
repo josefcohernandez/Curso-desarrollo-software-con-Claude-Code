@@ -23,8 +23,9 @@ Es un submódulo del monorepo `cursos-libros-ia`, que lo usa para generar el lib
 - `README.md` es la fuente de verdad estructural (módulos, títulos, duraciones). Si cambias un
   módulo, actualiza su `README.md` y el índice; el temario detallado `CURSO_CLAUDE_CODE.md` y el
   libro viven en el monorepo padre (de ahí el enlace `../CURSO_CLAUDE_CODE.md`).
-- `test-modules.py` tiene la lista de módulos anterior a la estructura de 17 (llega a M16
-  proyecto final) y su pasada completa falla; `scripts/check.sh` solo ejecuta M01-M15.
+- `test-modules.py` tiene la lista de los 17 módulos en `MODULES` y `EXPECTED_DIRS`: al añadir,
+  quitar o renombrar un módulo, actualízala. Los enlaces que salen del repo (`../CURSO_CLAUDE_CODE.md`
+  del monorepo padre) no se comprueban aquí.
 - Los tags `v1.0` y `v2.0` son antiguos (no siguen `vX.Y.Z`): no se tocan y `release.yml` los
   ignora al calcular la última versión.
 

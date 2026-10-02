@@ -25,9 +25,13 @@ Es un submódulo del monorepo `cursos-libros-ia`, que lo usa para generar el lib
   libro viven en el monorepo padre (de ahí el enlace `../CURSO_CLAUDE_CODE.md`).
 - `test-modules.py` tiene la lista de módulos anterior a la estructura de 17 (llega a M16
   proyecto final) y su pasada completa falla; `scripts/check.sh` solo ejecuta M01-M15.
-- La versión del curso (v3.9 en el README) es editorial; las releases son `vX.Y.Z` y las crea la
-  CI. Los tags `v1.0` y `v2.0` son antiguos y no se tocan.
+- Los tags `v1.0` y `v2.0` son antiguos (no siguen `vX.Y.Z`): no se tocan y `release.yml` los
+  ignora al calcular la última versión.
 
 ## Decisiones vigentes
 
 <!-- Una línea por ADR: - [0001 · Título](docs/adr/0001-titulo.md): resumen en una frase. -->
+
+- **Versiones = edición del curso.** Las releases `vX.Y.Z` (las crea la CI con `flujo publicar`)
+  siguen la edición: mayor.menor = edición del README (ahora la 3.9), patch = correcciones sin
+  edición nueva. La primera release será `v3.9.0`; una edición nueva sube la menor (o la mayor).

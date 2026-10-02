@@ -24,6 +24,12 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent
 
+
+def fuera_del_repo(ruta: Path) -> bool:
+    """Enlaces que salen del repo (p. ej. ../CURSO_CLAUDE_CODE.md del monorepo padre, cuando este
+    repo es un submódulo): no se pueden comprobar aquí."""
+    return not ruta.is_relative_to(REPO_ROOT)
+
 MODULES = [
     "modulo-01-introduccion",
     "modulo-02-cli-primeros-pasos",
@@ -40,7 +46,8 @@ MODULES = [
     "modulo-13-multimodalidad-notebooks",
     "modulo-14-agent-sdk",
     "modulo-15-plugins-marketplaces",
-    "modulo-16-proyecto-final",
+    "modulo-16-agentes-background-workflows",
+    "modulo-17-proyecto-final",
 ]
 
 # Directorios esperados por modulo (minimo requerido)
@@ -60,7 +67,8 @@ EXPECTED_DIRS = {
     "modulo-13-multimodalidad-notebooks": ["teoria", "ejercicios"],
     "modulo-14-agent-sdk": ["teoria", "ejercicios"],
     "modulo-15-plugins-marketplaces": ["teoria", "ejercicios"],
-    "modulo-16-proyecto-final": ["enunciado", "criterios-evaluacion", "solucion-referencia"],
+    "modulo-16-agentes-background-workflows": ["teoria", "ejercicios"],
+    "modulo-17-proyecto-final": ["enunciado", "criterios-evaluacion", "solucion-referencia"],
 }
 
 # Nombres de modelo obsoletos que no deberian aparecer
@@ -128,8 +136,8 @@ def check_structure(module_path: Path, module_name: str, verbose: bool):
     else:
         passed(f"Estructura de directorios correcta ({len(expected)} dirs)", verbose)
 
-    # README.md en raiz (excepto modulo-16 que no lo tiene)
-    if module_name != "modulo-16-proyecto-final":
+    # README.md en raiz (excepto el proyecto final, que no lo tiene)
+    if module_name != "modulo-17-proyecto-final":
         readme = module_path / "README.md"
         if not readme.exists():
             failed("README.md no existe en raiz del modulo", module_name)
@@ -238,7 +246,7 @@ def check_internal_links(module_path: Path, module_name: str, verbose: bool):
             # Resolve relative to the file's directory
             resolved = (md_file.parent / target_path).resolve()
 
-            if not resolved.exists():
+            if not fuera_del_repo(resolved) and not resolved.exists():
                 broken_links.append(f"{rel_file} -> {target_path}")
 
     if broken_links:
@@ -450,7 +458,7 @@ def check_navigation_links(verbose: bool):
         for match in link_re.finditer(content):
             target = match.group(2).split("#")[0]
             resolved = (readme.parent / target).resolve()
-            if not resolved.exists():
+            if not fuera_del_repo(resolved) and not resolved.exists():
                 broken.append(f"{module_name}/README.md -> {target}")
 
     if broken:
@@ -505,7 +513,7 @@ def check_root_files(verbose: bool):
     """Valida archivos en la raiz del repositorio."""
     print(f"\n{c(Colors.BOLD, '=== Archivos raiz ===')} ")
 
-    expected = ["README.md", "LICENSE", "REVISION-ERRORES.md"]
+    expected = ["README.md", "LICENSE"]
     for fname in expected:
         fpath = REPO_ROOT / fname
         if fpath.exists() and fpath.stat().st_size > 10:
@@ -529,7 +537,7 @@ def check_root_files(verbose: bool):
             if not target_path:
                 continue
             resolved = (readme.parent / target_path).resolve()
-            if not resolved.exists():
+            if not fuera_del_repo(resolved) and not resolved.exists():
                 broken.append(target_path)
 
         if broken:

@@ -1,0 +1,42 @@
+name: Historia de usuario
+description: Funcionalidad nueva o un cambio de comportamiento (tamaño M o L).
+title: "feat: "
+labels: [historia]
+body:
+  - type: textarea
+    id: historia
+    attributes:
+      label: Historia
+      description: Quién, qué y para qué.
+      value: "Como <quién> quiero <qué> para <para qué>."
+    validations:
+      required: true
+  - type: textarea
+    id: criterios
+    attributes:
+      label: Criterios de aceptación
+      description: 2-5 criterios. Cada uno acabará en al menos un test.
+      value: |
+        - Dado <contexto>, cuando <acción>, entonces <resultado>.
+    validations:
+      required: true
+  - type: textarea
+    id: fuera
+    attributes:
+      label: Fuera de alcance
+      description: Lo que esta issue NO hace (va a otra issue).
+  - type: dropdown
+    id: tamano
+    attributes:
+      label: Tamaño
+      options:
+        - "S: se describe en una frase"
+        - "M: varios ficheros o dudas de enfoque (modo plan)"
+        - "L: necesita spec en docs/specs/ y se trocea"
+    validations:
+      required: true
+  - type: textarea
+    id: notas
+    attributes:
+      label: Notas de diseño
+      description: Ficheros, interfaces, datos o migraciones implicados. Enlace a la spec si es L.
